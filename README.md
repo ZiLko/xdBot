@@ -1,4 +1,4 @@
-# xdBot
+# About xdBot
 
 xdBot has been meticulously crafted with user convenience in mind, ensuring a straightforward and hassle-free experience. Its intuitive design and user-friendly interface make it accessible to both beginners and experienced users alike. Whether you're new to bots or a seasoned user, xdBot offers a seamless and uncomplicated interaction. From streamlined commands to clear prompts, every aspect of xdBot is geared towards simplicity. Our goal is to provide users with an effortless and enjoyable experience, making xdBot the go-to choice for those seeking a straightforward and easy-to-use bot.
 
