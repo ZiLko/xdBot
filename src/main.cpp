@@ -170,14 +170,17 @@ public:
 		}
 		while (std::getline(file, line)) {
 			std::istringstream isSS(line);
-			int holding, frame, button, player1;
+			int holding;
+			int frame;
+			int button;
+			int player1;
 			char separator;
-			if (isSS >> holding >> separator >> frame >> separator >> button >> 
+			if (isSS >> frame >> separator >> holding >> separator >> button >> 
 			separator >> player1 && separator == '|') {
 				recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding});
-				updateInfo();
 			}
 		}				
+		updateInfo();
 		file.close();
 		free(loadPath);
    }
