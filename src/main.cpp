@@ -42,8 +42,9 @@ public:
 	int currentFrame() {
 		return static_cast<int>((*(double*)(((char*)PlayLayer::get()) + 0x328)) * fixedFps); // m_time * fps
 	}
-	void record_action(bool holding, int button, bool player1, int frame) {
-    	macro.push_back({player1,frame,button,holding});
+	void recordAction(bool holding, int button, bool player1, int frame, GJBaseGameLayer* bgl) {
+		bool p1 = (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) ? !player1 : player1;
+    		macro.push_back({p1,frame,button,holding});
 	}
 
 };
@@ -318,12 +319,14 @@ class $modify(GJBaseGameLayer) {
 		GJBaseGameLayer::handleButton(holding,button,player1);
 		if (recorder.state == state::recording) {
 			int frame = recorder.currentFrame(); 
-			recorder.record_action(holding, button, player1, frame);
+			recorder.recordAction(holding, button, player1, frame, this);
 		}
 	}
 
 	int getPlayer1(int p1, GJBaseGameLayer* bgl) {
-		auto player1 = (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) ? !p1 : p1;
+		bool player1;
+		if (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) player1 = !p1;
+		else player1 = p1;
 		return static_cast<int>(player1);
 	}
 
@@ -333,7 +336,6 @@ class $modify(GJBaseGameLayer) {
         	while (recorder.currentAction < static_cast<int>(recorder.macro.size()) &&
 			frame >= recorder.macro[recorder.currentAction].frame && !this->m_player1->m_isDead) {
             	auto& currentActionIndex = recorder.macro[recorder.currentAction];
-
         		cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
 				static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
 				currentActionIndex.holding, false);
