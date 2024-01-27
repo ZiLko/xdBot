@@ -1,7 +1,9 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
+#include <cocos2d.h>
 #include <Geode/modify/GJBaseGameLayer.hpp>
+#include <Geode/binding/GameManager.hpp>
 #include <Geode/modify/CCScheduler.hpp>
 #include <vector>
 #include <nfd.h>
@@ -11,6 +13,10 @@
 
 int fixedFps = 240;
 bool restart = false;
+int playerEnums[2][3] = {
+    {cocos2d::enumKeyCodes::KEY_ArrowUp, cocos2d::enumKeyCodes::KEY_ArrowLeft, cocos2d::enumKeyCodes::KEY_ArrowRight}, 
+    {cocos2d::enumKeyCodes::KEY_W, cocos2d::enumKeyCodes::KEY_A, cocos2d::enumKeyCodes::KEY_D}
+};
 
 using namespace geode::prelude;
 
@@ -313,21 +319,29 @@ class $modify(GJBaseGameLayer) {
 		if (recorder.state == state::recording) {
 			int frame = recorder.currentFrame(); 
 			recorder.record_action(holding, button, player1, frame);
-		} 
+		}
+	}
+
+	int getPlayer1(int p1, GJBaseGameLayer* bgl) {
+		auto player1 = (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) ? !p1 : p1;
+		return static_cast<int>(player1);
 	}
 
 	void update(float dt) {
-		GJBaseGameLayer::update(dt);
 		if (recorder.state == state::playing) {
 			int frame = recorder.currentFrame();
         	while (recorder.currentAction < static_cast<int>(recorder.macro.size()) &&
 			frame >= recorder.macro[recorder.currentAction].frame && !this->m_player1->m_isDead) {
             	auto& currentActionIndex = recorder.macro[recorder.currentAction];
-        		GJBaseGameLayer::handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
-            	recorder.currentAction++;	
+
+        		cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
+				static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
+				currentActionIndex.holding, false);
+            	recorder.currentAction++;
         	}
+			GJBaseGameLayer::update(dt);
 			if (recorder.currentAction >= recorder.macro.size()) recorder.state = state::off;
-    	}
+    	} else GJBaseGameLayer::update(dt);
 	}
 };
 
