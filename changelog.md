@@ -1,4 +1,4 @@
-# v1.0.11
+# v1.0.12
 
  * Fixed teleport orb not working while playing a macro.
  * Now targetting correct geode version.
