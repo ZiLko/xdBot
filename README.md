@@ -1,7 +1,11 @@
-# About xdBot
+# xdBot
 
-xdBot is a purposely-designed product with proportioned intricacies to make its use easy and facilitate smooth and easy functioning. The interface is user-friendly and the setup is intuitive enough even for amateurs to use it. Built with simplicity, that's effortless to use whether you are a seasoned user or new. Every feature of xdBot is designed to be easy - from streamlined commands to clear prompts. With this, it makes the xdBot by itself the perfect option for them who looking for a simple and user-friendly bot as it aims to provide hassle-free and fun experience to its users.
+xdBot is a macro recording tool for Geometry Dash with many different features like a macro saving and loading system, speedhack, and more.
 
-Other than these, the xdBot provides with various features according to the preferences of the interested parties. From rudimentary commands for everyday simple tasks to advanced features considered useful to power users xdBot caters to different levels of skill and requirement. Whether it be simply obtaining quick information or whether it be a fun element or whether it being used in automating mundane monotonous repetition of a task, xdBot is versatile enough to cater those as well. The combination of features carefully curated to offer a balance of simplicity with capability and provides both comprehensive yet intuitive to navigate bot experience. And user-friendly design devotion goes not only in the interface as with each new release of xdBot software, the program tries to implement received feedbacks from its users and improve its user experience according to community suggestions.
+![Image of xdBot's menu.](https://media.discordapp.net/attachments/1064726420632371249/1201671960841683004/20240129171944_1.jpg?ex=65caab39&is=65b83639&hm=85b2ba8ff125c563b65923893252163ea4380b7449e89f96ac97a4815bc0fb47&=&format=webp&width=809&height=455)
 
-![Image of xdBot's menu.](https://media.discordapp.net/attachments/1064726420632371249/1199951592410075157/20240124185646_1.jpg?ex=65c46901&is=65b1f401&hm=804ad5d50deea160f8d783d3bd5db2271038a2a7d2a9a72806a396be206e75b9&=&format=webp&width=809&height=455)
+![Image of xdBot's settings.](https://media.discordapp.net/attachments/1064726420632371249/1201671960573255720/20240129171953_1.jpg?ex=65caab39&is=65b83639&hm=31bb0c601a4e374ea3018975085acdd380f7590d6cebf97f01cd1fb1843cd950&=&format=webp&width=809&height=455)
+
+![Image of xdBot's macro loading menu.](https://media.discordapp.net/attachments/1064726420632371249/1201671960019341423/20240129172035_1.jpg?ex=65caab39&is=65b83639&hm=de96b8c861e15ef25d356455ba72ce27e35ffdeb711d4543d309ba47fb1ffd8b&=&format=webp&width=809&height=455)
+
+![Image of xdBot's macro saving menu.](https://media.discordapp.net/attachments/1064726420632371249/1201671959738318898/20240129172044_1.jpg?ex=65caab39&is=65b83639&hm=5156d2367ac18d62946e2c3d7564dfad8e7bc259f196393e9a13665aae156b7b&=&format=webp&width=809&height=455)
