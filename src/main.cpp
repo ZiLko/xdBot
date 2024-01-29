@@ -1,4 +1,4 @@
-#include <Geode/Geode.hpp>
+#include "fileSystem.hpp"
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <cocos2d.h>
@@ -9,14 +9,21 @@
 #include <nfd.h>
 #include <chrono>
 
-#define CCPOINT_CREATE(__X__,__Y__) cocos2d::CCPointMake((float)(__X__), (float)(__Y__))
-
+float leftOver = 0.f; // For CCScheduler
 int fixedFps = 240;
 bool restart = false;
-int playerEnums[2][3] = {
+const int playerEnums[2][3] = {
     {cocos2d::enumKeyCodes::KEY_ArrowUp, cocos2d::enumKeyCodes::KEY_ArrowLeft, cocos2d::enumKeyCodes::KEY_ArrowRight}, 
     {cocos2d::enumKeyCodes::KEY_W, cocos2d::enumKeyCodes::KEY_A, cocos2d::enumKeyCodes::KEY_D}
 };
+
+void releaseKeys() {
+	for (int row = 0; row < 2; ++row) {
+        for (int col = 0; col < 3; ++col) {
+			cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(static_cast<cocos2d::enumKeyCodes>(playerEnums[row][col]), false, false);
+        }
+    }
+}
 
 using namespace geode::prelude;
 
@@ -44,12 +51,13 @@ public:
 	}
 	void recordAction(bool holding, int button, bool player1, int frame, GJBaseGameLayer* bgl) {
 		bool p1 = (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) ? !player1 : player1;
-    		macro.push_back({p1,frame,button,holding});
+    	macro.push_back({p1,frame,button,holding});
 	}
 
 };
 
 recordSystem recorder;
+
 
 class RecordLayer : public geode::Popup<std::string const&> {
  	CCLabelBMFont* infoMacro = nullptr;
@@ -62,7 +70,7 @@ protected:
 		this->setTitle("xdBot");
 		auto menu = CCMenu::create();
     	menu->setPosition({0, 0});
-    	this->addChild(menu);
+    	m_mainLayer->addChild(menu);
 
  		auto checkOffSprite = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
    		auto checkOnSprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
@@ -73,7 +81,7 @@ protected:
     	label->setAnchorPoint({0, 0.5});
     	label->setScale(0.7f);
     	label->setPosition(corner + CCPOINT_CREATE(168, -60));
-    	this->addChild(label);
+    	m_mainLayer->addChild(label);
 
     	recording = CCMenuItemToggler::create(checkOffSprite,
 		checkOnSprite,
@@ -87,9 +95,9 @@ protected:
 
     	label = CCLabelBMFont::create("Play", "bigFont.fnt");
     	label->setScale(0.7f);
-    	label->setPosition(corner + CCPOINT_CREATE(198, -105)); 
+    	label->setPosition(corner + CCPOINT_CREATE(198, -90)); 
     	label->setAnchorPoint({0, 0.5});
-    	this->addChild(label);
+    	m_mainLayer->addChild(label);
 
      	playing = CCMenuItemToggler::create(checkOffSprite, checkOnSprite,
 	 	this,
@@ -106,7 +114,7 @@ protected:
 
    		auto btn = CCMenuItemSpriteExtra::create(btnSprite,
    		this,
-   		menu_selector(RecordLayer::saveMacro));
+   		menu_selector(saveMacroPopup::openSaveMacro));
 
     	btn->setPosition(corner + CCPOINT_CREATE(65, -160)); 
     	menu->addChild(btn);
@@ -116,7 +124,7 @@ protected:
 
     	btn = CCMenuItemSpriteExtra::create(btnSprite,
 		this,
-		menu_selector(RecordLayer::loadMacro));
+		menu_selector(loadMacroPopup::openLoadMenu));
 
     	btn->setPosition(corner + CCPOINT_CREATE(144, -160));
     	menu->addChild(btn);
@@ -135,19 +143,12 @@ protected:
     	infoMacro->setAnchorPoint({0, 1});
     	infoMacro->setPosition(corner + CCPOINT_CREATE(21, -57));
 		updateInfo();
-    	this->addChild(infoMacro);
+    	m_mainLayer->addChild(infoMacro);
 
         return true;
     }
 
-	void updateInfo() {
- 		std::stringstream infoText;
-    	infoText << "Current Macro:";
-    	infoText << "\nSize: " << recorder.macro.size();
-		infoText << "\nDuration: " << (!recorder.macro.empty() 
-		? recorder.macro.back().frame / fixedFps : 0) << "s";
-    	infoMacro->setString(infoText.str().c_str());
-	}
+	
 
     static RecordLayer* create() {
         auto ret = new RecordLayer();
@@ -160,69 +161,14 @@ protected:
     }
 
 public:
- 	void handleLoad() {
-		nfdchar_t* loadPath = nullptr;
-    	auto load = NFD_OpenDialog("xd", nullptr, &loadPath);
-    	if (load != NFD_OKAY) return;
-		recorder.macro.clear();
-        std::ifstream file(loadPath);
-		std::string line;
-		if (!file.is_open()) {
-			FLAlertLayer::create(
-    		"Load Error",   
-    		"An error occurred while loading this macro.",  
-    		"OK"      
-			)->show();
-			return;
-		}
-		while (std::getline(file, line)) {
-			std::istringstream isSS(line);
-			int holding;
-			int frame;
-			int button;
-			int player1;
-			char separator;
-			if (isSS >> frame >> separator >> holding >> separator >> button >> 
-			separator >> player1 && separator == '|') {
-				recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding});
-			}
-		}				
-		updateInfo();
-		file.close();
-		free(loadPath);
-   }
-	void loadMacro(CCObject*) {
-		if (!recorder.macro.empty()) {
-			geode::createQuickPopup(
-    		"Load Macro",     
-    		"<cr>Overwrite</c> the current macro?", 
-    		"Cancel", "Ok",  
-    		[this](auto, bool btn2) {
-        		if (btn2) this->handleLoad();
-    		});
-		} else handleLoad();
-	}
-	void saveMacro(CCObject*) {
-		if (recorder.macro.empty()) {
-			FLAlertLayer::create(
-    		"Save Macro",   
-    		"You can't save an <cl>empty</c> macro.",  
-    		"OK"      
-			)->show();
-			return;
-		}
-		nfdchar_t* savePath = nullptr;
-		auto save = NFD_SaveDialog("xd", nullptr, &savePath);
-		if (save == NFD_OKAY) {
- 			std::ofstream file(savePath);
-			if (file.is_open()) {
-				for (auto &action : recorder.macro) {
-					file << action.frame << "|" << action.holding <<
-					"|" << action.button << "|" << action.player1 << "\n";
-				}
-				file.close();
-			}
-		}
+ 
+	void updateInfo() {
+ 		std::stringstream infoText;
+    	infoText << "Current Macro:";
+    	infoText << "\nSize: " << recorder.macro.size();
+		infoText << "\nDuration: " << (!recorder.macro.empty() 
+		? recorder.macro.back().frame / fixedFps : 0) << "s";
+    	infoMacro->setString(infoText.str().c_str());
 	}
 
 	void togglePlay(CCObject*) {
@@ -268,17 +214,133 @@ public:
         	if (btn2) {
 				recorder.macro.clear();
 				this->updateInfo();
+				if (recorder.state == state::playing) this->playing->toggle(false);
+				if (recorder.state == state::recording) this->recording->toggle(false);
+				recorder.state = state::off;
 			}
     	});
 	}
 
     void openMenu(CCObject*) {
 		auto layer = create();
-		layer->m_noElasticity = true;
 		layer->show();
 	}
 };
 
+void saveMacroPopup::openSaveMacro(CCObject*) {
+	if (recorder.macro.empty()) {
+		FLAlertLayer::create(
+    	"Save Macro",   
+    	"You can't save an <cl>empty</c> macro.",  
+    	"OK"      
+		)->show();
+		return;
+	}
+	create()->show();
+}
+
+void saveMacroPopup::saveMacro(CCObject*) {
+    if (std::string(macroNameInput->getString()).length() < 1) {
+		FLAlertLayer::create(
+    	"Save Macro",   
+    	"Macro name can't be <cl>empty</c>.",  
+    	"OK"      
+		)->show();
+		return;
+	}
+	std::string savePath = Mod::get()->getSaveDir().string()
+     +"\\"+std::string(macroNameInput->getString()) + ".xd";
+ 	std::ofstream file(savePath);
+	if (file.is_open()) {
+		for (auto &action : recorder.macro) {
+			file << action.frame << "|" << action.holding <<
+			"|" << action.button << "|" << action.player1 << "\n";
+		}
+		file.close();
+		CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
+		CCObject* child;
+		CCARRAY_FOREACH(children, child) {
+    		saveMacroPopup* saveLayer = dynamic_cast<saveMacroPopup*>(child);
+    		if (saveLayer) {
+        		saveLayer->keyBackClicked();
+				break;
+   			}
+		}
+        FLAlertLayer::create(
+    	"Save Macro",   
+    	"Macro saved <cg>succesfully</c>.",  
+    	"OK"      
+		)->show();
+	} else {
+        FLAlertLayer::create(
+    	"Save Macro",   
+    	"There was an <cr>error</c> saving the macro.",  
+    	"OK"      
+		)->show();
+    }
+}
+
+void macroCell::handleLoad(CCObject* btn) {
+	std::string loadPath = Mod::get()->getSaveDir().string()
+    +"\\"+static_cast<CCMenuItemSpriteExtra*>(btn)->getID() + ".xd";
+	recorder.macro.clear();
+    std::ifstream file(loadPath);
+	std::string line;
+	if (!file.is_open()) {
+		FLAlertLayer::create(
+    	"Load Macro",   
+    	"An <cr>error</c> occurred while loading this macro.",  
+    	"OK"      
+		)->show();
+		return;
+	}
+	while (std::getline(file, line)) {
+		std::istringstream isSS(line);
+		int holding;
+		int frame;
+		int button;
+		int player1;
+		char separator;
+		if (isSS >> frame >> separator >> holding >> separator >> button >> 
+		separator >> player1 && separator == '|') {
+			recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding});
+		}
+	}
+	CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
+	CCObject* child;
+	CCARRAY_FOREACH(children, child) {
+    	RecordLayer* recordLayer = dynamic_cast<RecordLayer*>(child);
+    	loadMacroPopup* loadLayer = dynamic_cast<loadMacroPopup*>(child);
+    	if (recordLayer) {
+        	recordLayer->updateInfo();
+    	} else if (loadLayer) loadLayer->keyBackClicked();
+	}
+	file.close();
+	FLAlertLayer::create(
+    "Load Macro",   
+    "Macro loaded <cg>successfully</c>.",  
+    "OK"      
+	)->show();
+}
+
+void macroCell::loadMacro(CCObject* button) {
+	if (!recorder.macro.empty()) {
+		geode::createQuickPopup(
+    	"Load Macro",     
+    	"<cr>Overwrite</c> the current macro?", 
+    	"Cancel", "Ok",  
+    	[this, button](auto, bool btn2) {
+        	if (btn2) this->handleLoad(button);
+    	}); 
+	} else handleLoad(button);
+}
+
+void clearState() {
+	if (recorder.state != state::off) {
+		recorder.state = state::off;
+		leftOver = 0.f;
+	}
+}
 
 class $modify(PauseLayer) {
 	void customSetup() {
@@ -299,7 +361,12 @@ class $modify(PauseLayer) {
 
 	void onQuit(CCObject* sender) {
 		PauseLayer::onQuit(sender);
-		if (recorder.state != state::off) recorder.state = state::off;
+		clearState();
+	}
+
+	void goEdit() {
+		PauseLayer::goEdit();
+		clearState();
 	}
 
 	void onResume(CCObject* sender) {
@@ -331,6 +398,7 @@ class $modify(GJBaseGameLayer) {
 	}
 
 	void update(float dt) {
+		GJBaseGameLayer::update(dt);
 		if (recorder.state == state::playing) {
 			int frame = recorder.currentFrame();
         	while (recorder.currentAction < static_cast<int>(recorder.macro.size()) &&
@@ -341,18 +409,24 @@ class $modify(GJBaseGameLayer) {
 				currentActionIndex.holding, false);
             	recorder.currentAction++;
         	}
-			GJBaseGameLayer::update(dt);
 			if (recorder.currentAction >= recorder.macro.size()) recorder.state = state::off;
-    	} else GJBaseGameLayer::update(dt);
+    	} else if (recorder.state == state::recording) {
+			
+		}
 	}
 };
+
+	// ---------------- Hooks ---------------- //
 
 class $modify(PlayLayer) {
 	void resetLevel() {
 		PlayLayer::resetLevel();
 		if (recorder.state != state::off && restart != false) restart = false;
-		if (recorder.state == state::playing) recorder.currentAction = 0;
-		else if (recorder.state == state::recording) {
+		if (recorder.state == state::playing) {
+			recorder.currentAction = 0;
+			leftOver = 0.f;
+			releaseKeys();
+		} else if (recorder.state == state::recording) {
         	if (this->m_isPracticeMode && !recorder.macro.empty()) {
   				int frame = recorder.currentFrame(); 
             	auto condition = [&](data& actionIndex) -> bool {
@@ -377,15 +451,13 @@ class $modify(PlayLayer) {
 
 	void levelComplete() {
 		PlayLayer::levelComplete();
-		if (recorder.state != state::off) recorder.state = state::off;
+		clearState();
 	}
 };
 
-float leftOver = 0.f;
 class $modify(CCScheduler) {
 	void update(float dt) {
 		if (recorder.state == state::off) return CCScheduler::update(dt);
-
 		using namespace std::literals;
 		float dt2 = 1.f / fixedFps;
     	auto startTime = std::chrono::high_resolution_clock::now();
