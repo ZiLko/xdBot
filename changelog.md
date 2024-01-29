@@ -1,3 +1,7 @@
+# v1.0.2
+
+ * Reworked the macro saving and loading system.
+
 # v1.0.12
 
  * Fixed teleport orb not working while playing a macro.
