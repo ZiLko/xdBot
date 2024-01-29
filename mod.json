@@ -1,10 +1,34 @@
 {
 	"geode": "2.0.0",
-	"version": "v1.0.2",
+	"version": "v1.1.0",
 	"id": "zilko.xdbot",
 	"gd": "2.204",
 	"repository": "https://github.com/ZiLko/xdBot/",
 	"name": "xdBot",
+	"settings": {
+		"Speedhack": {
+			"name": "Speedhack",
+			"description": "Slows down the game to the desired value, only works while recording a macro.",
+			"type": "float",
+			"min": 0.01,
+			"max": 1.0,
+			"default": 1.0
+		},
+		"lock_delta": {
+			"name": "Lock-Delta",
+			"description": "Slows down the game on frame drops to make sure no frames are skipped.",
+			"type": "bool",
+			"default": false
+		},
+        "fps": {
+            "name": "Lock-Delta FPS",
+            "description": "The FPS value lock delta will use while enabled.",
+            "type": "int",
+			"min": 60,
+			"max": 240,
+            "default": 240
+        }
+    },
 	"developer": "Zilko",
 	"description": "Geometry Dash Bot"
 }
