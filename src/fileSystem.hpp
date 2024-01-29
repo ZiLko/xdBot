@@ -228,7 +228,9 @@ public:
     }
 
 	void openLoadMenu(CCObject*) {
-		create()->show();
+        auto layer = create();
+        layer->m_noElasticity = (static_cast<float>(Mod::get()->getSettingValue<double>("Speedhack")) < 1) ? true : false;
+		layer->show();
 	}
 
     void refresh() {
