@@ -1,3 +1,9 @@
+# v1.1.0
+
+ * Added speedhack.
+ * Added lock delta.
+ * Bugfixes
+
 # v1.0.2
 
  * Reworked the macro saving and loading system.
