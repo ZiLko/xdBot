@@ -1,21 +1,30 @@
-#include "fileSystem.hpp"
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <cocos2d.h>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/modify/CCScheduler.hpp>
+#include <Geode/ui/GeodeUI.hpp>
+#include <cocos2d.h>
 #include <vector>
-#include <nfd.h>
 #include <chrono>
+#include "fileSystem.hpp"
 
 float leftOver = 0.f; // For CCScheduler
 int fixedFps = 240;
 bool restart = false;
+
+bool lockDelta = false;
+int lockDeltaFps = 240;
+
 const int playerEnums[2][3] = {
     {cocos2d::enumKeyCodes::KEY_ArrowUp, cocos2d::enumKeyCodes::KEY_ArrowLeft, cocos2d::enumKeyCodes::KEY_ArrowRight}, 
     {cocos2d::enumKeyCodes::KEY_W, cocos2d::enumKeyCodes::KEY_A, cocos2d::enumKeyCodes::KEY_D}
 };
+
+bool hasCustomKeybinds() {
+	std::ifstream file(dirs::getGameDir().string() + "\\" + "geode\\mods\\geode.custom-keybinds.geode");
+    return file.good();
+}
 
 void releaseKeys() {
 	for (int row = 0; row < 2; ++row) {
@@ -58,7 +67,6 @@ public:
 
 recordSystem recorder;
 
-
 class RecordLayer : public geode::Popup<std::string const&> {
  	CCLabelBMFont* infoMacro = nullptr;
  	CCMenuItemToggler* recording = nullptr;
@@ -76,6 +84,7 @@ protected:
    		auto checkOnSprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
 
 		CCPoint corner = winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,-m_size.height/2.f);
+		CCPoint downCorner = winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,m_size.height/2.f);
  
 		auto label = CCLabelBMFont::create("Record", "bigFont.fnt"); 
     	label->setAnchorPoint({0, 0.5});
@@ -93,6 +102,16 @@ protected:
     	recording->toggle(recorder.state == state::recording); 
     	menu->addChild(recording);
 
+    auto settSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
+    settSpr->setScale(0.8f);
+    auto btn = CCMenuItemSpriteExtra::create(
+        settSpr,
+        this,
+        menu_selector(RecordLayer::openSettingsMenu)
+    );
+    btn->setPosition(downCorner + CCPOINT_CREATE(325, 20));
+    menu->addChild(btn);
+
     	label = CCLabelBMFont::create("Play", "bigFont.fnt");
     	label->setScale(0.7f);
     	label->setPosition(corner + CCPOINT_CREATE(198, -90)); 
@@ -108,11 +127,10 @@ protected:
     	playing->toggle(recorder.state == state::playing); 
     	menu->addChild(playing);
 
-
  		auto btnSprite = ButtonSprite::create("Save");
     	btnSprite->setScale(0.72f);
 
-   		auto btn = CCMenuItemSpriteExtra::create(btnSprite,
+   		btn = CCMenuItemSpriteExtra::create(btnSprite,
    		this,
    		menu_selector(saveMacroPopup::openSaveMacro));
 
@@ -146,9 +164,7 @@ protected:
     	m_mainLayer->addChild(infoMacro);
 
         return true;
-    }
-
-	
+	}
 
     static RecordLayer* create() {
         auto ret = new RecordLayer();
@@ -162,6 +178,10 @@ protected:
 
 public:
  
+	void openSettingsMenu(CCObject*) {
+		geode::openSettingsPopup(Mod::get());
+	}
+
 	void updateInfo() {
  		std::stringstream infoText;
     	infoText << "Current Macro:";
@@ -223,6 +243,8 @@ public:
 
     void openMenu(CCObject*) {
 		auto layer = create();
+		layer->m_noElasticity = (static_cast<float>(Mod::get()->getSettingValue<double>("Speedhack")) < 1
+		 && recorder.state == state::recording) ? true : false;
 		layer->show();
 	}
 };
@@ -236,7 +258,10 @@ void saveMacroPopup::openSaveMacro(CCObject*) {
 		)->show();
 		return;
 	}
-	create()->show();
+	auto layer = create();
+	layer->m_noElasticity = (static_cast<float>(Mod::get()->getSettingValue<double>("Speedhack")) < 1
+	 && recorder.state == state::recording) ? true : false;
+	layer->show();
 }
 
 void saveMacroPopup::saveMacro(CCObject*) {
@@ -336,10 +361,11 @@ void macroCell::loadMacro(CCObject* button) {
 }
 
 void clearState() {
-	if (recorder.state != state::off) {
-		recorder.state = state::off;
-		leftOver = 0.f;
-	}
+	FMOD::ChannelGroup* channel;
+    FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+	channel->setPitch(1);
+	recorder.state = state::off;
+	leftOver = 0.f;
 }
 
 class $modify(PauseLayer) {
@@ -372,11 +398,21 @@ class $modify(PauseLayer) {
 	void onResume(CCObject* sender) {
 		PauseLayer::onResume(sender);
 		if (restart) PlayLayer::get()->resetLevel();
+		if (recorder.state == state::off) {
+			FMOD::ChannelGroup* channel;
+        	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+			channel->setPitch(1);
+		}
 	}
 
 	void onPracticeMode(CCObject* sender) {
 		PauseLayer::onPracticeMode(sender);
 		if (restart) PlayLayer::get()->resetLevel();
+		if (recorder.state == state::off) {
+			FMOD::ChannelGroup* channel;
+        	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+			channel->setPitch(1);
+		}
 	}
 
 };
@@ -404,15 +440,19 @@ class $modify(GJBaseGameLayer) {
         	while (recorder.currentAction < static_cast<int>(recorder.macro.size()) &&
 			frame >= recorder.macro[recorder.currentAction].frame && !this->m_player1->m_isDead) {
             	auto& currentActionIndex = recorder.macro[recorder.currentAction];
-        		cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
-				static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
-				currentActionIndex.holding, false);
+				if (hasCustomKeybinds()) {
+					// Works with custom keybinds mod but teleport orb breaks
+					this->handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
+				} else {
+					// Teleport orb works but it breaks with custom keybinds mod
+					cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
+					static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
+					currentActionIndex.holding, false); 
+				}
             	recorder.currentAction++;
         	}
-			if (recorder.currentAction >= recorder.macro.size()) recorder.state = state::off;
-    	} else if (recorder.state == state::recording) {
-			
-		}
+			if (recorder.currentAction >= recorder.macro.size()) clearState();
+    	}
 	}
 };
 
@@ -421,10 +461,17 @@ class $modify(GJBaseGameLayer) {
 class $modify(PlayLayer) {
 	void resetLevel() {
 		PlayLayer::resetLevel();
-		if (recorder.state != state::off && restart != false) restart = false;
+		if (recorder.state != state::off)  {
+			restart = false;
+			leftOver = 0.f;
+		} else if (recorder.state != state::recording) {
+			FMOD::ChannelGroup* channel;
+        	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+        	channel->setPitch(1);
+		}
+
 		if (recorder.state == state::playing) {
 			recorder.currentAction = 0;
-			leftOver = 0.f;
 			releaseKeys();
 		} else if (recorder.state == state::recording) {
         	if (this->m_isPracticeMode && !recorder.macro.empty()) {
@@ -458,8 +505,25 @@ class $modify(PlayLayer) {
 class $modify(CCScheduler) {
 	void update(float dt) {
 		if (recorder.state == state::off) return CCScheduler::update(dt);
+
+		float speedhackValue = static_cast<float>(Mod::get()->getSettingValue<double>("Speedhack"));
+
+		if (recorder.state == state::recording) {
+			FMOD::ChannelGroup* channel;
+        	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+        	channel->setPitch(speedhackValue);
+		} else {
+			FMOD::ChannelGroup* channel;
+        	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+        	channel->setPitch(1);
+		}
+
+		if (Mod::get()->getSettingValue<bool>("lock_delta") && recorder.state == state::recording) 
+			return CCScheduler::update(speedhackValue / Mod::get()->getSettingValue<int64_t>("fps"));
+
 		using namespace std::literals;
-		float dt2 = 1.f / fixedFps;
+		float dt2 = (1.f / fixedFps);
+		dt = (recorder.state == state::recording) ? dt * speedhackValue : dt;
     	auto startTime = std::chrono::high_resolution_clock::now();
 		int mult = static_cast<int>((dt + leftOver)/dt2);  
     	for (int i = 0; i < mult; ++i) {
