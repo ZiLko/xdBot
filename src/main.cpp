@@ -461,18 +461,18 @@ class $modify(GJBaseGameLayer) {
 class $modify(PlayLayer) {
 	void resetLevel() {
 		PlayLayer::resetLevel();
-		if (recorder.state != state::off)  {
-			restart = false;
+		if (recorder.state != state::off && restart != false) {
 			leftOver = 0.f;
-		} else if (recorder.state != state::recording) {
-			FMOD::ChannelGroup* channel;
-        	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
-        	channel->setPitch(1);
+			restart = false;
 		}
 
 		if (recorder.state == state::playing) {
+			leftOver = 0.f;
 			recorder.currentAction = 0;
 			releaseKeys();
+			FMOD::ChannelGroup* channel;
+        	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
+        	channel->setPitch(1);
 		} else if (recorder.state == state::recording) {
         	if (this->m_isPracticeMode && !recorder.macro.empty()) {
   				int frame = recorder.currentFrame(); 
