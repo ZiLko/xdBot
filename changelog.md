@@ -1,3 +1,8 @@
+# v1.2.0
+
+ * Added speedhack key shortcut.
+ * Added Frame Stepper.
+
 # v1.1.1
 
  * Small bugfixes.
