@@ -1,6 +1,7 @@
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
+#include <Geode/modify/CCKeyboardDispatcher.hpp>
 #include <Geode/binding/GameManager.hpp>
 #include <Geode/modify/CCScheduler.hpp>
 #include <Geode/ui/GeodeUI.hpp>
@@ -12,6 +13,8 @@
 float leftOver = 0.f; // For CCScheduler
 int fixedFps = 240;
 bool restart = false;
+bool stepFrame = false;
+double prevSpeed = 1.0f;
 
 bool lockDelta = false;
 int lockDeltaFps = 240;
@@ -83,13 +86,12 @@ protected:
  		auto checkOffSprite = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
    		auto checkOnSprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
 
-		CCPoint corner = winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,-m_size.height/2.f);
-		CCPoint downCorner = winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,m_size.height/2.f);
+		CCPoint topLeftCorner = winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,-m_size.height/2.f);
  
 		auto label = CCLabelBMFont::create("Record", "bigFont.fnt"); 
     	label->setAnchorPoint({0, 0.5});
     	label->setScale(0.7f);
-    	label->setPosition(corner + CCPOINT_CREATE(168, -60));
+    	label->setPosition(topLeftCorner + CCPOINT_CREATE(168, -60));
     	m_mainLayer->addChild(label);
 
     	recording = CCMenuItemToggler::create(checkOffSprite,
@@ -102,19 +104,29 @@ protected:
     	recording->toggle(recorder.state == state::recording); 
     	menu->addChild(recording);
 
-    auto settSpr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
-    settSpr->setScale(0.8f);
-    auto btn = CCMenuItemSpriteExtra::create(
-        settSpr,
-        this,
-        menu_selector(RecordLayer::openSettingsMenu)
-    );
-    btn->setPosition(downCorner + CCPOINT_CREATE(325, 20));
-    menu->addChild(btn);
+    	auto spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
+    	spr->setScale(0.8f);
+    	auto btn = CCMenuItemSpriteExtra::create(
+        	spr,
+        	this,
+        	menu_selector(RecordLayer::openSettingsMenu)
+    	);
+    	btn->setPosition(winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,m_size.height/2.f) + CCPOINT_CREATE(325, 20));
+    	menu->addChild(btn);
+
+		spr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
+    	spr->setScale(0.65f);
+    	btn = CCMenuItemSpriteExtra::create(
+        	spr,
+        	this,
+        	menu_selector(RecordLayer::keyInfo)
+    	);
+    	btn->setPosition(topLeftCorner + CCPOINT_CREATE(290, -10));
+    	menu->addChild(btn);
 
     	label = CCLabelBMFont::create("Play", "bigFont.fnt");
     	label->setScale(0.7f);
-    	label->setPosition(corner + CCPOINT_CREATE(198, -90)); 
+    	label->setPosition(topLeftCorner + CCPOINT_CREATE(198, -90)); 
     	label->setAnchorPoint({0, 0.5});
     	m_mainLayer->addChild(label);
 
@@ -134,7 +146,7 @@ protected:
    		this,
    		menu_selector(saveMacroPopup::openSaveMacro));
 
-    	btn->setPosition(corner + CCPOINT_CREATE(65, -160)); 
+    	btn->setPosition(topLeftCorner + CCPOINT_CREATE(65, -160)); 
     	menu->addChild(btn);
 
 		btnSprite = ButtonSprite::create("Load");
@@ -144,7 +156,7 @@ protected:
 		this,
 		menu_selector(loadMacroPopup::openLoadMenu));
 
-    	btn->setPosition(corner + CCPOINT_CREATE(144, -160));
+    	btn->setPosition(topLeftCorner + CCPOINT_CREATE(144, -160));
     	menu->addChild(btn);
 
   		btnSprite = ButtonSprite::create("Clear");
@@ -154,12 +166,12 @@ protected:
 		this,
 		menu_selector(RecordLayer::clearMacro));
 
-    	btn->setPosition(corner + CCPOINT_CREATE(228, -160));
+    	btn->setPosition(topLeftCorner + CCPOINT_CREATE(228, -160));
     	menu->addChild(btn);
 
 		infoMacro = CCLabelBMFont::create("", "chatFont.fnt");
     	infoMacro->setAnchorPoint({0, 1});
-    	infoMacro->setPosition(corner + CCPOINT_CREATE(21, -57));
+    	infoMacro->setPosition(topLeftCorner + CCPOINT_CREATE(21, -57));
 		updateInfo();
     	m_mainLayer->addChild(infoMacro);
 
@@ -182,6 +194,14 @@ public:
 		geode::openSettingsPopup(Mod::get());
 	}
 
+	void keyInfo(CCObject*) {
+		FLAlertLayer::create(
+    		"Shortcuts",   
+    		"<cg>Toggle Speedhack</c> = <cl>C</c>\n<cg>Advance Frame</c> = <cl>V</c>\n<cg>Disable Frame Stepper</c> = <cl>B</c>",  
+    		"OK"      
+		)->show();
+	}
+
 	void updateInfo() {
  		std::stringstream infoText;
     	infoText << "Current Macro:";
@@ -197,6 +217,12 @@ public:
 
 		if (recorder.state == state::playing) restart = true;
 		else if (recorder.state == state::off) restart = false;
+		FMODAudioEngine::sharedEngine()->setMusicTimeMS(
+			(recorder.currentFrame()*1000)/240 + PlayLayer::get()->m_levelSettings->m_songOffset*1000,
+			true,
+			0
+		);
+		Mod::get()->setSettingValue("frame_stepper", false);
 	}
 
 	void toggleRecord(CCObject* sender) {
@@ -220,7 +246,15 @@ public:
 			if (recorder.state == state::recording) {
 				restart = true;
 				updateInfo();
-			} else if (recorder.state == state::off) restart = false;
+			} else if (recorder.state == state::off) {
+				restart = false;
+				FMODAudioEngine::sharedEngine()->setMusicTimeMS(
+					(recorder.currentFrame()*1000)/240 + PlayLayer::get()->m_levelSettings->m_songOffset*1000,
+					true,
+					0
+				);
+				Mod::get()->setSettingValue("frame_stepper", false);
+			}
 		}
 	}
 
@@ -243,7 +277,7 @@ public:
 
     void openMenu(CCObject*) {
 		auto layer = create();
-		layer->m_noElasticity = (static_cast<float>(Mod::get()->getSettingValue<double>("Speedhack")) < 1
+		layer->m_noElasticity = (static_cast<float>(Mod::get()->getSettingValue<double>("speedhack")) < 1
 		 && recorder.state == state::recording) ? true : false;
 		layer->show();
 	}
@@ -259,7 +293,7 @@ void saveMacroPopup::openSaveMacro(CCObject*) {
 		return;
 	}
 	auto layer = create();
-	layer->m_noElasticity = (static_cast<float>(Mod::get()->getSettingValue<double>("Speedhack")) < 1
+	layer->m_noElasticity = (static_cast<float>(Mod::get()->getSettingValue<double>("speedhack")) < 1
 	 && recorder.state == state::recording) ? true : false;
 	layer->show();
 }
@@ -366,6 +400,7 @@ void clearState() {
 	channel->setPitch(1);
 	recorder.state = state::off;
 	leftOver = 0.f;
+	Mod::get()->setSettingValue("frame_stepper", false);
 }
 
 class $modify(PauseLayer) {
@@ -434,6 +469,20 @@ class $modify(GJBaseGameLayer) {
 	}
 
 	void update(float dt) {
+		if (recorder.state == state::recording) {
+			if (Mod::get()->getSettingValue<bool>("frame_stepper") && stepFrame == false) 
+				return;
+			else if (stepFrame) {
+				GJBaseGameLayer::update(1.f/fixedFps);
+				stepFrame = false;
+				FMODAudioEngine::sharedEngine()->setMusicTimeMS(
+					(recorder.currentFrame()*1000)/240 + this->m_levelSettings->m_songOffset*1000,
+					true,
+					0
+				);
+			}
+		}
+		
 		GJBaseGameLayer::update(dt);
 		if (recorder.state == state::playing) {
 			int frame = recorder.currentFrame();
@@ -506,7 +555,7 @@ class $modify(CCScheduler) {
 	void update(float dt) {
 		if (recorder.state == state::off) return CCScheduler::update(dt);
 
-		float speedhackValue = static_cast<float>(Mod::get()->getSettingValue<double>("Speedhack"));
+		float speedhackValue = static_cast<float>(Mod::get()->getSettingValue<double>("speedhack"));
 
 		if (recorder.state == state::recording) {
 			FMOD::ChannelGroup* channel;
@@ -534,5 +583,39 @@ class $modify(CCScheduler) {
         	}
     	}
     leftOver += (dt - dt2 * mult); 
+	}
+};
+
+class $modify(CCKeyboardDispatcher) {
+	bool dispatchKeyboardMSG(enumKeyCodes key, bool hold, bool p) {
+		if (key == cocos2d::enumKeyCodes::KEY_C && hold && !p && recorder.state == state::recording) {
+			if (!Mod::get()->getSettingValue<bool>("disable_speedhack")) {
+				if (prevSpeed != 1 && Mod::get()->getSettingValue<double>("speedhack") == 1)
+					Mod::get()->setSettingValue("speedhack", prevSpeed);
+				else {
+					prevSpeed = Mod::get()->getSettingValue<double>("speedhack");
+					Mod::get()->setSettingValue("speedhack", 1.0);
+				}
+			}
+		}
+
+		if (key == cocos2d::enumKeyCodes::KEY_V && hold && !p && recorder.state == state::recording) {
+			if (!Mod::get()->getSettingValue<bool>("disable_frame_stepper")) {
+				if (Mod::get()->getSettingValue<bool>("frame_stepper")) stepFrame = true;
+				else Mod::get()->setSettingValue("frame_stepper", true);
+			}
+		}
+
+		if (key == cocos2d::enumKeyCodes::KEY_B && hold && !p && recorder.state == state::recording) {
+			if (Mod::get()->getSettingValue<bool>("frame_stepper")) {
+				FMODAudioEngine::sharedEngine()->setMusicTimeMS(
+					(recorder.currentFrame()*1000)/240 + PlayLayer::get()->m_levelSettings->m_songOffset*1000,
+					true,
+					0
+				);
+				Mod::get()->setSettingValue("frame_stepper", false);
+			}
+		}
+		return CCKeyboardDispatcher::dispatchKeyboardMSG(key,hold,p);
 	}
 };
