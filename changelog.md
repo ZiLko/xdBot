@@ -1,8 +1,12 @@
+# v1.1.1
+
+ * Small bugfixes.
+
 # v1.1.0
 
  * Added speedhack.
  * Added lock delta.
- * Bugfixes
+ * Bugfixes.
 
 # v1.0.2
 
