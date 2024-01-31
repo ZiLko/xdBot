@@ -1,5 +1,6 @@
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
+#include <Geode/modify/EndLevelLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
 #include <Geode/binding/GameManager.hpp>
@@ -15,6 +16,7 @@ int fixedFps = 240;
 bool restart = false;
 bool stepFrame = false;
 double prevSpeed = 1.0f;
+bool safeModeEnabled = false;
 
 bool lockDelta = false;
 int lockDeltaFps = 240;
@@ -38,6 +40,50 @@ void releaseKeys() {
 }
 
 using namespace geode::prelude;
+
+
+
+namespace safeMode
+{
+using opcode = std::pair<unsigned long, std::vector<uint8_t>>;
+
+	inline const std::array<opcode, 15> codes{
+		opcode{ 0x2DDC7E, { 0x0F, 0x84, 0xCA, 0x00, 0x00, 0x00 } },
+		{ 0x2DDD6A, { 0x0F, 0x84, 0xEA, 0x01, 0x00, 0x00 } },
+		{ 0x2DDD70, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 } },
+		{ 0x2DDD77, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 } },
+		{ 0x2DDEE5, { 0x90 } },
+		{ 0x2DDF6E, { 0x0F, 0x84, 0xC2, 0x02, 0x00, 0x00 } },
+
+		{ 0x2E6BDE, { 0x90, 0xE9, 0xAD, 0x00, 0x00, 0x00 } },
+		{ 0x2E6B32, { 0xEB, 0x0D } },
+		{ 0x2E69F4, { 0x0F, 0x4C, 0xC1 } },
+		{ 0x2E6993, { 0x90, 0xE9, 0x85, 0x01, 0x00, 0x00 } },
+
+		{ 0x2EACD0, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 } },
+		{ 0x2EACD6, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 } }, 
+		{ 0x2EACF7, { 0x90 } },
+
+		{ 0x2EA81F, { 0x6A, 0x00 } },
+		{ 0x2EA83D, { 0x90 } }
+	};
+	inline std::array<geode::Patch*, 15> patches;
+
+	void updateSafeMode() {
+		for (auto& patch : patches) {
+		if (safeModeEnabled) {
+			if (!patch->isEnabled())
+				patch->enable();
+		}
+		else {
+			if (patch->isEnabled())
+				patch->disable();
+		}
+	}
+	}
+
+}
+
 
 struct data {
     bool player1;
@@ -394,14 +440,20 @@ void macroCell::loadMacro(CCObject* button) {
 	} else handleLoad(button);
 }
 
-void clearState() {
+void clearState(bool safeMode) {
 	FMOD::ChannelGroup* channel;
     FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
 	channel->setPitch(1);
 	recorder.state = state::off;
 	leftOver = 0.f;
 	Mod::get()->setSettingValue("frame_stepper", false);
+	if (!safeMode) {
+		safeModeEnabled = false;
+		safeMode::updateSafeMode();
+	}
 }
+
+	// ---------------- Hooks ---------------- //
 
 class $modify(PauseLayer) {
 	void customSetup() {
@@ -422,12 +474,12 @@ class $modify(PauseLayer) {
 
 	void onQuit(CCObject* sender) {
 		PauseLayer::onQuit(sender);
-		clearState();
+		clearState(false);
 	}
 
 	void goEdit() {
 		PauseLayer::goEdit();
-		clearState();
+		clearState(false);
 	}
 
 	void onResume(CCObject* sender) {
@@ -470,6 +522,11 @@ class $modify(GJBaseGameLayer) {
 
 	void update(float dt) {
 		if (recorder.state == state::recording) {
+			if (safeModeEnabled) {
+				safeModeEnabled = false;
+				safeMode::updateSafeMode();
+			}
+			
 			if (Mod::get()->getSettingValue<bool>("frame_stepper") && stepFrame == false) 
 				return;
 			else if (stepFrame) {
@@ -489,6 +546,10 @@ class $modify(GJBaseGameLayer) {
         	while (recorder.currentAction < static_cast<int>(recorder.macro.size()) &&
 			frame >= recorder.macro[recorder.currentAction].frame && !this->m_player1->m_isDead) {
             	auto& currentActionIndex = recorder.macro[recorder.currentAction];
+				if (!safeModeEnabled) {
+					safeModeEnabled = true;
+					safeMode::updateSafeMode();
+				}
 				if (hasCustomKeybinds()) {
 					// Works with custom keybinds mod but teleport orb breaks
 					this->handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
@@ -500,12 +561,10 @@ class $modify(GJBaseGameLayer) {
 				}
             	recorder.currentAction++;
         	}
-			if (recorder.currentAction >= recorder.macro.size()) clearState();
+			if (recorder.currentAction >= recorder.macro.size()) clearState(true);
     	}
 	}
 };
-
-	// ---------------- Hooks ---------------- //
 
 class $modify(PlayLayer) {
 	void resetLevel() {
@@ -514,6 +573,9 @@ class $modify(PlayLayer) {
 			leftOver = 0.f;
 			restart = false;
 		}
+
+		safeModeEnabled = false;
+		safeMode::updateSafeMode();
 
 		if (recorder.state == state::playing) {
 			leftOver = 0.f;
@@ -547,7 +609,24 @@ class $modify(PlayLayer) {
 
 	void levelComplete() {
 		PlayLayer::levelComplete();
-		clearState();
+		clearState(true);
+	}
+};
+
+class $modify(EndLevelLayer) {
+	void onReplay(CCObject* s) {
+		EndLevelLayer::onReplay(s);
+		clearState(false);
+	}
+
+	void goEdit() {
+		EndLevelLayer::goEdit();
+		clearState(false);
+	}
+
+	void onMenu(CCObject* s) {
+		EndLevelLayer::onMenu(s);
+		clearState(false);
 	}
 };
 
@@ -619,3 +698,13 @@ class $modify(CCKeyboardDispatcher) {
 		return CCKeyboardDispatcher::dispatchKeyboardMSG(key,hold,p);
 	}
 };
+
+$execute
+{
+	for (std::size_t i = 0; i < 15; i++)
+	{
+		safeMode::patches[i] = Mod::get()->patch(reinterpret_cast<void*>(base::get() + std::get<0>(safeMode::codes[i])),
+		std::get<1>(safeMode::codes[i])).unwrap();
+		safeMode::patches[i]->disable();
+	}
+}
