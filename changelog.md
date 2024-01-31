@@ -1,3 +1,7 @@
+# v1.2.1
+
+ * Added (forced) safe mode when playing a macro.
+
 # v1.2.0
 
  * Added speedhack key shortcut.
