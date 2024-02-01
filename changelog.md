@@ -1,3 +1,10 @@
+# v1.3.0
+
+ * Removed lock delta (it was useless).
+ * Added clicks to the macro info label.
+ * Added Input Fixes and Frame Fixes. Input Fixes is on by default, "vanilla" option disables it.
+ * Fixed teleport orb bug for real.
+
 # v1.2.1
 
  * Added (forced) safe mode when playing a macro.
