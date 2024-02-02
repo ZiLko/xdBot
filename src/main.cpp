@@ -17,27 +17,7 @@ bool restart = false;
 bool stepFrame = false;
 double prevSpeed = 1.0f;
 bool safeModeEnabled = false;
-
-bool lockDelta = false;
-int lockDeltaFps = 240;
-
-const int playerEnums[2][3] = {
-    {cocos2d::enumKeyCodes::KEY_ArrowUp, cocos2d::enumKeyCodes::KEY_ArrowLeft, cocos2d::enumKeyCodes::KEY_ArrowRight}, 
-    {cocos2d::enumKeyCodes::KEY_W, cocos2d::enumKeyCodes::KEY_A, cocos2d::enumKeyCodes::KEY_D}
-};
-
-bool hasCustomKeybinds() {
-	std::ifstream file(dirs::getGameDir().string() + "\\" + "geode\\mods\\geode.custom-keybinds.geode");
-    return file.good();
-}
-
-void releaseKeys() {
-	for (int row = 0; row < 2; ++row) {
-        for (int col = 0; col < 3; ++col) {
-			cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(static_cast<cocos2d::enumKeyCodes>(playerEnums[row][col]), false, false);
-        }
-    }
-}
+bool playerHolding;
 
 using namespace geode::prelude;
 
@@ -84,12 +64,23 @@ using opcode = std::pair<unsigned long, std::vector<uint8_t>>;
 
 }
 
+struct playerData {
+	double xPos;
+	double yPos;
+	bool upsideDown;
+	float rotation;
+	double xSpeed;
+	double ySpeed;
+};
 
 struct data {
     bool player1;
     int frame;
     int button;
     bool holding;
+	bool posOnly;
+	playerData p1;
+	playerData p2;
 };
 
 enum state {
@@ -107,9 +98,9 @@ public:
 	int currentFrame() {
 		return static_cast<int>((*(double*)(((char*)PlayLayer::get()) + 0x328)) * fixedFps); // m_time * fps
 	}
-	void recordAction(bool holding, int button, bool player1, int frame, GJBaseGameLayer* bgl) {
+	void recordAction(bool holding, int button, bool player1, int frame, GJBaseGameLayer* bgl, playerData p1Data, playerData p2Data) {
 		bool p1 = (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) ? !player1 : player1;
-    	macro.push_back({p1,frame,button,holding});
+    	macro.push_back({p1, frame, button, holding, false, p1Data, p2Data});
 	}
 
 };
@@ -217,7 +208,7 @@ protected:
 
 		infoMacro = CCLabelBMFont::create("", "chatFont.fnt");
     	infoMacro->setAnchorPoint({0, 1});
-    	infoMacro->setPosition(topLeftCorner + CCPOINT_CREATE(21, -57));
+    	infoMacro->setPosition(topLeftCorner + CCPOINT_CREATE(21, -45));
 		updateInfo();
     	m_mainLayer->addChild(infoMacro);
 
@@ -249,9 +240,17 @@ public:
 	}
 
 	void updateInfo() {
+		int clicksCount = 0;
+		if (!recorder.macro.empty()) {
+			for (const data& element : recorder.macro) {
+        		if (element.holding && !element.posOnly) clicksCount++;
+    		}
+		}
+		
  		std::stringstream infoText;
     	infoText << "Current Macro:";
     	infoText << "\nSize: " << recorder.macro.size();
+		infoText << "\nClicks: " << clicksCount;
 		infoText << "\nDuration: " << (!recorder.macro.empty() 
 		? recorder.macro.back().frame / fixedFps : 0) << "s";
     	infoMacro->setString(infoText.str().c_str());
@@ -359,7 +358,14 @@ void saveMacroPopup::saveMacro(CCObject*) {
 	if (file.is_open()) {
 		for (auto &action : recorder.macro) {
 			file << action.frame << "|" << action.holding <<
-			"|" << action.button << "|" << action.player1 << "\n";
+			"|" << action.button << "|" << action.player1 <<
+			"|" << action.posOnly << "|" << action.p1.xPos <<
+			"|" << action.p1.yPos << "|" << action.p1.upsideDown <<
+			"|" << action.p1.rotation << "|" << action.p1.xSpeed <<
+			"|" << action.p1.ySpeed << "|" << action.p2.xPos <<
+			"|" << action.p2.yPos << "|" << action.p2.upsideDown <<
+			"|" << action.p2.rotation << "|" << action.p2.xSpeed <<
+			"|" << action.p2.ySpeed  << "\n";
 		}
 		file.close();
 		CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
@@ -401,14 +407,65 @@ void macroCell::handleLoad(CCObject* btn) {
 	}
 	while (std::getline(file, line)) {
 		std::istringstream isSS(line);
+		// Do not question my methods
+		playerData p1;
+		playerData p2;
 		int holding;
 		int frame;
 		int button;
 		int player1;
-		char separator;
-		if (isSS >> frame >> separator >> holding >> separator >> button >> 
-		separator >> player1 && separator == '|') {
-			recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding});
+		int posOnly;
+		double p1xPos;
+		double p1yPos;
+		int p1upsideDown;
+		double p1rotation;
+		double p1xSpeed;
+		double p1ySpeed;
+		double p2xPos;
+		double p2yPos;
+		int p2upsideDown;
+		double p2rotation;
+		double p2xSpeed;
+		double p2ySpeed;
+		char s;
+		int count = 0;
+    	for (char ch : line) {
+        	if (ch == '|') {
+            	count++;
+        	}
+    	}
+		if (count > 3) {
+			if (isSS >> frame >> s >> holding >> s >> button >> 
+			s >> player1 >> s >> posOnly >> s >>
+			p1xPos >> s >> p1yPos >> s >> p1upsideDown
+		 	>> s >> p1rotation >> s >> p1xSpeed >> s >>
+		 	p1ySpeed >> s >> p2xPos >> s >> p2yPos >> s >> p2upsideDown
+		 	>> s >> p2rotation >> s >> p2xSpeed >> s >>
+		 	p2ySpeed && s == '|') {
+				p1 = {
+					(double)p1xPos,
+					(double)p1yPos,
+					(bool)p1upsideDown,
+					(float)p1rotation,
+					(double)p1xSpeed,
+					(double)p1ySpeed,
+				};
+				p2 = {
+					(double)p2xPos,
+					(double)p2yPos,
+					(bool)p2upsideDown,
+					(float)p2rotation,
+					(double)p2xSpeed,
+					(double)p2ySpeed,
+				};
+				recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding, (bool)posOnly, p1, p2});
+			}
+		} else {
+			if (isSS >> frame >> s >> holding >> s >> button >> 
+			s >> player1 && s == '|') {
+				p1.xPos = 0;
+				recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding, false, p1, p2});
+			}
 		}
 	}
 	CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
@@ -508,25 +565,41 @@ class $modify(GJBaseGameLayer) {
 	void handleButton(bool holding, int button, bool player1) {
 		GJBaseGameLayer::handleButton(holding,button,player1);
 		if (recorder.state == state::recording) {
+			playerData p1;
+			playerData p2;
+			if (!Mod::get()->getSettingValue<bool>("vanilla") || Mod::get()->getSettingValue<bool>("frame_fix")) {
+				if (!Mod::get()->getSettingValue<bool>("frame_fix")) playerHolding = holding;
+				p1 = {
+				this->m_player1->getPositionX(),
+				this->m_player1->getPositionY(),
+				this->m_player1->m_isUpsideDown,
+				this->m_player1->getRotationX(),
+				-50085,
+				-50085
+			};
+			if (this->m_player2 != nullptr) {
+				p2 = {
+				this->m_player2->getPositionX(),
+				this->m_player2->getPositionY(),
+				this->m_player2->m_isUpsideDown,
+				this->m_player2->getRotationX(),
+				-50085,
+				-50085
+				};
+			} else {
+				p2.xPos = 0;
+			}
+			} else {
+				p1.xPos = 0;
+			}
 			int frame = recorder.currentFrame(); 
-			recorder.recordAction(holding, button, player1, frame, this);
+			recorder.recordAction(holding, button, player1, frame, this, p1, p2);
 		}
 	}
 
-	int getPlayer1(int p1, GJBaseGameLayer* bgl) {
-		bool player1;
-		if (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) player1 = !p1;
-		else player1 = p1;
-		return static_cast<int>(player1);
-	}
 
 	void update(float dt) {
 		if (recorder.state == state::recording) {
-			if (safeModeEnabled) {
-				safeModeEnabled = false;
-				safeMode::updateSafeMode();
-			}
-			
 			if (Mod::get()->getSettingValue<bool>("frame_stepper") && stepFrame == false) 
 				return;
 			else if (stepFrame) {
@@ -539,32 +612,88 @@ class $modify(GJBaseGameLayer) {
 				);
 			}
 		}
-		
 		GJBaseGameLayer::update(dt);
-		if (recorder.state == state::playing) {
+		
+	}
+};
+
+void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
+	if (recorder.state == state::recording) {
+		if (((playerHolding && !Mod::get()->getSettingValue<bool>("vanilla")) ||
+		Mod::get()->getSettingValue<bool>("frame_fix")) && !recorder.macro.empty()) {
+			
+			if (!(recorder.macro.back().frame == recorder.currentFrame() &&
+			(recorder.macro.back().posOnly || recorder.macro.back().p1.xPos != 0))) {
+				playerData p1 = {
+					self->m_player1->getPositionX(),
+					self->m_player1->getPositionY(),
+					self->m_player1->m_isUpsideDown,
+					self->m_player1->getRotationX(),
+					-50085,
+					-50085
+				};
+				playerData p2;
+				if (self->m_player2 != nullptr) {
+					p2 = {
+					self->m_player2->getPositionX(),
+					self->m_player2->getPositionY(),
+					self->m_player2->m_isUpsideDown,
+					self->m_player2->getRotationX(),
+					-50085,
+					-50085
+					};
+				} else {
+					p2.xPos = 0;
+				}
+				recorder.macro.push_back({true,recorder.currentFrame(),1,true,true,p1,p2});
+			}
+		}
+	}
+
+	if (recorder.state == state::playing) {
 			int frame = recorder.currentFrame();
         	while (recorder.currentAction < static_cast<int>(recorder.macro.size()) &&
-			frame >= recorder.macro[recorder.currentAction].frame && !this->m_player1->m_isDead) {
+			frame >= recorder.macro[recorder.currentAction].frame && !self->m_player1->m_isDead) {
             	auto& currentActionIndex = recorder.macro[recorder.currentAction];
+
 				if (!safeModeEnabled) {
 					safeModeEnabled = true;
 					safeMode::updateSafeMode();
 				}
-				if (hasCustomKeybinds()) {
-					// Works with custom keybinds mod but teleport orb breaks
-					this->handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
-				} else {
-					// Teleport orb works but it breaks with custom keybinds mod
-					cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
-					static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
-					currentActionIndex.holding, false); 
+
+				if (currentActionIndex.p1.xPos != 0) {
+					if (self->m_player1->getPositionX() != currentActionIndex.p1.xPos ||
+					self->m_player1->getPositionY() != currentActionIndex.p1.yPos)
+						self->m_player1->setPosition(cocos2d::CCPoint(currentActionIndex.p1.xPos, currentActionIndex.p1.yPos));
+
+					if (self->m_player1->m_isUpsideDown != currentActionIndex.p1.upsideDown && currentActionIndex.posOnly)
+						self->m_player1->flipGravity(currentActionIndex.p1.upsideDown, true);
+
+					if (self->m_player1->getRotationX() != currentActionIndex.p1.rotation && currentActionIndex.p1.rotation >= 0)
+						self->m_player1->setRotationX(currentActionIndex.p1.rotation);
+
+					if (currentActionIndex.p2.xPos != 0 && self->m_player2 != nullptr) {
+						if (self->m_player2->getPositionX() != currentActionIndex.p2.xPos ||
+						self->m_player2->getPositionY() != currentActionIndex.p2.yPos)
+							self->m_player2->setPosition(cocos2d::CCPoint(currentActionIndex.p2.xPos, currentActionIndex.p2.yPos));
+
+						if (self->m_player2->m_isUpsideDown != currentActionIndex.p2.upsideDown && currentActionIndex.posOnly)
+							self->m_player2->flipGravity(currentActionIndex.p1.upsideDown, true);
+
+						if (self->m_player2->getRotationX() != currentActionIndex.p2.rotation && currentActionIndex.p2.rotation >= 0)
+							self->m_player2->setRotationX(currentActionIndex.p2.rotation);
+					}
 				}
+
+				if (!currentActionIndex.posOnly) 
+					self->handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
+
             	recorder.currentAction++;
         	}
 			if (recorder.currentAction >= recorder.macro.size()) clearState(true);
     	}
-	}
-};
+	reinterpret_cast<void(__thiscall *)(GJBaseGameLayer *)>(base::get() + 0x1BD240)(self);
+}
 
 class $modify(PlayLayer) {
 	void resetLevel() {
@@ -575,12 +704,12 @@ class $modify(PlayLayer) {
 		}
 
 		safeModeEnabled = false;
+		playerHolding = false;
 		safeMode::updateSafeMode();
 
 		if (recorder.state == state::playing) {
 			leftOver = 0.f;
 			recorder.currentAction = 0;
-			releaseKeys();
 			FMOD::ChannelGroup* channel;
         	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
         	channel->setPitch(1);
@@ -646,9 +775,6 @@ class $modify(CCScheduler) {
         	channel->setPitch(1);
 		}
 
-		if (Mod::get()->getSettingValue<bool>("lock_delta") && recorder.state == state::recording) 
-			return CCScheduler::update(speedhackValue / Mod::get()->getSettingValue<int64_t>("fps"));
-
 		using namespace std::literals;
 		float dt2 = (1.f / fixedFps);
 		dt = (recorder.state == state::recording) ? dt * speedhackValue : dt;
@@ -699,10 +825,9 @@ class $modify(CCKeyboardDispatcher) {
 	}
 };
 
-$execute
-{
-	for (std::size_t i = 0; i < 15; i++)
-	{
+$execute {
+	Mod::get()->hook(reinterpret_cast<void *>(base::get() + 0x1BD240), &GJBaseGameLayerProcessCommands, "GJBaseGameLayer::processCommands", tulip::hook::TulipConvention::Thiscall);
+	for (std::size_t i = 0; i < 15; i++) {
 		safeMode::patches[i] = Mod::get()->patch(reinterpret_cast<void*>(base::get() + std::get<0>(safeMode::codes[i])),
 		std::get<1>(safeMode::codes[i])).unwrap();
 		safeMode::patches[i]->disable();
