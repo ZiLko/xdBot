@@ -1,6 +1,6 @@
 {
 	"geode": "2.0.0",
-	"version": "v1.3.0",
+	"version": "v1.3.1",
 	"id": "zilko.xdbot",
 	"gd": "2.204",
 	"repository": "https://github.com/ZiLko/xdBot/",
@@ -32,7 +32,30 @@
 			"type": "bool",
 			"default": false
 		},
-		
+		"auto_enable_play": {
+			"name": "Auto-Enable Play",
+			"description": "Toggles playing the macro automatically when you finish recording a level.",
+			"type": "bool",
+			"default": false
+		},
+		"show_frame_label": {
+			"name": "Show frame label",
+			"description": "Enables the frame label.",
+			"type": "bool",
+			"default": false
+		},
+		"show_recording_label": {
+			"name": "Show Recording Label",
+			"description": "Enables the recording label.",
+			"type": "bool",
+			"default": true
+		},
+		"show_playing_label": {
+			"name": "Show Playing Label",
+			"description": "Enables the playing label.",
+			"type": "bool",
+			"default": true
+		},
 		"disable_frame_stepper": {
 			"name": "Disable FS Shortcut",
 			"description": "Disables frame stepper key shortcut.",
