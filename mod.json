@@ -1,6 +1,6 @@
 {
 	"geode": "2.0.0",
-	"version": "v1.2.1",
+	"version": "v1.3.0",
 	"id": "zilko.xdbot",
 	"gd": "2.204",
 	"repository": "https://github.com/ZiLko/xdBot/",
@@ -14,26 +14,25 @@
 			"max": 1.0,
 			"default": 1.0
 		},
-		"lock_delta": {
-			"name": "Lock-Delta",
-			"description": "Slows down the game on frame drops to make sure no frames are skipped.",
-			"type": "bool",
-			"default": false
-		},
-        "fps": {
-            "name": "Lock-Delta FPS",
-            "description": "The FPS value lock delta will use while enabled.",
-            "type": "int",
-			"min": 60,
-			"max": 240,
-            "default": 240
-        },
 		"frame_stepper": {
 			"name": "Frame Stepper",
 			"description": "<cg>Advance Frame</c> = <cl>V</c>\n<cg>Disable</c> = <cl>B</c>\nLets you advance frame by frame for more precision.",
 			"type": "bool",
 			"default": false
 		},
+		"vanilla": {
+			"name": "Vanilla",
+			"description": "Stops recording the player's position during an input. Macro might be less accurate.\nModerately decreases macro size.",
+			"type": "bool",
+			"default": false
+		},
+		"frame_fix": {
+			"name": "Frame Fixes",
+			"description": "Improves accuracy by recording the player's position every frame to make sure the macro doesn't break.\nHeavily increases macro size.",
+			"type": "bool",
+			"default": false
+		},
+		
 		"disable_frame_stepper": {
 			"name": "Disable FS Shortcut",
 			"description": "Disables frame stepper key shortcut.",
