@@ -1,3 +1,12 @@
+# v1.3.1
+
+ * Fixed rotation bug on input fix and frame fix modes.
+ * Added "Auto-Enable Play" setting.
+ * Speedhack shortcut value now saves after restarting the game.
+ * Fixed frame stepper advancing two frames instead of one.
+ * Added toggleable frame and macro state labels.
+ * Vanilla and Frame Fix settings now also change the way the macro plays.
+
 # v1.3.0
 
  * Removed lock delta (it was useless).
