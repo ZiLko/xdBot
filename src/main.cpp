@@ -667,6 +667,18 @@ class $modify(GJBaseGameLayer) {
 				PlayLayer::get()->resetLevel();
 			}
 		}
+
+		if (recorder.state == state::off) {
+			if (frameLabel != nullptr) {
+				frameLabel->removeFromParent();
+				frameLabel = nullptr;
+			}
+			if (stateLabel != nullptr) {
+				stateLabel->removeFromParent();
+				stateLabel = nullptr;
+			}
+		}
+		
 		if (recorder.state == state::recording) {
 			if (stateLabel != nullptr) {
 				if (stateLabel->getString() != "Recording" && Mod::get()->getSettingValue<bool>("show_recording_label"))
@@ -747,7 +759,7 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 					safeModeEnabled = true;
 					safeMode::updateSafeMode();
 				}
-				if (!Mod::get()->getSettingValue<bool>("override_macro_mode")) {
+				if (!Mod::get()->getSettingValue<bool>("override_macro_mode") && currentActionIndex.p1.xPos != 0) {
 					if (self->m_player1->getPositionX() != currentActionIndex.p1.xPos ||
 						self->m_player1->getPositionY() != currentActionIndex.p1.yPos)
 							self->m_player1->setPosition(cocos2d::CCPoint(currentActionIndex.p1.xPos, currentActionIndex.p1.yPos));
