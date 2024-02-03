@@ -2,6 +2,7 @@
 
  * Added version label on the menu.
  * Saved macros list is now in the correct alphabetical order.
+ * Added override macro mode setting.
 
 # v1.3.1
 
