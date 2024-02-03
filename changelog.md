@@ -1,3 +1,8 @@
+# v1.3.2
+
+ * Added version label on the menu.
+ * Saved macros list is now in the correct alphabetical order.
+
 # v1.3.1
 
  * Fixed rotation bug on input fix and frame fix modes.
