@@ -1,8 +1,13 @@
+# v1.3.3
+
+ * Added override macro mode setting.
+ * Fixed labels not disappearing after disabling recording or playing.
+ * Previous version never came out but fixed a crash xd.
+
 # v1.3.2
 
  * Added version label on the menu.
  * Saved macros list is now in the correct alphabetical order.
- * Added override macro mode setting.
 
 # v1.3.1
 
