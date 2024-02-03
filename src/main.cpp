@@ -747,6 +747,25 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 					safeModeEnabled = true;
 					safeMode::updateSafeMode();
 				}
+				if (!Mod::get()->getSettingValue<bool>("override_macro_mode")) {
+					if (self->m_player1->getPositionX() != currentActionIndex.p1.xPos ||
+						self->m_player1->getPositionY() != currentActionIndex.p1.yPos)
+							self->m_player1->setPosition(cocos2d::CCPoint(currentActionIndex.p1.xPos, currentActionIndex.p1.yPos));
+
+						if (self->m_player1->m_isUpsideDown != currentActionIndex.p1.upsideDown && currentActionIndex.posOnly)
+							self->m_player1->flipGravity(currentActionIndex.p1.upsideDown, true);
+
+					
+						if (currentActionIndex.p2.xPos != 0 && self->m_player2 != nullptr) {
+							if (self->m_player2->getPositionX() != currentActionIndex.p2.xPos ||
+							self->m_player2->getPositionY() != currentActionIndex.p2.yPos)
+								self->m_player2->setPosition(cocos2d::CCPoint(currentActionIndex.p2.xPos, currentActionIndex.p2.yPos));
+
+							if (self->m_player2->m_isUpsideDown != currentActionIndex.p2.upsideDown && currentActionIndex.posOnly)
+								self->m_player2->flipGravity(currentActionIndex.p1.upsideDown, true);
+
+						}
+				} else {
 				if ((currentActionIndex.p1.xPos != 0 && self->m_player1 != nullptr) && (!Mod::get()->getSettingValue<bool>("vanilla") || Mod::get()->getSettingValue<bool>("frame_fix"))) {
 					if (((!Mod::get()->getSettingValue<bool>("vanilla") && !Mod::get()->getSettingValue<bool>("frame_fix")) && lastHold)
 					|| Mod::get()->getSettingValue<bool>("frame_fix")) {
@@ -769,7 +788,7 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 						}
 					}
 				}
-
+				}
 				if (!currentActionIndex.posOnly) {
 					self->handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
 					if (currentActionIndex.holding) lastHold = true;
