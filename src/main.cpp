@@ -58,12 +58,21 @@ using opcode = std::pair<unsigned long, std::vector<uint8_t>>;
 	void updateSafeMode() {
 		for (auto& patch : patches) {
 		if (safeModeEnabled) {
-			if (!patch->isEnabled())
-				patch->enable();
-		}
-		else {
-			if (patch->isEnabled())
-				patch->disable();
+			if (!patch->isEnabled()) {
+				try {
+					patch->enable();
+				} catch(const std::exception& e) {
+					log::debug("wtf? - {}", e);
+				}
+			}
+		} else {
+			if (patch->isEnabled()) {
+				try {
+					patch->disable();
+				} catch(const std::exception& e) {
+					log::debug("wtf 2? - {}", e);
+				}
+			}
 		}
 	}
 	}
@@ -120,7 +129,12 @@ class RecordLayer : public geode::Popup<std::string const&> {
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.2 - made by Zilko", "chatFont.fnt");
+		versionLabel->setOpacity(60);
+		versionLabel->setAnchorPoint(CCPOINT_CREATE(0.0f,0.5f));
+		versionLabel->setPosition(winSize/2 + CCPOINT_CREATE(-winSize.width/2, -winSize.height/2) + CCPOINT_CREATE(3, 6));
+		versionLabel->setScale(0.5f);
+		this->addChild(versionLabel);
 		this->setTitle("xdBot");
 		auto menu = CCMenu::create();
     	menu->setPosition({0, 0});
@@ -130,7 +144,7 @@ protected:
    		auto checkOnSprite = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
 
 		CCPoint topLeftCorner = winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,-m_size.height/2.f);
- 
+
 		auto label = CCLabelBMFont::create("Record", "bigFont.fnt"); 
     	label->setAnchorPoint({0, 0.5});
     	label->setScale(0.7f);
@@ -733,7 +747,7 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 					safeModeEnabled = true;
 					safeMode::updateSafeMode();
 				}
-				if (currentActionIndex.p1.xPos != 0 && (!Mod::get()->getSettingValue<bool>("vanilla") || Mod::get()->getSettingValue<bool>("frame_fix"))) {
+				if ((currentActionIndex.p1.xPos != 0 && self->m_player1 != nullptr) && (!Mod::get()->getSettingValue<bool>("vanilla") || Mod::get()->getSettingValue<bool>("frame_fix"))) {
 					if (((!Mod::get()->getSettingValue<bool>("vanilla") && !Mod::get()->getSettingValue<bool>("frame_fix")) && lastHold)
 					|| Mod::get()->getSettingValue<bool>("frame_fix")) {
 						if (self->m_player1->getPositionX() != currentActionIndex.p1.xPos ||
@@ -780,9 +794,13 @@ class $modify(PlayLayer) {
 			restart = false;
 		}
 		
-		safeModeEnabled = false;
 		playerHolding = false;
-		safeMode::updateSafeMode();
+
+		if (safeModeEnabled) {
+			safeModeEnabled = false;
+			safeMode::updateSafeMode();
+		}
+		
 
 		if (recorder.state == state::playing) {
 			leftOver = 0.f;
