@@ -67,6 +67,12 @@
 			"description": "Disables speedhack key shortcut.",
 			"type": "bool",
 			"default": false
+		},
+		"override_macro_mode": {
+			"name": "Override Macro Mode",
+			"description": "Ignores the mode the macro was originally recorded in and uses the current mode.",
+			"type": "bool",
+			"default": false
 		}
     },
 	"developer": "Zilko",
