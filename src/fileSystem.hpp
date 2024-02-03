@@ -172,7 +172,7 @@ public:
         openFolderBtn->setPosition(corner + CCPOINT_CREATE(380,20));
         menu->addChild(openFolderBtn);
 
-        for (int i = macros.value().size(); i--> 0;) {
+        for (int i = 0; i < macros.value().size(); ++i) {
             std::ifstream file;
             if (macros.value()[i].extension() == ".xd") {
                 file.open(macros.value()[i].string());
