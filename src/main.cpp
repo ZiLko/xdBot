@@ -1,4 +1,5 @@
 #include <Geode/modify/PauseLayer.hpp>
+#include "fileSystem.hpp"
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/EndLevelLayer.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
@@ -8,8 +9,10 @@
 #include <Geode/ui/GeodeUI.hpp>
 #include <cocos2d.h>
 #include <vector>
+#include <locale>
+#include <codecvt>
+#include <string>
 #include <chrono>
-#include "fileSystem.hpp"
 
 float leftOver = 0.f; // For CCScheduler
 int fixedFps = 240;
@@ -21,6 +24,7 @@ bool playerHolding = false;
 bool lastHold = false;
 bool shouldPlay = false;
 bool shouldPlay2 = false;
+bool playingAction = false;
 
 CCLabelBMFont* frameLabel = nullptr;
 CCLabelBMFont* stateLabel = nullptr;
@@ -113,6 +117,15 @@ public:
 	int currentFrame() {
 		return static_cast<int>((*(double*)(((char*)PlayLayer::get()) + 0x328)) * fixedFps); // m_time * fps
 	}
+
+	void syncMusic() {
+		FMODAudioEngine::sharedEngine()->setMusicTimeMS(
+			(currentFrame()*1000)/240 + PlayLayer::get()->m_levelSettings->m_songOffset*1000,
+			true,
+			0
+		);
+	}
+
 	void recordAction(bool holding, int button, bool player1, int frame, GJBaseGameLayer* bgl, playerData p1Data, playerData p2Data) {
 		bool p1 = (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) ? !player1 : player1;
     	macro.push_back({p1, frame, button, holding, false, p1Data, p2Data});
@@ -129,7 +142,7 @@ class RecordLayer : public geode::Popup<std::string const&> {
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.2 - made by Zilko", "chatFont.fnt");
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.5 - made by Zilko", "chatFont.fnt");
 		versionLabel->setOpacity(60);
 		versionLabel->setAnchorPoint(CCPOINT_CREATE(0.0f,0.5f));
 		versionLabel->setPosition(winSize/2 + CCPOINT_CREATE(-winSize.width/2, -winSize.height/2) + CCPOINT_CREATE(3, 6));
@@ -282,45 +295,21 @@ public:
 
 		if (recorder.state == state::playing) restart = true;
 		else if (recorder.state == state::off) restart = false;
-		FMODAudioEngine::sharedEngine()->setMusicTimeMS(
-			(recorder.currentFrame()*1000)/240 + PlayLayer::get()->m_levelSettings->m_songOffset*1000,
-			true,
-			0
-		);
+		recorder.syncMusic();
 		Mod::get()->setSettingValue("frame_stepper", false);
 	}
 
 	void toggleRecord(CCObject* sender) {
-		if(!recorder.macro.empty() && recorder.state != state::recording) {
-			geode::createQuickPopup(
-    			"Warning",     
-    			"This will <cr>clear</c> the current macro.", 
-    			"Cancel", "Ok",  
-    			[this, sender](auto, bool btn2) {
-        			if (!btn2) this->recording->toggle(false);
-			 		else {
-						recorder.macro.clear();
-						this->toggleRecord(sender);
-					}
-   				}
-			);
-		} else {
 			if (recorder.state == state::playing) this->playing->toggle(false);
     		recorder.state = (recorder.state == state::recording) 
 			? state::off : state::recording;
 			if (recorder.state == state::recording) {
 				restart = true;
-				updateInfo();
 			} else if (recorder.state == state::off) {
 				restart = false;
-				FMODAudioEngine::sharedEngine()->setMusicTimeMS(
-					(recorder.currentFrame()*1000)/240 + PlayLayer::get()->m_levelSettings->m_songOffset*1000,
-					true,
-					0
-				);
+				recorder.syncMusic();
 				Mod::get()->setSettingValue("frame_stepper", false);
 			}
-		}
 	}
 
 	void clearMacro(CCObject*) {
@@ -372,9 +361,17 @@ void saveMacroPopup::saveMacro(CCObject*) {
 		)->show();
 		return;
 	}
+
 	std::string savePath = Mod::get()->getSaveDir().string()
      +"\\"+std::string(macroNameInput->getString()) + ".xd";
- 	std::ofstream file(savePath);
+
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::wstring wideString = converter.from_bytes(savePath);
+	std::locale utf8_locale(std::locale(), new std::codecvt_utf8<wchar_t>);
+
+    std::wofstream file(wideString);
+    file.imbue(utf8_locale);
+
 	if (file.is_open()) {
 		for (auto &action : recorder.macro) {
 			file << action.frame << "|" << action.holding <<
@@ -412,11 +409,20 @@ void saveMacroPopup::saveMacro(CCObject*) {
 }
 
 void macroCell::handleLoad(CCObject* btn) {
+
+
 	std::string loadPath = Mod::get()->getSaveDir().string()
     +"\\"+static_cast<CCMenuItemSpriteExtra*>(btn)->getID() + ".xd";
 	recorder.macro.clear();
-    std::ifstream file(loadPath);
-	std::string line;
+
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    std::wstring wideString = converter.from_bytes(loadPath);
+	std::locale utf8_locale(std::locale(), new std::codecvt_utf8<wchar_t>);
+
+
+    std::wifstream file(wideString);
+    file.imbue(utf8_locale);
+	std::wstring line;
 	if (!file.is_open()) {
 		FLAlertLayer::create(
     	"Load Macro",   
@@ -426,28 +432,17 @@ void macroCell::handleLoad(CCObject* btn) {
 		return;
 	}
 	while (std::getline(file, line)) {
-		std::istringstream isSS(line);
-		// Do not question my methods
+		std::wistringstream isSS(line);
+
 		playerData p1;
 		playerData p2;
-		int holding;
-		int frame;
-		int button;
-		int player1;
-		int posOnly;
-		double p1xPos;
-		double p1yPos;
-		int p1upsideDown;
-		double p1rotation;
-		double p1xSpeed;
-		double p1ySpeed;
-		double p2xPos;
-		double p2yPos;
-		int p2upsideDown;
-		double p2rotation;
-		double p2xSpeed;
-		double p2ySpeed;
-		char s;
+
+		int holding, frame, button, player1, posOnly;
+		double p1xPos, p1yPos, p1rotation, p1xSpeed, p1ySpeed;
+		double p2xPos, p2yPos, p2rotation, p2xSpeed, p2ySpeed;
+		int p1upsideDown, p2upsideDown;
+
+		wchar_t s;
 		int count = 0;
     	for (char ch : line) {
         	if (ch == '|') {
@@ -461,7 +456,7 @@ void macroCell::handleLoad(CCObject* btn) {
 		 	>> s >> p1rotation >> s >> p1xSpeed >> s >>
 		 	p1ySpeed >> s >> p2xPos >> s >> p2yPos >> s >> p2upsideDown
 		 	>> s >> p2rotation >> s >> p2xSpeed >> s >>
-		 	p2ySpeed && s == '|') {
+		 	p2ySpeed && s == L'|') {
 				p1 = {
 					(double)p1xPos,
 					(double)p1yPos,
@@ -482,7 +477,7 @@ void macroCell::handleLoad(CCObject* btn) {
 			}
 		} else {
 			if (isSS >> frame >> s >> holding >> s >> button >> 
-			s >> player1 && s == '|') {
+			s >> player1 && s == L'|') {
 				p1.xPos = 0;
 				recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding, false, p1, p2});
 			}
@@ -521,9 +516,8 @@ void clearState(bool safeMode) {
 	FMOD::ChannelGroup* channel;
     FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
 	channel->setPitch(1);
+	playingAction = false;
 	recorder.state = state::off;
-	
-	leftOver = 0.f;
 	if (PlayLayer::get()) {
 		CCArray* children = PlayLayer::get()->getChildren();
 		CCObject* child;
@@ -579,6 +573,8 @@ class $modify(PauseLayer) {
 			FMOD::ChannelGroup* channel;
         	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
 			channel->setPitch(1);
+		} else {
+			recorder.syncMusic();
 		}
 	}
 
@@ -611,9 +607,19 @@ void addLabel(const char* text) {
 	PlayLayer::get()->addChild(label);
 }
 
+
 class $modify(GJBaseGameLayer) {
 	void handleButton(bool holding, int button, bool player1) {
-		GJBaseGameLayer::handleButton(holding,button,player1);
+
+		if (recorder.state == state::playing) {
+			if (playingAction) {
+				GJBaseGameLayer::handleButton(holding,button,player1);
+				playingAction = false;
+			}
+		} else {
+			GJBaseGameLayer::handleButton(holding,button,player1);
+		}
+		
 		if (recorder.state == state::recording) {
 			playerData p1;
 			playerData p2;
@@ -695,11 +701,7 @@ class $modify(GJBaseGameLayer) {
 			else if (stepFrame) {
 				GJBaseGameLayer::update(1.f/fixedFps);
 				stepFrame = false;
-				FMODAudioEngine::sharedEngine()->setMusicTimeMS(
-					(recorder.currentFrame()*1000)/240 + this->m_levelSettings->m_songOffset*1000,
-					true,
-					0
-				);
+				recorder.syncMusic();
 			} else GJBaseGameLayer::update(dt);
 		} else GJBaseGameLayer::update(dt);
 		
@@ -802,6 +804,7 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 				}
 				}
 				if (!currentActionIndex.posOnly) {
+					playingAction = true;
 					self->handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
 					if (currentActionIndex.holding) lastHold = true;
 					else lastHold = false;
@@ -821,7 +824,6 @@ class $modify(PlayLayer) {
 	void resetLevel() {
 		PlayLayer::resetLevel();
 		if (recorder.state != state::off && restart != false) {
-			leftOver = 0.f;
 			restart = false;
 		}
 		
@@ -834,21 +836,27 @@ class $modify(PlayLayer) {
 		
 
 		if (recorder.state == state::playing) {
-			leftOver = 0.f;
 			recorder.currentAction = 0;
 			FMOD::ChannelGroup* channel;
         	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
         	channel->setPitch(1);
 		} else if (recorder.state == state::recording) {
-        	if (this->m_isPracticeMode && !recorder.macro.empty()) {
   				int frame = recorder.currentFrame(); 
+        	if (this->m_isPracticeMode && !recorder.macro.empty() && frame > 0) {
             	auto condition = [&](data& actionIndex) -> bool {
 					return actionIndex.frame >= frame;
 				};
 
-            	recorder.macro.erase(remove_if(recorder.macro.begin(),
-				recorder.macro.end(), condition),
-				recorder.macro.end());
+				if (!recorder.macro.empty()) {
+					try {
+						recorder.macro.erase(remove_if(recorder.macro.begin(),
+						recorder.macro.end(), condition),
+						recorder.macro.end());
+					} catch(const std::exception& e) {
+						log::debug("wtf 3? - {}", e);
+					}
+				}
+            	
 
             	if (recorder.macro.back().holding && !recorder.macro.empty())
                 	recorder.macro.push_back({
@@ -893,7 +901,7 @@ class $modify(EndLevelLayer) {
 		clearState(false);
 	}
 };
-
+int syncCooldown = 0;
 class $modify(CCScheduler) {
 	void update(float dt) {
 		if (recorder.state == state::off) return CCScheduler::update(dt);
@@ -922,7 +930,14 @@ class $modify(CCScheduler) {
             	break;
         	}
     	}
-    leftOver += (dt - dt2 * mult); 
+    leftOver += (dt - dt2 * mult);
+	if (recorder.state == state::playing && leftOver > 1) {
+		syncCooldown++;
+		if (syncCooldown >= 20) {
+			syncCooldown = 0;
+			recorder.syncMusic();
+		}
+	}
 	}
 };
 
@@ -949,11 +964,7 @@ class $modify(CCKeyboardDispatcher) {
 
 		if (key == cocos2d::enumKeyCodes::KEY_B && hold && !p && recorder.state == state::recording) {
 			if (Mod::get()->getSettingValue<bool>("frame_stepper")) {
-				FMODAudioEngine::sharedEngine()->setMusicTimeMS(
-					(recorder.currentFrame()*1000)/240 + PlayLayer::get()->m_levelSettings->m_songOffset*1000,
-					true,
-					0
-				);
+				recorder.syncMusic();
 				Mod::get()->setSettingValue("frame_stepper", false);
 			}
 		}
