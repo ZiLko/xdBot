@@ -1,4 +1,8 @@
 #include <Geode/Geode.hpp>
+#include <locale>
+#include <codecvt>
+#include <string>
+
 #define CCPOINT_CREATE(__X__,__Y__) cocos2d::CCPointMake((float)(__X__), (float)(__Y__))
 
 using namespace geode::prelude;
@@ -21,33 +25,43 @@ public:
     void handleDelete(CCObject* btn) {
 	    std::string path = Mod::get()->getSaveDir().string()
         +"\\"+static_cast<CCMenuItemSpriteExtra*>(btn)->getID() + ".xd";
-        if (std::remove(path.c_str()) != 0) {
+
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+        std::wstring wideString = converter.from_bytes(path);
+	    std::locale utf8_locale(std::locale(), new std::codecvt_utf8<wchar_t>);
+
+        try {
+        std::filesystem::remove(wideString);
+        } catch (const std::filesystem::filesystem_error& e) {
             FLAlertLayer::create(
     		"Delete Macro",   
     		"There was an <cr>error</c> deleting this macro.",  
     		"OK"      
-			)->show();
-        } else {
-            if (this->getParent()->getParent()->getChildren()->count() == 1)  {
-                CCLabelBMFont* noMacroLbl = CCLabelBMFont::create("No macros.", "bigFont.fnt");
-                noMacroLbl->setAlignment(CCTextAlignment::kCCTextAlignmentCenter);
-                noMacroLbl->setColor(ccc3(201,170,153));
-                noMacroLbl->setScale(0.725f);
-                this->getParent()->getParent()->getParent()->addChild(noMacroLbl);
-                noMacroLbl->setPosition(this->getParent()->getParent()->getParent()->getContentSize() / 2);
-            }
-            this->getParent()->removeFromParentAndCleanup(true);
-            FLAlertLayer::create(
+		    )->show();
+            return;
+        }
+            
+        if (this->getParent()->getParent()->getChildren()->count() == 1)  {
+            CCLabelBMFont* noMacroLbl = CCLabelBMFont::create("No macros.", "bigFont.fnt");
+            noMacroLbl->setAlignment(CCTextAlignment::kCCTextAlignmentCenter);
+            noMacroLbl->setColor(ccc3(201,170,153));
+            noMacroLbl->setScale(0.725f);
+            this->getParent()->getParent()->getParent()->addChild(noMacroLbl);
+            noMacroLbl->setPosition(this->getParent()->getParent()->getParent()->getContentSize() / 2);
+        }
+
+        this->getParent()->removeFromParentAndCleanup(true);
+        
+        FLAlertLayer::create(
     		"Delete Macro",   
     		"Macro deleted <cg>successfully</c>.",  
     		"OK"      
-			)->show();
-        }
+		)->show();
     }
 
     void deleteMacro(CCObject* btn) {
         geode::createQuickPopup(
-    		"Load Macro",     
+    		"Delete Macro",     
     		"<cr>Delete</c> this macro?", 
     		"Cancel", "Ok",  
     		[this, btn](auto, bool btn2) {
@@ -95,7 +109,7 @@ public:
     void importMacro(CCObject*) {
         file::FilePickOptions fileOptions;
         file::FilePickOptions::Filter textFilter;
-        textFilter.description = "Text Files";
+        textFilter.description = "Macro Files";
         textFilter.files = {"*.xd"};
         fileOptions.filters.push_back(textFilter);
 
@@ -173,9 +187,16 @@ public:
         menu->addChild(openFolderBtn);
 
         for (int i = 0; i < macros.value().size(); ++i) {
-            std::ifstream file;
+
+            std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+            std::wstring wideString = converter.from_bytes(macros.value()[i].string());
+            std::locale utf8_locale(std::locale(), new std::codecvt_utf8<wchar_t>);
+
+            std::wifstream file;
+
             if (macros.value()[i].extension() == ".xd") {
-                file.open(macros.value()[i].string());
+                file.open(wideString);
+                file.imbue(utf8_locale);
                 if (file){
                     macroCell* cell = macroCell::create(macros.value()[i].filename().string().substr(0, macros.value()[i].filename().string().find_last_of('.')));
                     macroList->addObject(cell);
@@ -235,8 +256,7 @@ public:
 
     void refresh() {
         this->keyBackClicked();
-        CCObject* fill;
-        openLoadMenu(fill);
+        openLoadMenu(nullptr);
     }
 
     void openMacrosFolder(CCObject*) {
