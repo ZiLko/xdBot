@@ -1,3 +1,7 @@
+# v1.3.8
+
+ * Fixed occasional crash on restart again.
+
 # v1.3.7
 
  * Added bugs.
