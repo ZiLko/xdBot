@@ -845,21 +845,19 @@ class $modify(PlayLayer) {
 					return actionIndex.frame >= frame;
 				};
 
-            	
-
             	if (!recorder.macro.empty()) {
-					if (recorder.macro.back().holding) {
 						recorder.macro.erase(remove_if(recorder.macro.begin(),
 						recorder.macro.end(), condition),
 						recorder.macro.end());
-					}
-				}
+					if (recorder.macro.back().holding) {
                 	recorder.macro.push_back({
 						recorder.macro.back().player1,
 						frame,
 						recorder.macro.back().button,
 						false
 					});
+					}
+				}
 
         	} else if (!recorder.macro.empty()) recorder.macro.clear();
    		}
