@@ -142,7 +142,7 @@ class RecordLayer : public geode::Popup<std::string const&> {
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.5 - made by Zilko", "chatFont.fnt");
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.6 - made by Zilko", "chatFont.fnt");
 		versionLabel->setOpacity(60);
 		versionLabel->setAnchorPoint(CCPOINT_CREATE(0.0f,0.5f));
 		versionLabel->setPosition(winSize/2 + CCPOINT_CREATE(-winSize.width/2, -winSize.height/2) + CCPOINT_CREATE(3, 6));
@@ -541,10 +541,8 @@ void clearState(bool safeMode) {
 
 class $modify(PauseLayer) {
 	void customSetup() {
+		PauseLayer::customSetup();
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
-        auto menu = CCMenu::create();
-        menu->setPosition(winSize.width-36, winSize.height - 70.f);
-        this->addChild(menu);
         auto sprite = CCSprite::createWithSpriteFrameName("GJ_stopEditorBtn_001.png");
         sprite->setScale(0.75f);
 
@@ -552,8 +550,9 @@ class $modify(PauseLayer) {
 		this,
 		menu_selector(RecordLayer::openMenu));
 
+		auto menu = this->getChildByID("right-button-menu");
         menu->addChild(btn);
-		PauseLayer::customSetup();
+		menu->updateLayout();
 	} 
 
 	void onQuit(CCObject* sender) {
