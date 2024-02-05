@@ -1,8 +1,13 @@
+# v1.3.6
+
+ * Air update.
+
 # v1.3.5
 
  * Fixed macros saving with "WA" at the end lmao.
  * Fixed Delete Macro pop up title being Load Macro instead of Delete Macro.
  * Fixed macros not saving if the path contains non-english characters. 
+ * Fixed crash when opening the pause menu.
 
 # v1.3.4
 
