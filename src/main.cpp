@@ -135,7 +135,7 @@ class RecordLayer : public geode::Popup<std::string const&> {
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.7 - made by Zilko", "chatFont.fnt");
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.8 - made by Zilko", "chatFont.fnt");
 		versionLabel->setOpacity(60);
 		versionLabel->setAnchorPoint(CCPOINT_CREATE(0.0f,0.5f));
 		versionLabel->setPosition(winSize/2 + CCPOINT_CREATE(-winSize.width/2, -winSize.height/2) + CCPOINT_CREATE(3, 6));
@@ -845,11 +845,15 @@ class $modify(PlayLayer) {
 					return actionIndex.frame >= frame;
 				};
 
-            	recorder.macro.erase(remove_if(recorder.macro.begin(),
-				recorder.macro.end(), condition),
-				recorder.macro.end());
+            	
 
-            	if (recorder.macro.back().holding && !recorder.macro.empty())
+            	if (!recorder.macro.empty()) {
+					if (recorder.macro.back().holding) {
+						recorder.macro.erase(remove_if(recorder.macro.begin(),
+						recorder.macro.end(), condition),
+						recorder.macro.end());
+					}
+				}
                 	recorder.macro.push_back({
 						recorder.macro.back().player1,
 						frame,
@@ -857,7 +861,7 @@ class $modify(PlayLayer) {
 						false
 					});
 
-        	} else recorder.macro.clear();
+        	} else if (!recorder.macro.empty()) recorder.macro.clear();
    		}
 	}
 
