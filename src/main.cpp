@@ -76,7 +76,6 @@ using opcode = std::pair<unsigned long, std::vector<uint8_t>>;
 		}
 	}
 	}
-
 }
 
 struct playerData {
@@ -293,20 +292,6 @@ public:
 	}
 
 	void toggleRecord(CCObject* sender) {
-		if(!recorder.macro.empty() && recorder.state != state::recording) {
-			geode::createQuickPopup(
-    			"Warning",     
-    			"This will <cr>clear</c> the current macro.", 
-    			"Cancel", "Ok",  
-    			[this, sender](auto, bool btn2) {
-        			if (!btn2) this->recording->toggle(false);
-			 		else {
-						recorder.macro.clear();
-						this->toggleRecord(sender);
-					}
-   				}
-			);
-		} else {
 			if (recorder.state == state::playing) this->playing->toggle(false);
     		recorder.state = (recorder.state == state::recording) 
 			? state::off : state::recording;
@@ -318,7 +303,6 @@ public:
 				recorder.syncMusic();
 				Mod::get()->setSettingValue("frame_stepper", false);
 			}
-		}
 	}
 
 	void clearMacro(CCObject*) {
@@ -844,11 +828,22 @@ class $modify(PlayLayer) {
             	auto condition = [&](data& actionIndex) -> bool {
 					return actionIndex.frame >= frame;
 				};
-
+				
+				try {
             	if (!recorder.macro.empty()) {
-						recorder.macro.erase(remove_if(recorder.macro.begin(),
-						recorder.macro.end(), condition),
-						recorder.macro.end());
+						for (auto it = recorder.macro.begin(); it != recorder.macro.end();) {
+    						if (condition(*it)) {
+							if (!recorder.macro.empty()) {
+								try {
+        							it = recorder.macro.erase(it);
+								} catch (const std::exception& e) {
+							
+								}
+							}
+    						} else {
+        						++it;
+    						}
+						}
 					if (recorder.macro.back().holding) {
                 	recorder.macro.push_back({
 						recorder.macro.back().player1,
@@ -858,7 +853,9 @@ class $modify(PlayLayer) {
 					});
 					}
 				}
-
+				} catch (const std::exception& e) {
+					log::debug("wtfffff? - {}",e);
+				}
         	} else if (!recorder.macro.empty()) recorder.macro.clear();
    		}
 	}
@@ -976,4 +973,3 @@ $execute {
 		safeMode::patches[i]->disable();
 	}
 }
-//end
