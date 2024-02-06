@@ -1,3 +1,8 @@
+# v1.3.9
+
+ * Fixed crash i think xd
+ * You can now add inputs to a macro by recording over it (again).
+
 # v1.3.8
 
  * Fixed occasional crash on restart again.
