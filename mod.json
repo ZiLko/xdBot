@@ -2,10 +2,7 @@
 	"geode": "2.0.0-beta.13",
 	"version": "v1.3.9",
 	"id": "zilko.xdbot",
-	"gd": {
-	"win":"2.204",
-	"android":"2.205"
-	},
+	"gd": "2.204",
 	"repository": "https://github.com/ZiLko/xdBot/",
 	"name": "xdBot",
 	"settings": {
