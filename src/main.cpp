@@ -22,6 +22,10 @@ bool lastHold = false;
 bool shouldPlay = false;
 bool shouldPlay2 = false;
 
+bool areEqual(float a, float b) {
+    return std::abs(a - b) < 0.1f;
+}
+
 CCLabelBMFont* frameLabel = nullptr;
 CCLabelBMFont* stateLabel = nullptr;
 
@@ -79,8 +83,8 @@ using opcode = std::pair<unsigned long, std::vector<uint8_t>>;
 }
 
 struct playerData {
-	double xPos;
-	double yPos;
+	float xPos;
+	float yPos;
 	bool upsideDown;
 	float rotation;
 	double xSpeed;
@@ -134,7 +138,7 @@ class RecordLayer : public geode::Popup<std::string const&> {
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.8 - made by Zilko", "chatFont.fnt");
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.3.10 - made by Zilko", "chatFont.fnt");
 		versionLabel->setOpacity(60);
 		versionLabel->setAnchorPoint(CCPOINT_CREATE(0.0f,0.5f));
 		versionLabel->setPosition(winSize/2 + CCPOINT_CREATE(-winSize.width/2, -winSize.height/2) + CCPOINT_CREATE(3, 6));
@@ -429,8 +433,8 @@ void macroCell::handleLoad(CCObject* btn) {
 		playerData p2;
 
 		int holding, frame, button, player1, posOnly;
-		double p1xPos, p1yPos, p1rotation, p1xSpeed, p1ySpeed;
-		double p2xPos, p2yPos, p2rotation, p2xSpeed, p2ySpeed;
+		float p1xPos, p1yPos, p1rotation, p1xSpeed, p1ySpeed;
+		float p2xPos, p2yPos, p2rotation, p2xSpeed, p2ySpeed;
 		int p1upsideDown, p2upsideDown;
 
 		wchar_t s;
@@ -449,16 +453,16 @@ void macroCell::handleLoad(CCObject* btn) {
 		 	>> s >> p2rotation >> s >> p2xSpeed >> s >>
 		 	p2ySpeed && s == L'|') {
 				p1 = {
-					(double)p1xPos,
-					(double)p1yPos,
+					(float)p1xPos,
+					(float)p1yPos,
 					(bool)p1upsideDown,
 					(float)p1rotation,
 					(double)p1xSpeed,
 					(double)p1ySpeed,
 				};
 				p2 = {
-					(double)p2xPos,
-					(double)p2yPos,
+					(float)p2xPos,
+					(float)p2yPos,
 					(bool)p2upsideDown,
 					(float)p2rotation,
 					(double)p2xSpeed,
@@ -606,6 +610,15 @@ class $modify(GJBaseGameLayer) {
 			playerData p2;
 			if (!Mod::get()->getSettingValue<bool>("vanilla") || Mod::get()->getSettingValue<bool>("frame_fix")) {
 				if (!Mod::get()->getSettingValue<bool>("frame_fix")) playerHolding = holding;
+				if (!recorder.macro.empty()) {
+					try {
+						if (recorder.macro.back().frame == recorder.currentFrame() && recorder.macro.back().posOnly) {
+							recorder.macro.pop_back();
+						}
+					} catch (const std::exception& e) {
+						log::debug("wtfffff AMAZ? - {}",e);
+					}
+				}
 				p1 = {
 				this->m_player1->getPositionX(),
 				this->m_player1->getPositionY(),
@@ -690,6 +703,7 @@ class $modify(GJBaseGameLayer) {
 };
 
 void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
+	reinterpret_cast<void(__thiscall *)(GJBaseGameLayer *)>(base::get() + 0x1BD240)(self);
 	if (recorder.state == state::recording) {
 		if (((playerHolding && !Mod::get()->getSettingValue<bool>("vanilla")) ||
 		Mod::get()->getSettingValue<bool>("frame_fix")) && !recorder.macro.empty()) {
@@ -743,17 +757,17 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 					safeMode::updateSafeMode();
 				}
 				if (!Mod::get()->getSettingValue<bool>("override_macro_mode") && currentActionIndex.p1.xPos != 0) {
-					if (self->m_player1->getPositionX() != currentActionIndex.p1.xPos ||
-						self->m_player1->getPositionY() != currentActionIndex.p1.yPos)
-							self->m_player1->setPosition(cocos2d::CCPoint(currentActionIndex.p1.xPos, currentActionIndex.p1.yPos));
+						if (!areEqual(self->m_player1->getPositionX(), currentActionIndex.p1.xPos) ||
+						!areEqual(self->m_player1->getPositionY(), currentActionIndex.p1.yPos))
+								self->m_player1->setPosition(cocos2d::CCPoint(currentActionIndex.p1.xPos, currentActionIndex.p1.yPos));
 
 						if (self->m_player1->m_isUpsideDown != currentActionIndex.p1.upsideDown && currentActionIndex.posOnly)
 							self->m_player1->flipGravity(currentActionIndex.p1.upsideDown, true);
 
 					
 						if (currentActionIndex.p2.xPos != 0 && self->m_player2 != nullptr) {
-							if (self->m_player2->getPositionX() != currentActionIndex.p2.xPos ||
-							self->m_player2->getPositionY() != currentActionIndex.p2.yPos)
+							if (!areEqual(self->m_player2->getPositionX(), currentActionIndex.p2.xPos) ||
+							!areEqual(self->m_player2->getPositionY(), currentActionIndex.p2.yPos))
 								self->m_player2->setPosition(cocos2d::CCPoint(currentActionIndex.p2.xPos, currentActionIndex.p2.yPos));
 
 							if (self->m_player2->m_isUpsideDown != currentActionIndex.p2.upsideDown && currentActionIndex.posOnly)
@@ -764,17 +778,18 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 				if ((currentActionIndex.p1.xPos != 0 && self->m_player1 != nullptr) && (!Mod::get()->getSettingValue<bool>("vanilla") || Mod::get()->getSettingValue<bool>("frame_fix"))) {
 					if (((!Mod::get()->getSettingValue<bool>("vanilla") && !Mod::get()->getSettingValue<bool>("frame_fix")) && lastHold)
 					|| Mod::get()->getSettingValue<bool>("frame_fix")) {
-						if (self->m_player1->getPositionX() != currentActionIndex.p1.xPos ||
-						self->m_player1->getPositionY() != currentActionIndex.p1.yPos)
+						if (!areEqual(self->m_player1->getPositionX(), currentActionIndex.p1.xPos) ||
+						!areEqual(self->m_player1->getPositionY(), currentActionIndex.p1.yPos))
 							self->m_player1->setPosition(cocos2d::CCPoint(currentActionIndex.p1.xPos, currentActionIndex.p1.yPos));
+							
 
 						if (self->m_player1->m_isUpsideDown != currentActionIndex.p1.upsideDown && currentActionIndex.posOnly)
 							self->m_player1->flipGravity(currentActionIndex.p1.upsideDown, true);
 
 					
 						if (currentActionIndex.p2.xPos != 0 && self->m_player2 != nullptr) {
-							if (self->m_player2->getPositionX() != currentActionIndex.p2.xPos ||
-							self->m_player2->getPositionY() != currentActionIndex.p2.yPos)
+							if (!areEqual(self->m_player2->getPositionX(), currentActionIndex.p2.xPos) ||
+							!areEqual(self->m_player2->getPositionY(), currentActionIndex.p2.yPos))
 								self->m_player2->setPosition(cocos2d::CCPoint(currentActionIndex.p2.xPos, currentActionIndex.p2.yPos));
 
 							if (self->m_player2->m_isUpsideDown != currentActionIndex.p2.upsideDown && currentActionIndex.posOnly)
@@ -797,7 +812,6 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 				clearState(true);
 			}
 		}
-	reinterpret_cast<void(__thiscall *)(GJBaseGameLayer *)>(base::get() + 0x1BD240)(self);
 }
 
 class $modify(PlayLayer) {
@@ -877,7 +891,6 @@ class $modify(EndLevelLayer) {
 			shouldPlay2 = false;
 			shouldPlay = true;
 		}
-		
 		clearState(false);
 	}
 
