@@ -1,3 +1,7 @@
+# v1.3.10
+ 
+ * Fixed macros working different when loaded.
+
 # v1.3.9
 
  * Fixed crash i think xd
