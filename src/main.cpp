@@ -16,17 +16,12 @@ float leftOver = 0.f; // For CCScheduler
 double prevSpeed = 1.0f;
 
 int fixedFps = 240;
+int androidFps = 60;
 
 #ifdef GEODE_IS_ANDROID
 	int offset = 0x320;
 #else
 	int offset = 0x328;
-#endif
-
-#ifdef GEODE_IS_ANDROID
-	bool isAndroid = true;
-#else
-	bool isAndroid = false;
 #endif
 
 bool safeModeEnabled = false;
@@ -41,6 +36,14 @@ int playerEnums[2][3] = {
     {cocos2d::enumKeyCodes::KEY_ArrowUp, cocos2d::enumKeyCodes::KEY_ArrowLeft, cocos2d::enumKeyCodes::KEY_ArrowRight}, 
     {cocos2d::enumKeyCodes::KEY_W, cocos2d::enumKeyCodes::KEY_A, cocos2d::enumKeyCodes::KEY_D}
 };
+
+void releaseKeys() {
+	for (int row = 0; row < 2; ++row) {
+        for (int col = 0; col < 3; ++col) {
+			cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(static_cast<cocos2d::enumKeyCodes>(playerEnums[row][col]), false, false);
+        }
+    }
+}
 
 bool areEqual(float a, float b) {
     return std::abs(a - b) < 0.1f;
@@ -133,6 +136,7 @@ enum state {
 
 class recordSystem {
 public:
+	bool android = isAndroid;
     state state = off;
  	size_t currentAction = 0;
    	std::vector<data> macro;
@@ -149,10 +153,12 @@ public:
 	}
 	void recordAction(bool holding, int button, bool player1, int frame, GJBaseGameLayer* bgl, playerData p1Data, playerData p2Data) {
 		bool realp1;
-		if (isAndroid)
+		if (isAndroid) {
 			realp1 = (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) ? !player1 : player1;
-		else
-			realp1 = player1;
+			if (!android)
+				android = true;
+		}
+		else realp1 = player1;
 		
     	macro.push_back({realp1, frame, button, holding, false, p1Data, p2Data});
 	}
@@ -208,6 +214,16 @@ protected:
         	menu_selector(RecordLayer::openSettingsMenu)
     	);
     	btn->setPosition(winSize/2.f-ccp(m_size.width/2.f,m_size.height/2.f) + ccp(325, 20));
+    	menu->addChild(btn);
+
+		spr = CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png");
+    	spr->setScale(0.8f);
+    	btn = CCMenuItemSpriteExtra::create(
+        	spr,
+        	this,
+        	menu_selector(RecordLayer::discordPopup)
+    	);
+    	btn->setPosition(winSize/2.f-ccp(-m_size.width/2.f,m_size.height/2.f) + ccp(-315, 20));
     	menu->addChild(btn);
 
 		if (!isAndroid) {
@@ -292,6 +308,18 @@ public:
 		geode::openSettingsPopup(Mod::get());
 	}
 
+	void discordPopup(CCObject*) {
+		geode::createQuickPopup(
+    	"Join Discord",     
+    	"Join the <cb>Discord</c> server?\n(<cl>discord.gg/dwk5whfeu2</c>)", 
+    	"No", "Yes",  
+    	[this](auto, bool btn2) {
+        	if (btn2) {
+				geode::utils::web::openLinkInBrowser("https://discord.gg/dwk5whfeu2");
+			}
+    	});
+	}
+
 	void keyInfo(CCObject*) {
 		FLAlertLayer::create(
     		"Shortcuts",   
@@ -309,11 +337,16 @@ public:
 		}
 		
  		std::stringstream infoText;
-    	infoText << "Current Macro:";
+		
     	infoText << "\nSize: " << recorder.macro.size();
+		
 		infoText << "\nClicks: " << clicksCount;
+
 		infoText << "\nDuration: " << (!recorder.macro.empty() 
 		? recorder.macro.back().frame / fixedFps : 0) << "s";
+
+		infoText << "\nPlatform: " << ((recorder.android) ? "Android" : "PC");
+
     	infoMacro->setString(infoText.str().c_str());
 	}
 
@@ -402,6 +435,9 @@ void saveMacroPopup::saveMacro(CCObject*) {
     file.imbue(utf8_locale);
 
 	if (file.is_open()) {
+		if (isAndroid) {
+			file << "android\n";
+		}
 		for (auto &action : recorder.macro) {
 			file << action.frame << "|" << action.holding <<
 			"|" << action.button << "|" << action.player1 <<
@@ -458,6 +494,8 @@ void macroCell::handleLoad(CCObject* btn) {
 		)->show();
 		return;
 	}
+	bool firstIt = true;
+	bool andr = false;
 	while (std::getline(file, line)) {
 		std::wistringstream isSS(line);
 
@@ -476,6 +514,7 @@ void macroCell::handleLoad(CCObject* btn) {
             	count++;
         	}
     	}
+
 		if (count > 3) {
 			if (isSS >> frame >> s >> holding >> s >> button >> 
 			s >> player1 >> s >> posOnly >> s >>
@@ -502,6 +541,14 @@ void macroCell::handleLoad(CCObject* btn) {
 				};
 				recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding, (bool)posOnly, p1, p2});
 			}
+		} else if (count < 1) {
+			std::wstring andStr;
+			if (firstIt) {
+    			if (isSS >> andStr && andStr == L"android") {
+					andr = true;
+        			recorder.android = true;
+				}
+			}
 		} else {
 			if (isSS >> frame >> s >> holding >> s >> button >> 
 			s >> player1 && s == L'|') {
@@ -509,7 +556,11 @@ void macroCell::handleLoad(CCObject* btn) {
 				recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding, false, p1, p2});
 			}
 		}
+    	firstIt = false;
 	}
+	if (!andr && !recorder.android)
+		recorder.android = false;
+
 	CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
 	CCObject* child;
 	CCARRAY_FOREACH(children, child) {
@@ -754,10 +805,10 @@ void addLabel(const char* text) {
 
 class $modify(GJBaseGameLayer) {
 	void handleButton(bool holding, int button, bool player1) {
-		GJBaseGameLayer::handleButton(holding,button,player1);
-		
+		if (!isAndroid) GJBaseGameLayer::handleButton(holding,button,player1);
 		if (isAndroid) {
 			if (recorder.state == state::recording) {
+			GJBaseGameLayer::handleButton(holding,button,player1);
 			playerData p1;
 			playerData p2;
 				p1 = {
@@ -794,9 +845,11 @@ class $modify(GJBaseGameLayer) {
 							!areEqual(this->m_player2->getPositionY(), androidAction->p2.yPos))
 								this->m_player2->setPosition(cocos2d::CCPoint(androidAction->p2.xPos, androidAction->p2.yPos));
 						}
+						GJBaseGameLayer::handleButton(holding,button,player1);
 				}
 		}
-		}
+		} else GJBaseGameLayer::handleButton(holding,button,player1);
+
 	} else if (recorder.state == state::recording) {
 			playerData p1;
 			playerData p2;
@@ -957,7 +1010,8 @@ class $modify(GJBaseGameLayer) {
 			if (Mod::get()->getSettingValue<bool>("frame_stepper") && stepFrame == false) 
 				return;
 			else if (stepFrame) {
-				GJBaseGameLayer::update(1.f/fixedFps);
+				int fps = (isAndroid) ? androidFps : fixedFps;
+				GJBaseGameLayer::update(1.f/fps);
 				stepFrame = false;
 				recorder.syncMusic();
 			} else GJBaseGameLayer::update(dt);
@@ -1108,6 +1162,11 @@ class $modify(PlayLayer) {
 		playerHolding = false;
 		leftOver = 0.f;
 
+		if (isAndroid) {
+			androidAction = nullptr;
+			releaseKeys();
+		}
+
 		if (safeModeEnabled && !isAndroid) {
 			safeModeEnabled = false;
 			safeMode::updateSafeMode();
@@ -1197,7 +1256,18 @@ class $modify(CCScheduler) {
 		}
 
 		using namespace std::literals;
-		float dt2 = (1.f / fixedFps);
+
+		bool wasAndroid;
+		if (recorder.state == state::playing) {
+			if (recorder.android)
+				wasAndroid = true;
+			else
+			 	wasAndroid = false;
+		} else 
+			wasAndroid = true;
+
+		int fps = (isAndroid && wasAndroid) ? androidFps : fixedFps;
+		float dt2 = (1.f / fps);
 		dt = (recorder.state == state::recording) ? dt * speedhackValue : dt;
     	auto startTime = std::chrono::high_resolution_clock::now();
 		int mult = static_cast<int>((dt + leftOver)/dt2);  
@@ -1264,9 +1334,13 @@ $execute {
 	else
 		prevSpeed = 0.5f;
 
-
 	if (!isAndroid)
 		Mod::get()->hook(reinterpret_cast<void *>(base::get() + 0x1BD240), &GJBaseGameLayerProcessCommands, "GJBaseGameLayer::processCommands", tulip::hook::TulipConvention::Thiscall);
+	else {
+		if (sizeof(void*) == 8) {
+        	offset = 0x3B8;
+    	}
+	}
 
 	for (std::size_t i = 0; i < 15; i++) {
 		safeMode::patches[i] = Mod::get()->patch(reinterpret_cast<void*>(base::get() + std::get<0>(safeMode::codes[i])),
