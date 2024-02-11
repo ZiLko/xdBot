@@ -558,7 +558,7 @@ void macroCell::handleLoad(CCObject* btn) {
 		}
     	firstIt = false;
 	}
-	if (!andr && !recorder.android)
+	if (!andr)
 		recorder.android = false;
 
 	CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
