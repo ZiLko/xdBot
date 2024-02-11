@@ -285,7 +285,7 @@ protected:
 
 		infoMacro = CCLabelBMFont::create("", "chatFont.fnt");
     	infoMacro->setAnchorPoint({0, 1});
-    	infoMacro->setPosition(topLeftCorner + ccp(21, -45));
+    	infoMacro->setPosition(topLeftCorner + ccp(21, -25));
 		updateInfo();
     	m_mainLayer->addChild(infoMacro);
 
@@ -337,7 +337,7 @@ public:
 		}
 		
  		std::stringstream infoText;
-		
+
     	infoText << "\nSize: " << recorder.macro.size();
 		
 		infoText << "\nClicks: " << clicksCount;
