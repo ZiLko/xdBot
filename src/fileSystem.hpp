@@ -3,6 +3,14 @@
 #include <codecvt>
 #include <string>
 
+#ifdef GEODE_IS_ANDROID
+    std::string slash = "/";
+	bool isAndroid = true;
+#else
+    std::string slash = "\\";
+	bool isAndroid = false;
+#endif
+
 #define CCPOINT_CREATE(__X__,__Y__) cocos2d::CCPointMake((float)(__X__), (float)(__Y__))
 
 using namespace geode::prelude;
@@ -24,7 +32,7 @@ public:
 
     void handleDelete(CCObject* btn) {
 	    std::string path = Mod::get()->getSaveDir().string()
-        +"\\"+static_cast<CCMenuItemSpriteExtra*>(btn)->getID() + ".xd";
+        +slash+static_cast<CCMenuItemSpriteExtra*>(btn)->getID() + ".xd";
 
         std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
         std::wstring wideString = converter.from_bytes(path);
@@ -115,22 +123,23 @@ public:
 
         file::pickFile(file::PickMode::OpenFile , fileOptions, [this](ghc::filesystem::path result) {
             auto path = ghc::filesystem::path(result.c_str());
+            
             std::ifstream sourceMacro(path);
             if (!sourceMacro.is_open()) {
             FLAlertLayer::create(
     		    "Import Macro",   
-    		    "An <cr>error<c/> occurred while importing this macro.",  
+    		    "An <cr>error</c> occurred while importing this macro.",  
     		    "OK"      
 			)->show();
             return;
             }
             std::ofstream copiedMacro(Mod::get()->getSaveDir().string()
-            + "\\" + path.filename().string(), std::ios::binary);
+            + slash + path.filename().string(), std::ios::binary);
 
             if (!copiedMacro.is_open()) {
                 FLAlertLayer::create(
     		        "Import Macro",   
-    		        "An <cr>error<c/> occurred while importing this macro.",  
+    		        "An <cr>error</c> occurred while importing this macro.",  
     		        "OK"      
 			    )->show();
                 return;
@@ -148,7 +157,7 @@ public:
 			)->show();
         });
     }
-
+//i
     bool setup(std::string const& value) override {
         CCArray* macroList = CCArray::create();
         auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -167,6 +176,7 @@ public:
         auto menu = CCMenu::create();
         menu->setPosition({0,0});
 
+        if (!isAndroid) {
         CCSprite* importMacroSprite = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
         importMacroSprite->setScale(0.8f);
         auto importMacroButton = CCMenuItemSpriteExtra::create(
@@ -176,6 +186,7 @@ public:
         );
         importMacroButton->setPosition(corner + CCPOINT_CREATE(380,65));
         menu->addChild(importMacroButton);
+        }
 
         m_mainLayer->addChild(menu);
         auto openFolderBtn = CCMenuItemSpriteExtra::create(
