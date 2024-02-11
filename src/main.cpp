@@ -136,7 +136,7 @@ enum state {
 
 class recordSystem {
 public:
-	bool android = isAndroid;
+	bool android = false;
     state state = off;
  	size_t currentAction = 0;
    	std::vector<data> macro;
@@ -1337,6 +1337,7 @@ $execute {
 	if (!isAndroid)
 		Mod::get()->hook(reinterpret_cast<void *>(base::get() + 0x1BD240), &GJBaseGameLayerProcessCommands, "GJBaseGameLayer::processCommands", tulip::hook::TulipConvention::Thiscall);
 	else {
+		recorder.android = true;
 		if (sizeof(void*) == 8) {
         	offset = 0x3B8;
     	}
