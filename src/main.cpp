@@ -854,10 +854,8 @@ class $modify(GJBaseGameLayer) {
 			int frame = recorder.currentFrame(); 
 			recorder.recordAction(holding, button, player1, frame, this, p1, p2);
 		} else if (recorder.state == state::playing) {
+			GJBaseGameLayer::handleButton(holding,button,player1);
 			if (androidAction != nullptr) {
-				if (!androidAction->posOnly)
-					GJBaseGameLayer::handleButton(holding,button,player1);
-
 			if (androidAction->p1.xPos != 0) {
 				if (!areEqual(this->m_player1->getPositionX(), androidAction->p1.xPos) ||
 				!areEqual(this->m_player1->getPositionY(), androidAction->p1.yPos))
@@ -1076,6 +1074,7 @@ if (recorder.state == state::playing && isAndroid) {
             	auto& currentActionIndex = recorder.macro[recorder.currentAction];
 				androidAction = &currentActionIndex;
 				
+				if (!currentActionIndex.posOnly)
 				cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
 				static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
 				currentActionIndex.holding, false);
