@@ -639,7 +639,7 @@ void clearState(bool safeMode) {
 	androidAction = nullptr;
 	leftOver = 0.f;
 
-	if (isAndroid) releaseKeys();
+	if (isAndroid && recorder.state == state::off) releaseKeys();
 
 	if (PlayLayer::get()) {
 		CCArray* children = PlayLayer::get()->getChildren();
