@@ -69,7 +69,7 @@
 			"name": "Frame Fixes",
 			"description": "<cr>WINDOWS ONLY</c>\nImproves accuracy by recording the player's position every frame to make sure the macro doesn't break.\nHeavily increases macro size.",
 			"type": "bool",
-			"default": false
+			"default": true
 		},
 		"override_macro_mode": {
 			"name": "Override Macro Mode",
