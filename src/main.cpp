@@ -988,7 +988,18 @@ class $modify(GJBaseGameLayer) {
 				buttonsMenu = nullptr;
 			}
 		}
-		
+		if (recorder.state == state::playing) {
+			if (stateLabel != nullptr) {
+				if (stateLabel->getString() != "Playing" && Mod::get()->getSettingValue<bool>("show_playing_label"))
+					stateLabel->setString("Playing");
+				else if (!Mod::get()->getSettingValue<bool>("show_playing_label")) {
+					stateLabel->removeFromParent();
+					stateLabel = nullptr;
+				}
+			} else if (Mod::get()->getSettingValue<bool>("show_playing_label")) {
+				addLabel("Playing");
+			}
+		}
 		if (recorder.state == state::recording) {
 			if (isAndroid) {
 			if (buttonsMenu != nullptr) {
@@ -1036,16 +1047,7 @@ class $modify(GJBaseGameLayer) {
 			}
 			}
 			}
-if (stateLabel != nullptr) {
-				if (stateLabel->getString() != "Playing" && Mod::get()->getSettingValue<bool>("show_playing_label"))
-					stateLabel->setString("Playing");
-				else if (!Mod::get()->getSettingValue<bool>("show_playing_label")) {
-					stateLabel->removeFromParent();
-					stateLabel = nullptr;
-				}
-			} else if (Mod::get()->getSettingValue<bool>("show_playing_label")) {
-				addLabel("Playing");
-			}
+
 			if (stateLabel != nullptr) {
 				if (stateLabel->getString() != "Recording" && Mod::get()->getSettingValue<bool>("show_recording_label"))
 					stateLabel->setString("Recording");
