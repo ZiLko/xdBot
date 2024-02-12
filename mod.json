@@ -1,6 +1,6 @@
 {
 	"geode": "2.0.0-beta.13",
-	"version": "v1.4.1",
+	"version": "v1.4.2",
 	"id": "zilko.xdbot",
 	"gd": {
 		"win": "2.204",
@@ -16,6 +16,17 @@
 			"min": 0.01,
 			"max": 1.0,
 			"default": 1.0
+		},
+		"bot_fps": {
+			"name": "Bot FPS",
+			"description": "<cr>CAN'T GO PAST 240</c>\nThe Frames per Second the bot will use to record and record the macro.",
+			"type": "int",
+			"min": 60,
+			"max": 240,
+			"default": {
+				"win": 240,
+				"android": 60
+			  }
 		},
 		"frame_stepper": {
 			"name": "Frame Stepper",
