@@ -137,12 +137,14 @@ enum state {
 class recordSystem {
 public:
 	bool android = false;
+	int fps = 0;
     state state = off;
  	size_t currentAction = 0;
    	std::vector<data> macro;
 
 	int currentFrame() {
-		return static_cast<int>((*(double*)(((char*)PlayLayer::get()) + offset)) * fixedFps);
+		int fps2 = (android) ? 240 : fps;
+		return static_cast<int>((*(double*)(((char*)PlayLayer::get()) + offset)) * fps2);
 	}
 	void syncMusic() {
 		FMODAudioEngine::sharedEngine()->setMusicTimeMS(
@@ -174,7 +176,7 @@ class RecordLayer : public geode::Popup<std::string const&> {
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-		auto versionLabel = CCLabelBMFont::create("xdBot v1.4.1 - made by Zilko", "chatFont.fnt");
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.4.2 - made by Zilko", "chatFont.fnt");
 		versionLabel->setOpacity(60);
 		versionLabel->setAnchorPoint(ccp(0.0f,0.5f));
 		versionLabel->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(3, 6));
@@ -345,7 +347,7 @@ public:
 		infoText << "\nDuration: " << (!recorder.macro.empty() 
 		? recorder.macro.back().frame / fixedFps : 0) << "s";
 
-		infoText << "\nPlatform: " << ((recorder.android) ? "Android" : "PC");
+		infoText << "\nFPS: " << (recorder.fps);
 
     	infoMacro->setString(infoText.str().c_str());
 	}
@@ -365,6 +367,9 @@ public:
     		recorder.state = (recorder.state == state::recording) 
 			? state::off : state::recording;
 			if (recorder.state == state::recording) {
+				if (recorder.macro.empty())
+					recorder.fps = Mod::get()->getSettingValue<int64_t>("bot_fps");
+				
 				restart = true;
 				updateInfo();
 			} else if (recorder.state == state::off) {
@@ -435,9 +440,9 @@ void saveMacroPopup::saveMacro(CCObject*) {
     file.imbue(utf8_locale);
 
 	if (file.is_open()) {
-		if (isAndroid) {
-			file << "android\n";
-		}
+
+		file << recorder.fps << "\n";
+
 		for (auto &action : recorder.macro) {
 			file << action.frame << "|" << action.holding <<
 			"|" << action.button << "|" << action.player1 <<
@@ -543,11 +548,20 @@ void macroCell::handleLoad(CCObject* btn) {
 			}
 		} else if (count < 1) {
 			std::wstring andStr;
+			int fps;
 			if (firstIt) {
-    			if (isSS >> andStr && andStr == L"android") {
+    			if (isSS >> fps) {
 					andr = true;
-        			recorder.android = true;
-				}
+					recorder.android = false;
+					recorder.fps = (int)fps;
+    			} else {
+        			isSS.clear();
+        			if (isSS >> andStr && andStr == L"android") {
+            			andr = true;
+            			recorder.android = true;
+						recorder.fps = 60;
+        			}
+    			}
 			}
 		} else {
 			if (isSS >> frame >> s >> holding >> s >> button >> 
@@ -558,9 +572,13 @@ void macroCell::handleLoad(CCObject* btn) {
 		}
     	firstIt = false;
 	}
-	if (!andr)
+	if (!andr) {
 		recorder.android = false;
+		recorder.fps = 240;
+	}
 
+	Mod::get()->setSettingValue("bot_fps", static_cast<int64_t>(recorder.fps));
+	
 	CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
 	CCObject* child;
 	CCARRAY_FOREACH(children, child) {
@@ -712,7 +730,8 @@ public:
         		PlayLayer::get(),
 				menu_selector(mobileButtons::disableFrameStepper)
     			);
-				btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(45, 35));
+				btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(70, 35));
+				btn->setZOrder(100);
 				btn->setID("disable_fs_btn");
 				buttonsMenu->addChild(btn);
 				disableFSBtn = btn;
@@ -797,7 +816,7 @@ void addButton(const char* id) {
         	PlayLayer::get(),
 			menu_selector(mobileButtons::disableFrameStepper)
     	);
-		btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(45, 35));
+		btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(70, 35));
 		btn->setID(id);
 		btn->setZOrder(100);
 		buttonsMenu->addChild(btn);
@@ -1059,8 +1078,8 @@ class $modify(GJBaseGameLayer) {
 			if (Mod::get()->getSettingValue<bool>("frame_stepper") && stepFrame == false) 
 				return;
 			else if (stepFrame) {
-				int fps = (isAndroid) ? androidFps : fixedFps;
-				GJBaseGameLayer::update(1.f/fps);
+				int fps = (recorder.fps > 240) ? 240 : recorder.fps;
+				GJBaseGameLayer::update(1.f / fps);
 				stepFrame = false;
 				recorder.syncMusic();
 			} else GJBaseGameLayer::update(dt);
@@ -1075,9 +1094,9 @@ if (recorder.state == state::playing && isAndroid) {
 				androidAction = &currentActionIndex;
 				
 				if (!currentActionIndex.posOnly)
-				cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
-				static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
-				currentActionIndex.holding, false);
+					cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
+					static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
+					currentActionIndex.holding, false);
 
             	recorder.currentAction++;
         	}
@@ -1245,7 +1264,10 @@ class $modify(PlayLayer) {
 				} catch (const std::exception& e) {
 					log::debug("wtfffff? - {}",e);
 				}
-        	} else if (!recorder.macro.empty()) recorder.macro.clear();
+        	} else if (!recorder.macro.empty()) {
+				recorder.fps = Mod::get()->getSettingValue<int64_t>("bot_fps");
+				recorder.macro.clear();
+			} 
    		}
 	}
 
@@ -1298,17 +1320,7 @@ class $modify(CCScheduler) {
 
 		using namespace std::literals;
 
-		bool wasAndroid;
-		if (recorder.state == state::playing) {
-			if (recorder.android)
-				wasAndroid = true;
-			else
-			 	wasAndroid = false;
-		} else 
-			wasAndroid = true;
-
-		int fps = (isAndroid && wasAndroid) ? androidFps : fixedFps;
-		float dt2 = (1.f / fps);
+		float dt2 = (1.f / recorder.fps);
 		dt = (recorder.state == state::recording) ? dt * speedhackValue : dt;
     	auto startTime = std::chrono::high_resolution_clock::now();
 		int mult = static_cast<int>((dt + leftOver)/dt2);  
@@ -1378,11 +1390,12 @@ $execute {
 	if (!isAndroid)
 		Mod::get()->hook(reinterpret_cast<void *>(base::get() + 0x1BD240), &GJBaseGameLayerProcessCommands, "GJBaseGameLayer::processCommands", tulip::hook::TulipConvention::Thiscall);
 	else {
-		recorder.android = true;
 		if (sizeof(void*) == 8) {
         	offset = 0x3B8;
     	}
 	}
+
+	recorder.fps = Mod::get()->getSettingValue<int64_t>("bot_fps");
 
 	for (std::size_t i = 0; i < 15; i++) {
 		safeMode::patches[i] = Mod::get()->patch(reinterpret_cast<void*>(base::get() + std::get<0>(safeMode::codes[i])),
