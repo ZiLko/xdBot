@@ -1,3 +1,11 @@
+# v1.4.1
+
+ * Fixed layering issues with labels and 2.2 shaders.
+ * Fixed playing label not working on Windows.
+ * Fixed Vanilla macros not saving correctly.
+ * Fixed Android buttons staying after completing a level.
+ * Fixed spider teleport animation not showing on Android.
+ 
 # v1.4.0
 
  * Added android support.
