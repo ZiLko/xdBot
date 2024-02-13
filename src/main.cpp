@@ -287,7 +287,7 @@ protected:
 
 		infoMacro = CCLabelBMFont::create("", "chatFont.fnt");
     	infoMacro->setAnchorPoint({0, 1});
-    	infoMacro->setPosition(topLeftCorner + ccp(21, -25));
+    	infoMacro->setPosition(topLeftCorner + ccp(34, -44));
 		updateInfo();
     	m_mainLayer->addChild(infoMacro);
 
