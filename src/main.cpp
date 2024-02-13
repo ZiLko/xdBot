@@ -615,6 +615,7 @@ void clearState(bool safeMode) {
 	recorder.state = state::off;
 
 	if (isAndroid) {
+		releaseKeys();
 		if (disableFSBtn != nullptr) {
 			disableFSBtn->removeFromParent();
 			disableFSBtn = nullptr;
@@ -1222,10 +1223,7 @@ class $modify(PlayLayer) {
 		playerHolding = false;
 		leftOver = 0.f;
 
-		if (isAndroid) {
-			androidAction = nullptr;
-			releaseKeys();
-		}
+		if (isAndroid) androidAction = nullptr;
 
 		if (safeModeEnabled && !isAndroid) {
 			safeModeEnabled = false;
