@@ -1,11 +1,18 @@
+# v1.4.2
+
+ * Added FPS selector to both platforms. Higher FPS might make the game slow down in Android.
+ * Fixed not being able to hold at the beginning of an attempt in Android.
+ * Moved the disable button away from the advance frame one to prevent misclicks in Android.
+ * Removed size macro info because it was too cluttered.
+
 # v1.4.1
 
  * Fixed layering issues with labels and 2.2 shaders.
- * Fixed playing label not working on Windows.
+ * Fixed playing label not working in Windows.
  * Fixed Vanilla macros not saving correctly.
  * Fixed Android buttons staying after completing a level.
- * Fixed spider teleport animation not showing on Android.
- 
+ * Fixed spider teleport animation not showing in Android.
+
 # v1.4.0
 
  * Added android support.
