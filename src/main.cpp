@@ -716,8 +716,15 @@ class $modify(PauseLayer) {
 	void customSetup() {
 		PauseLayer::customSetup();
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
-        auto sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-		sprite->setScale(0.35f);
+		CCSprite* sprite = nullptr;
+		
+		if (Loader::get()->isModLoaded("tpdea.betterpause-Better")) {
+			sprite = CCSprite::createWithSpriteFrameName("GJ_stopEditorBtn_001.png");
+		} else {
+ 			sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+			sprite->setScale(0.35f);
+		}
+       
 
         auto btn = CCMenuItemSpriteExtra::create(sprite,
 		this,
