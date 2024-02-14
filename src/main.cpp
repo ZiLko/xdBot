@@ -30,6 +30,7 @@ bool restart = false;
 bool stepFrame = false;
 bool playerHolding = false;
 bool lastHold = false;
+bool playingAction = false;
 bool shouldPlay = false;
 bool shouldPlay2 = false;
 
@@ -909,7 +910,7 @@ void addLabel(const char* text) {
 
 class $modify(GJBaseGameLayer) {
 	void handleButton(bool holding, int button, bool player1) {
-		if (!isAndroid) GJBaseGameLayer::handleButton(holding,button,player1);
+		if (!isAndroid && recorder.state != state::recording) GJBaseGameLayer::handleButton(holding,button,player1);
 		if (isAndroid) {
 			if (recorder.state == state::recording) {
 			GJBaseGameLayer::handleButton(holding,button,player1);
@@ -937,7 +938,7 @@ class $modify(GJBaseGameLayer) {
 			}
 			int frame = recorder.currentFrame(); 
 			recorder.recordAction(holding, button, player1, frame, this, p1, p2);
-		} else if (recorder.state == state::playing) {
+		} else if (recorder.state == state::playing && playingAction) {
 			GJBaseGameLayer::handleButton(holding,button,player1);
 			if (androidAction != nullptr) {
 			if (androidAction->p1.xPos != 0) {
@@ -1011,7 +1012,7 @@ class $modify(GJBaseGameLayer) {
 				};
 		}
 			recorder.recordAction(holding, button, player1, recorder.currentFrame(), this, p1, p2);
-	}
+}
 	}
 
 	int getPlayer1(int p1, GJBaseGameLayer* bgl) {
