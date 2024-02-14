@@ -1,7 +1,8 @@
 # v1.4.3
 
- * Fixed frame stepper buttons conflicting with platformer buttons on Android
  * Re-worked FPS selector.
+ * Fixed frame stepper buttons conflicting with platformer buttons on Android
+ * Fixed incompatibility with BetterPause.
 
 # v1.4.2
 
