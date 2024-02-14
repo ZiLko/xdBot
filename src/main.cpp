@@ -520,7 +520,7 @@ void saveMacroPopup::saveMacro(CCObject*) {
 		}
         FLAlertLayer::create(
     	"Save Macro",   
-    	"Macro saved <cg>succesfully</c>.",  
+    	"Macro saved <cg>successfully</c>.",  
     	"OK"      
 		)->show();
 	} else {
@@ -666,6 +666,7 @@ void clearState(bool safeMode) {
 	channel->setPitch(1);
 	recorder.state = state::off;
 
+playingAction = false;
 	if (isAndroid) {
 		if (disableFSBtn != nullptr) {
 			disableFSBtn->removeFromParent();
@@ -910,7 +911,10 @@ void addLabel(const char* text) {
 
 class $modify(GJBaseGameLayer) {
 	void handleButton(bool holding, int button, bool player1) {
-		if (!isAndroid && recorder.state != state::recording) GJBaseGameLayer::handleButton(holding,button,player1);
+		if (!isAndroid) {
+if ((recorder.state == state::playing && playingAction) || recorder.state != state::playing) GJBaseGameLayer::handleButton(holding,button,player1);
+
+} 
 		if (isAndroid) {
 			if (recorder.state == state::recording) {
 			GJBaseGameLayer::handleButton(holding,button,player1);
@@ -954,7 +958,7 @@ class $modify(GJBaseGameLayer) {
 				}
 			}
 		}
-		} else GJBaseGameLayer::handleButton(holding,button,player1);
+		} else if (recorder.state != state::playing) GJBaseGameLayer::handleButton(holding,button,player1);
 
 	} else if (recorder.state == state::recording) {
 			playerData p1;
@@ -1159,13 +1163,14 @@ if (recorder.state == state::playing && isAndroid) {
             	auto& currentActionIndex = recorder.macro[recorder.currentAction];
 				androidAction = &currentActionIndex;
 				
-				if (!currentActionIndex.posOnly)
-					cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
+				if (!currentActionIndex.posOnly) {
+				playingAction = true;	cocos2d::CCKeyboardDispatcher::get()->dispatchKeyboardMSG(
 					static_cast<cocos2d::enumKeyCodes>(playerEnums[getPlayer1(currentActionIndex.player1, this)][currentActionIndex.button-1]),
 					currentActionIndex.holding, false);
-
+}
             	recorder.currentAction++;
         	}
+playingAction = false;
 			if (recorder.currentAction >= recorder.macro.size()) {
 				if (stateLabel!=nullptr) stateLabel->removeFromParent();
 				clearState(false);
@@ -1263,13 +1268,14 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 				}
 				}
 				if (!currentActionIndex.posOnly) {
-					self->handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
+				playingAction = true;	self->handleButton(currentActionIndex.holding, currentActionIndex.button, currentActionIndex.player1);
 					if (currentActionIndex.holding) lastHold = true;
 					else lastHold = false;
 				}
 
             	recorder.currentAction++;
         	}
+playingAction = false;
 			if (recorder.currentAction >= recorder.macro.size()) {
 				if (stateLabel!=nullptr) stateLabel->removeFromParent();
 				clearState(true);
@@ -1287,7 +1293,7 @@ class $modify(PlayLayer) {
 		
 		playerHolding = false;
 		leftOver = 0.f;
-
+playingAction = false;
 
 
 		if (isAndroid) androidAction = nullptr;
