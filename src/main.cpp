@@ -1331,10 +1331,12 @@ class $modify(PlayLayer) {
 				} catch (const std::exception& e) {
 					log::debug("wtfffff? - {}",e);
 				}
-        	} else if (!recorder.macro.empty()) {
+        	} else {
+				if (!recorder.macro.empty())
+					recorder.macro.clear();
+					
 				recorder.android = false;
 				recorder.fps = fpsArr[fpsIndex];
-				recorder.macro.clear();
 			} 
    		}
 	}
