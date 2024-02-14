@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "**"
+      - "xd"
 
 jobs:
   build:
@@ -41,7 +41,7 @@ jobs:
     needs: ['build']
 
     steps:
-      - uses: geode-sdk/build-geode-mod/combine@main
+      - uses: geode-sdk/build-geode-mod/combine@v1
         id: build
 
       - uses: actions/upload-artifact@v4
