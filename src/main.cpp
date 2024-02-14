@@ -716,20 +716,8 @@ class $modify(PauseLayer) {
 	void customSetup() {
 		PauseLayer::customSetup();
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
-		CCSprite* sprite = nullptr;
-		if (!isAndroid) {
-			std::ifstream file(dirs::getGameDir().string() + "\\" + "geode\\mods\\tpdea.betterpause-Better.geode");
-			if (file.good()) {
-				sprite = CCSprite::createWithSpriteFrameName("GJ_stopEditorBtn_001.png");
-			} else {
-				sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-				sprite->setScale(0.35f);
-			}
-		} else {
- 			sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-			sprite->setScale(0.35f);
-		}
-       
+        auto sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+		sprite->setScale(0.35f);
 
         auto btn = CCMenuItemSpriteExtra::create(sprite,
 		this,
