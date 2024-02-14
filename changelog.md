@@ -1,8 +1,13 @@
+# v1.4.4
+
+ * Fixed Android macros recording incorrectly.
+
 # v1.4.3
 
  * Re-worked FPS selector.
- * Fixed frame stepper buttons conflicting with platformer buttons on Android
+ * Fixed frame stepper buttons conflicting with platformer buttons on Android.
  * Fixed incompatibility with BetterPause.
+ 
 
 # v1.4.2
 
