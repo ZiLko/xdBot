@@ -17,6 +17,7 @@ double prevSpeed = 1.0f;
 
 int fixedFps = 240;
 int androidFps = 60;
+int fpsIndex = 0;
 
 #ifdef GEODE_IS_ANDROID
 	int offset = 0x320;
@@ -32,10 +33,12 @@ bool lastHold = false;
 bool shouldPlay = false;
 bool shouldPlay2 = false;
 
-int playerEnums[2][3] = {
+const int playerEnums[2][3] = {
     {cocos2d::enumKeyCodes::KEY_ArrowUp, cocos2d::enumKeyCodes::KEY_ArrowLeft, cocos2d::enumKeyCodes::KEY_ArrowRight}, 
     {cocos2d::enumKeyCodes::KEY_W, cocos2d::enumKeyCodes::KEY_A, cocos2d::enumKeyCodes::KEY_D}
 };
+
+const int fpsArr[4] = {60,120,180,240};
 
 void releaseKeys() {
 	for (int row = 0; row < 2; ++row) {
@@ -170,13 +173,14 @@ public:
 recordSystem recorder;
 
 class RecordLayer : public geode::Popup<std::string const&> {
+CCLabelBMFont* fpsLabel = nullptr;
  	CCLabelBMFont* infoMacro = nullptr;
  	CCMenuItemToggler* recording = nullptr;
     CCMenuItemToggler* playing = nullptr;
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-		auto versionLabel = CCLabelBMFont::create("xdBot v1.4.2 - made by Zilko", "chatFont.fnt");
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.4.3 - made by Zilko", "chatFont.fnt");
 		versionLabel->setOpacity(60);
 		versionLabel->setAnchorPoint(ccp(0.0f,0.5f));
 		versionLabel->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(3, 6));
@@ -228,6 +232,28 @@ protected:
     	btn->setPosition(winSize/2.f-ccp(-m_size.width/2.f,m_size.height/2.f) + ccp(-315, 20));
     	menu->addChild(btn);
 
+		spr = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
+    	spr->setScale(0.8f);
+    	btn = CCMenuItemSpriteExtra::create(
+        	spr,
+        	this,
+        	menu_selector(RecordLayer::updateFps)
+    	);
+    	btn->setPosition(winSize/2.f-ccp(-m_size.width/2.f,m_size.height/2.f) + ccp(-78, 80));
+		btn->setID("left");
+    	menu->addChild(btn);
+
+		spr = CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png");
+    	spr->setScale(0.8f);
+    	btn = CCMenuItemSpriteExtra::create(
+        	spr,
+        	this,
+        	menu_selector(RecordLayer::updateFps)
+    	);
+    	btn->setPosition(winSize/2.f-ccp(-m_size.width/2.f,m_size.height/2.f) + ccp(-16, 80));
+		btn->setID("right");
+    	menu->addChild(btn);
+
 		if (!isAndroid) {
 		spr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
     	spr->setScale(0.65f);
@@ -239,6 +265,18 @@ protected:
     	btn->setPosition(topLeftCorner + ccp(290, -10));
     	menu->addChild(btn);
 		}
+
+		label = CCLabelBMFont::create("FPS", "bigFont.fnt");
+    	label->setScale(0.6f);
+    	label->setPosition(winSize/2.f-ccp(-m_size.width/2.f,m_size.height/2.f) + ccp(-129, 80)); 
+    	label->setAnchorPoint({0, 0.5});
+    	m_mainLayer->addChild(label);
+
+		fpsLabel = CCLabelBMFont::create(std::to_string(fpsArr[fpsIndex]).c_str(), "bigFont.fnt");
+    	fpsLabel->setScale(0.6f);
+    	fpsLabel->setPosition(winSize/2.f-ccp(-m_size.width/2.f,m_size.height/2.f) + ccp(-47, 80)); 
+    	fpsLabel->setAnchorPoint({0.5, 0.5});
+    	m_mainLayer->addChild(fpsLabel);
 
     	label = CCLabelBMFont::create("Play", "bigFont.fnt");
     	label->setScale(0.7f);
@@ -312,6 +350,20 @@ public:
 		geode::openSettingsPopup(Mod::get());
 	}
 
+	void updateFps(CCObject* ob) {
+		if (static_cast<CCLabelBMFont*>(ob)->getID() == "left")
+			fpsIndex--;
+		else if (static_cast<CCLabelBMFont*>(ob)->getID() == "right") {
+			fpsIndex++;
+		}
+
+		if (fpsIndex == -1) fpsIndex = 3;
+		else if (fpsIndex == 4) fpsIndex = 0;
+
+		fpsLabel->setString(std::to_string(fpsArr[fpsIndex]).c_str());
+		Mod::get()->setSavedValue<float>("previous_fps", fpsIndex);
+	}
+
 	void discordPopup(CCObject*) {
 		geode::createQuickPopup(
     	"Join Discord",     
@@ -370,7 +422,7 @@ public:
 			? state::off : state::recording;
 			if (recorder.state == state::recording) {
 				if (recorder.macro.empty())
-					recorder.fps = Mod::get()->getSettingValue<int64_t>("bot_fps");
+					recorder.fps = fpsArr[fpsIndex];
 				
 				restart = true;
 				updateInfo();
@@ -579,8 +631,6 @@ void macroCell::handleLoad(CCObject* btn) {
 		recorder.fps = 240;
 	}
 
-	Mod::get()->setSettingValue("bot_fps", static_cast<int64_t>(recorder.fps));
-	
 	CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
 	CCObject* child;
 	CCARRAY_FOREACH(children, child) {
@@ -641,8 +691,6 @@ void clearState(bool safeMode) {
 
 	androidAction = nullptr;
 	leftOver = 0.f;
-
-	if (isAndroid && recorder.state == state::off) releaseKeys();
 
 	if (PlayLayer::get()) {
 		CCArray* children = PlayLayer::get()->getChildren();
@@ -733,7 +781,7 @@ public:
         		PlayLayer::get(),
 				menu_selector(mobileButtons::disableFrameStepper)
     			);
-				btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(70, 35));
+				btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(70, 70));
 				btn->setZOrder(100);
 				btn->setID("disable_fs_btn");
 				buttonsMenu->addChild(btn);
@@ -805,7 +853,7 @@ void addButton(const char* id) {
         	PlayLayer::get(),
 			menu_selector(mobileButtons::toggleSpeedhack)
     	);
-		btn->setPosition(winSize/2 + ccp(winSize.width/2, -winSize.height/2) + ccp(-15, 35));
+		btn->setPosition(winSize/2 + ccp(winSize.width/2, -winSize.height/2) + ccp(-15, 70));
 		btn->setID(id);
 		btn->setZOrder(100);
 		buttonsMenu->addChild(btn);
@@ -819,7 +867,7 @@ void addButton(const char* id) {
         	PlayLayer::get(),
 			menu_selector(mobileButtons::disableFrameStepper)
     	);
-		btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(70, 35));
+		btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(70, 70));
 		btn->setID(id);
 		btn->setZOrder(100);
 		buttonsMenu->addChild(btn);
@@ -1225,6 +1273,8 @@ class $modify(PlayLayer) {
 		playerHolding = false;
 		leftOver = 0.f;
 
+
+
 		if (isAndroid) androidAction = nullptr;
 
 		if (safeModeEnabled && !isAndroid) {
@@ -1239,6 +1289,7 @@ class $modify(PlayLayer) {
         	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
         	channel->setPitch(1);
 		} else if (recorder.state != state::off) {
+			releaseKeys();
         	if (this->m_isPracticeMode && !recorder.macro.empty() && recorder.currentFrame() != 0) {
   				int frame = recorder.currentFrame(); 
 				try {
@@ -1265,7 +1316,7 @@ class $modify(PlayLayer) {
 					log::debug("wtfffff? - {}",e);
 				}
         	} else if (!recorder.macro.empty()) {
-				recorder.fps = Mod::get()->getSettingValue<int64_t>("bot_fps");
+				recorder.fps = fpsArr[fpsIndex];
 				recorder.macro.clear();
 			} 
    		}
@@ -1382,6 +1433,16 @@ class $modify(CCKeyboardDispatcher) {
 };
 
 $execute {
+	if (Mod::get()->getSavedValue<float>("previous_fps"))
+		fpsIndex = Mod::get()->getSavedValue<float>("previous_fps");
+	else if (isAndroid)
+		fpsIndex = 0;
+	else {
+		fpsIndex = 3;
+	}
+
+	recorder.fps = fpsArr[fpsIndex];
+
 	if (Mod::get()->getSavedValue<float>("previous_speed"))
 		prevSpeed = Mod::get()->getSavedValue<float>("previous_speed");
 	else
@@ -1394,8 +1455,6 @@ $execute {
         	offset = 0x3B8;
     	}
 	}
-
-	recorder.fps = Mod::get()->getSettingValue<int64_t>("bot_fps");
 
 	for (std::size_t i = 0; i < 15; i++) {
 		safeMode::patches[i] = Mod::get()->patch(reinterpret_cast<void*>(base::get() + std::get<0>(safeMode::codes[i])),
