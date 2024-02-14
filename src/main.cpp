@@ -246,6 +246,12 @@ protected:
     	label->setAnchorPoint({0, 0.5});
     	m_mainLayer->addChild(label);
 
+label = CCLabelBMFont::create("FPS", "bigFont.fnt");
+    	label->setScale(0.7f);
+    	label->setPosition(topLeftCorner + ccp(150, -90)); 
+    	label->setAnchorPoint({0, 0.5});
+    	m_mainLayer->addChild(label);
+
      	playing = CCMenuItemToggler::create(checkOffSprite, checkOnSprite,
 	 	this,
 	 	menu_selector(RecordLayer::togglePlay));
