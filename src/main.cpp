@@ -669,7 +669,6 @@ void clearState(bool safeMode) {
 	recorder.state = state::off;
 
 	if (isAndroid) {
-		releaseKeys();
 		if (disableFSBtn != nullptr) {
 			disableFSBtn->removeFromParent();
 			disableFSBtn = nullptr;
@@ -687,6 +686,8 @@ void clearState(bool safeMode) {
 			buttonsMenu = nullptr;
 		}
 	}
+
+	releaseKeys();
 
 	frameLabel = nullptr;
 	stateLabel = nullptr;
@@ -1305,7 +1306,6 @@ class $modify(PlayLayer) {
         	FMODAudioEngine::sharedEngine()->m_system->getMasterChannelGroup(&channel);
         	channel->setPitch(1);
 		} else if (recorder.state != state::off) {
-			releaseKeys();
         	if (this->m_isPracticeMode && !recorder.macro.empty() && recorder.currentFrame() != 0) {
   				int frame = recorder.currentFrame(); 
 				try {
@@ -1332,6 +1332,7 @@ class $modify(PlayLayer) {
 					log::debug("wtfffff? - {}",e);
 				}
         	} else if (!recorder.macro.empty()) {
+				recorder.android = false;
 				recorder.fps = fpsArr[fpsIndex];
 				recorder.macro.clear();
 			} 
