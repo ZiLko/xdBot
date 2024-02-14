@@ -717,9 +717,14 @@ class $modify(PauseLayer) {
 		PauseLayer::customSetup();
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
 		CCSprite* sprite = nullptr;
-		if (Loader::get()->isModLoaded("tpdea.betterpause-Better")) {
-			sprite = CCSprite::createWithSpriteFrameName("GJ_stopEditorBtn_001.png");
-        	sprite->setScale(0.75f);
+		if (!isAndroid) {
+			std::ifstream file(dirs::getGameDir().string() + "\\" + "geode\\mods\\geode.custom-keybinds.geode");
+			if (file.good()) {
+				sprite = CCSprite::createWithSpriteFrameName("GJ_stopEditorBtn_001.png");
+			} else {
+				sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+				sprite->setScale(0.35f);
+			}
 		} else {
  			sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
 			sprite->setScale(0.35f);
