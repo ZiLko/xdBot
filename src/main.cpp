@@ -716,8 +716,15 @@ class $modify(PauseLayer) {
 	void customSetup() {
 		PauseLayer::customSetup();
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
-        auto sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
-		sprite->setScale(0.35f);
+		CCSprite* sprite = nullptr;
+		if (Loader::get()->isModLoaded("tpdea.betterpause-Better")) {
+			sprite = CCSprite::createWithSpriteFrameName("GJ_stopEditorBtn_001.png");
+        	sprite->setScale(0.75f);
+		} else {
+ 			sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+			sprite->setScale(0.35f);
+		}
+       
 
         auto btn = CCMenuItemSpriteExtra::create(sprite,
 		this,
@@ -842,7 +849,7 @@ void addButton(const char* id) {
         	PlayLayer::get(),
 			menu_selector(mobileButtons::frameAdvance)
     	);
-		btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(15, y));
+		btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(15, 7));
 		btn->setID(id);
 		btn->setZOrder(100);
 		buttonsMenu->addChild(btn);
