@@ -158,11 +158,8 @@ public:
 	}
 	void recordAction(bool holding, int button, bool player1, int frame, GJBaseGameLayer* bgl, playerData p1Data, playerData p2Data) {
 		bool realp1;
-		if (isAndroid) {
+		if (isAndroid) 
 			realp1 = (GameManager::get()->getGameVariable("0010") && !bgl->m_levelSettings->m_platformerMode) ? !player1 : player1;
-			if (!android)
-				android = true;
-		}
 		else realp1 = player1;
 		
     	macro.push_back({realp1, frame, button, holding, false, p1Data, p2Data});
@@ -1334,7 +1331,7 @@ class $modify(PlayLayer) {
         	} else {
 				if (!recorder.macro.empty())
 					recorder.macro.clear();
-					
+
 				recorder.android = false;
 				recorder.fps = fpsArr[fpsIndex];
 			} 
