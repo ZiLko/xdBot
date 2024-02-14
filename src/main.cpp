@@ -718,7 +718,7 @@ class $modify(PauseLayer) {
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
 		CCSprite* sprite = nullptr;
 		if (!isAndroid) {
-			std::ifstream file(dirs::getGameDir().string() + "\\" + "geode\\mods\\geode.custom-keybinds.geode");
+			std::ifstream file(dirs::getGameDir().string() + "\\" + "geode\\mods\\tpdea.betterpause-Better.geode");
 			if (file.good()) {
 				sprite = CCSprite::createWithSpriteFrameName("GJ_stopEditorBtn_001.png");
 			} else {
