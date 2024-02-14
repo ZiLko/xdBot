@@ -421,9 +421,11 @@ public:
     		recorder.state = (recorder.state == state::recording) 
 			? state::off : state::recording;
 			if (recorder.state == state::recording) {
-				if (recorder.macro.empty())
+				if (recorder.macro.empty()) {
+					recorder.android = false;
 					recorder.fps = fpsArr[fpsIndex];
-				
+				}
+					
 				restart = true;
 				updateInfo();
 			} else if (recorder.state == state::off) {
@@ -717,7 +719,7 @@ class $modify(PauseLayer) {
 		PauseLayer::customSetup();
 		auto winSize = CCDirector::sharedDirector()->getWinSize();
 		CCSprite* sprite = nullptr;
-		
+
 		if (Loader::get()->isModLoaded("tpdea.betterpause-Better")) {
 			sprite = CCSprite::createWithSpriteFrameName("GJ_stopEditorBtn_001.png");
 		} else {
@@ -849,7 +851,7 @@ void addButton(const char* id) {
         	PlayLayer::get(),
 			menu_selector(mobileButtons::frameAdvance)
     	);
-		btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(15, y));
+		btn->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(15, 7));
 		btn->setID(id);
 		btn->setZOrder(100);
 		buttonsMenu->addChild(btn);
