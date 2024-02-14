@@ -1,6 +1,6 @@
 # v1.4.3
 
- * Moved frame stepper buttons on Android.
+ * Fixed frame stepper buttons conflicting with platformer buttons on Android
  * Re-worked FPS selector.
 
 # v1.4.2
