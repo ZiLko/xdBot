@@ -1,3 +1,16 @@
+# v1.4.5
+
+ * Fixed some Android macros crashing.
+ * Fixed frame stepper button being misaligned on Android.
+ * Fixed music unsyncing when resuming the game.
+ * Fixed music unsyncing when using speedhack.
+ * Added Apeedhack Audio setting.
+ * Added Show Button at End setting.
+ * Added ignore click on play on Windows.
+ * You can now hold the frame stepper key on Windows.
+ * Made speedhack limit 2 instead of 1.
+ * Speedhack now also works while playing a level.
+
 # v1.4.4
 
  * Fixed Android macros recording incorrectly.
