@@ -1,6 +1,6 @@
 {
 	"geode": "2.0.0-beta.13",
-	"version": "v1.4.4",
+	"version": "v1.4.5",
 	"id": "zilko.xdbot",
 	"gd": {
 		"win": "2.204",
@@ -14,8 +14,14 @@
 			"description": "<cg>Toggle Speedhack</c> = <cl>C</c>\nSlows down the game to the desired value, only works while recording a macro.",
 			"type": "float",
 			"min": 0.01,
-			"max": 1.0,
+			"max": 2.0,
 			"default": 1.0
+		},
+		"speedhack_audio": {
+			"name": "Speedhack Audio",
+			"description": "Slows down the song to match the game speed.",
+			"type": "bool",
+			"default": true
 		},
 		"frame_stepper": {
 			"name": "Frame Stepper",
@@ -28,6 +34,12 @@
 			"description": "Toggles playing the macro automatically when you finish recording a level.",
 			"type": "bool",
 			"default": false
+		},
+		"end_button": {
+			"name": "Show Button At End",
+			"description": "Shows the xdBot menu button at the level complete screen.",
+			"type": "bool",
+			"default": true
 		},
 		"show_frame_label": {
 			"name": "Show frame label",
