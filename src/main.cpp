@@ -1522,7 +1522,7 @@ class $modify(CCScheduler) {
     leftOver += (dt - dt2 * mult); 
 	if (recorder.state == state::playing) {
 		syncCooldown++;
-		if (syncCooldown >= 20) {
+		if (syncCooldown >= 20 && leftOver > 1) {
 			syncCooldown = 0;
 			recorder.syncMusic();
 		}
