@@ -1427,7 +1427,7 @@ class $modify(PlayLayer) {
 	void levelComplete() {
 		PlayLayer::levelComplete();
 		if (stateLabel!=nullptr) stateLabel->removeFromParent();
-		if (recorder.state == state::recording)
+		if (recorder.state != state::off)
 			shouldPlay2 = true;
 		
 		clearState(true);
