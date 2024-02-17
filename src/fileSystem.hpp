@@ -197,6 +197,24 @@ public:
         openFolderBtn->setPosition(corner + CCPOINT_CREATE(380,20));
         menu->addChild(openFolderBtn);
 
+        if (isAndroid) {
+            for (int i = macros.value().size() - 1; i >= 0; --i) {
+                std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+            std::wstring wideString = converter.from_bytes(macros.value()[i].string());
+            std::locale utf8_locale(std::locale(), new std::codecvt_utf8<wchar_t>);
+
+            std::wifstream file;
+
+            if (macros.value()[i].extension() == ".xd") {
+                file.open(wideString);
+                file.imbue(utf8_locale);
+                if (file){
+                    macroCell* cell = macroCell::create(macros.value()[i].filename().string().substr(0, macros.value()[i].filename().string().find_last_of('.')));
+                    macroList->addObject(cell);
+                }
+            }
+            }
+        } else {
         for (int i = 0; i < macros.value().size(); ++i) {
 
             std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
@@ -214,7 +232,7 @@ public:
                 }
             }
         }
-
+    }
         ListView* mcrList = ListView::create(macroList, 40, 308, 200);
 
         mcrList->setScaleY(0.875f);
