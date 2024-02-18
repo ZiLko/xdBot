@@ -179,7 +179,7 @@ CCLabelBMFont* fpsLabel = nullptr;
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-		auto versionLabel = CCLabelBMFont::create("xdBot v1.4.5 - made by Zilko", "chatFont.fnt");
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.4.6 - made by Zilko", "chatFont.fnt");
 		versionLabel->setOpacity(60);
 		versionLabel->setAnchorPoint(ccp(0.0f,0.5f));
 		versionLabel->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(3, 6));
@@ -409,7 +409,10 @@ public:
 		if (recorder.state == state::recording) recording->toggle(false);
     	recorder.state = (recorder.state == state::playing) ? state::off : state::playing;
 
-		if (recorder.state == state::playing) restart = true;
+		if (recorder.state == state::playing) {
+			restart = true;
+			Mod::get()->setSettingValue("speedhack", 1.0);
+		}
 		else if (recorder.state == state::off) restart = false;
 		recorder.syncMusic();
 		Mod::get()->setSettingValue("frame_stepper", false);
@@ -599,7 +602,6 @@ void macroCell::handleLoad(CCObject* btn) {
 					(double)p2xSpeed,
 					(double)p2ySpeed,
 				};
-				if (!((bool)posOnly))
 					recorder.macro.push_back({(bool)player1, (int)frame, (int)button, (bool)holding, (bool)posOnly, p1, p2});
 			}
 		} else if (count < 1) {
@@ -757,7 +759,6 @@ void toggleSpeedhack(CCObject*) {
 			prevSpeed = Mod::get()->getSettingValue<double>("speedhack");
 			Mod::get()->setSavedValue<float>("previous_speed", prevSpeed);
 			Mod::get()->setSettingValue("speedhack", 1.0);
-			if (Mod::get()->getSettingValue<bool>("speedhack_audio")) recorder.syncMusic();
 		}
 	}
 }
@@ -1403,11 +1404,17 @@ class $modify(PlayLayer) {
 							} else break;
     					}
 					if (recorder.macro.back().holding) {
+						playerData p1;
+						p1.xPos = 0;
+						playerData p2;
                 	recorder.macro.push_back({
 						recorder.macro.back().player1,
 						frame,
 						recorder.macro.back().button,
-						false
+						false,
+						true,
+						p1,
+						p2
 					});
 					}
 				}
@@ -1438,7 +1445,7 @@ class $modify(EndLevelLayer) {
 
 	void customSetup() {
 		EndLevelLayer::customSetup();
-		if (Mod::get()->getSettingValue<bool>("end_button") && shouldPlay2) {
+		if (Mod::get()->getSettingValue<bool>("end_button")) {
 			auto winSize = CCDirector::sharedDirector()->getWinSize();
 			CCSprite* sprite = nullptr;
 			sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
@@ -1540,7 +1547,6 @@ class $modify(CCKeyboardDispatcher) {
 					prevSpeed = Mod::get()->getSettingValue<double>("speedhack");
 					Mod::get()->setSavedValue<float>("previous_speed", prevSpeed);
 					Mod::get()->setSettingValue("speedhack", 1.0);
-					if (Mod::get()->getSettingValue<bool>("speedhack_audio")) recorder.syncMusic();
 				}
 			}
 		}
