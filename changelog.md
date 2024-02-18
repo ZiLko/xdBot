@@ -1,10 +1,17 @@
+# v1.4.6
+
+ * Fixed occasional crash on restart.
+ * Fixed macros ignoring frame fixes when loaded.
+ * Made it so speedhack sets to 1 when you play a macro to avoid confusion.
+ * Made it so xdBot button always appears at the end screen if the setting is enabled.
+
 # v1.4.5
 
  * Fixed some Android macros crashing.
  * Fixed frame stepper button being misaligned on Android.
  * Fixed music unsyncing when resuming the game.
  * Fixed music unsyncing when using speedhack.
- * Added Apeedhack Audio setting.
+ * Added Speedhack Audio setting.
  * Added Show Button at End setting.
  * Added ignore click on play on Windows.
  * You can now hold the frame stepper key on Windows.
