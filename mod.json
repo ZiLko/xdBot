@@ -1,6 +1,6 @@
 {
 	"geode": "2.0.0-beta.13",
-	"version": "v1.4.5",
+	"version": "v1.4.6",
 	"id": "zilko.xdbot",
 	"gd": {
 		"win": "2.204",
@@ -39,7 +39,7 @@
 			"name": "Show Button At End",
 			"description": "Shows the xdBot menu button at the level complete screen.",
 			"type": "bool",
-			"default": true
+			"default": false
 		},
 		"show_frame_label": {
 			"name": "Show frame label",
