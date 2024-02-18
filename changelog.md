@@ -1,3 +1,8 @@
+# v1.4.7
+
+ * Fixed speedhack audio staying after toggling play macro.
+ * Fixed macro not recording a release when you place a checkpoint while holding.
+
 # v1.4.6
 
  * Fixed occasional crash on restart.
