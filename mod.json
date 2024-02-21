@@ -1,6 +1,6 @@
 {
 	"geode": "2.0.0-beta.13",
-	"version": "v1.4.7",
+	"version": "v1.4.8",
 	"id": "zilko.xdbot",
 	"gd": {
 		"win": "2.204",
@@ -29,8 +29,17 @@
 			"type": "bool",
 			"default": false
 		},
+		"auto_safe_mode": {
+			"name": "Auto Safe Mode",
+			"description": "<cr>WINDOWS ONLY</c>\nDisables level progress when playing a macro to prevent accidental hacking.\nAdds a water mark at the end if disabled.",
+			"type": "bool",
+			"default": {
+				"win": true,
+				"android": false
+			}
+		},
 		"auto_enable_play": {
-			"name": "Auto-Enable Play",
+			"name": "Auto Play",
 			"description": "Toggles playing the macro automatically when you finish recording a level.",
 			"type": "bool",
 			"default": false
