@@ -1,3 +1,8 @@
+# v1.4.8
+
+ * Fixed some macro bugs on Android.
+ * Added Auto Safe Mode setting.
+
 # v1.4.7
 
  * Fixed speedhack audio staying after toggling play macro.
