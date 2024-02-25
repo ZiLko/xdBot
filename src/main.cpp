@@ -930,7 +930,7 @@ void checkUI() {
 				buttonsMenu->removeFromParent();
 				buttonsMenu = nullptr;
 			}
-		} else if (recorder.state == state::recording) {
+		} else if (recorder.state == state::recording && isAndroid) {
 			if (buttonsMenu != nullptr) {
 			if (advanceFrameBtn != nullptr) {
 				if (mod->getSettingValue<bool>("disable_frame_stepper")) {
