@@ -14,6 +14,7 @@
 #define CCPOINT_CREATE(__X__,__Y__) cocos2d::CCPointMake((float)(__X__), (float)(__Y__))
 
 using namespace geode::prelude;
+
 class macroCell : public CCNode {
 public:
     static macroCell* create(std::string name) {
@@ -107,6 +108,7 @@ public:
         btn->setPosition({225,20});
         btn->setID(name);
         menu->addChild(btn);
+
         this->addChild(menu);
         return true;
     }
@@ -166,29 +168,41 @@ public:
         std::string noBUMessage;
         CCPoint corner = winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,m_size.height/2.f);
         macros = file::readDirectory(Mod::get()->getSaveDir());
+        auto menu = CCMenu::create();
+        menu->setPosition({0,0});
+        CCSprite* tSprite = nullptr;
+        CCMenuItemSpriteExtra* button = nullptr;
 
+        int y = 110;
+
+        if (!isAndroid) {
+            tSprite = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
+            tSprite->setScale(0.8f);
+            button = CCMenuItemSpriteExtra::create(
+                tSprite,
+                this,
+                menu_selector(loadMacroPopup::importMacro)
+            );
+            button->setPosition(corner + CCPOINT_CREATE(380,65));
+            menu->addChild(button);
+        } else y = 65;
+
+        tSprite = CCSprite::createWithSpriteFrameName("GJ_deleteSongBtn_001.png");
+        button = CCMenuItemSpriteExtra::create(
+            tSprite,
+            this,
+            menu_selector(loadMacroPopup::clearMacros)
+        );
+        button->setPosition(corner + CCPOINT_CREATE(380,y));
+        menu->addChild(button);
+        m_mainLayer->addChild(menu);
+        
         auto emptyBtn = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
         emptyBtn->setScale(0.75f);
         auto folderIcon = CCSprite::createWithSpriteFrameName("folderIcon_001.png");
         folderIcon->setPosition(emptyBtn->getContentSize() / 2);
         folderIcon->setScale(0.8f);
         emptyBtn->addChild(folderIcon);
-        auto menu = CCMenu::create();
-        menu->setPosition({0,0});
-
-        if (!isAndroid) {
-        CCSprite* importMacroSprite = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
-        importMacroSprite->setScale(0.8f);
-        auto importMacroButton = CCMenuItemSpriteExtra::create(
-            importMacroSprite,
-            this,
-            menu_selector(loadMacroPopup::importMacro)
-        );
-        importMacroButton->setPosition(corner + CCPOINT_CREATE(380,65));
-        menu->addChild(importMacroButton);
-        }
-
-        m_mainLayer->addChild(menu);
         auto openFolderBtn = CCMenuItemSpriteExtra::create(
             emptyBtn,
             this,
@@ -196,6 +210,7 @@ public:
         );
         openFolderBtn->setPosition(corner + CCPOINT_CREATE(380,20));
         menu->addChild(openFolderBtn);
+
 
         if (isAndroid) {
             for (int i = macros.value().size() - 1; i >= 0; --i) {
@@ -287,6 +302,49 @@ public:
         this->keyBackClicked();
         openLoadMenu(nullptr);
     }
+
+    void handleClear() {
+        Result<std::vector<ghc::filesystem::path>> macros;
+        macros = file::readDirectory(Mod::get()->getSaveDir());
+        int del = 0;
+        for (int i = 0; i < macros.value().size(); ++i) {
+            
+            std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+            std::wstring wideString = converter.from_bytes(macros.value()[i].string());
+	        std::locale utf8_locale(std::locale(), new std::codecvt_utf8<wchar_t>);
+
+            if (macros.value()[i].extension() == ".xd") {
+                try {
+                std::filesystem::remove(wideString);
+                } catch (const std::filesystem::filesystem_error& e) {
+                    log::debug("noo - {}", e);
+                    del--;
+                }
+                del++;
+            }
+        }
+        std::stringstream ss;
+        ss << "<cl>";
+        ss << del;
+        ss << "</c> macros have been <cr>deleted</c>.";
+        refresh();
+        FLAlertLayer::create(
+    		"Clear Macros",   
+    		 ss.str().c_str(),
+    		"OK"      
+		)->show();
+    }
+
+    void clearMacros(CCObject*) {
+        geode::createQuickPopup(
+    	"Clear Macros",     
+    	"<cr>Delete</c> all saved macros?", 
+    	"Cancel", "Ok",  
+    	[this](auto, bool btn2) {
+        	if (btn2) this->handleClear();
+    	}); 
+    }
+
 
     void openMacrosFolder(CCObject*) {
         file::openFolder(Mod::get()->getSaveDir());
