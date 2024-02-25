@@ -1,6 +1,6 @@
 {
 	"geode": "2.0.0-beta.13",
-	"version": "v1.4.8",
+	"version": "v1.5.0",
 	"id": "zilko.xdbot",
 	"gd": {
 		"win": "2.204",
@@ -29,14 +29,41 @@
 			"type": "bool",
 			"default": false
 		},
+		"noclip": {
+			"name": "NoClip",
+			"description": "Stops the player from dying.",
+			"type": "bool",
+			"default": false
+		},
+		"instant_mirror": {
+			"name": "Instant Mirror Portal",
+			"description": "Disables mirror portal transition animation.",
+			"type": "bool",
+			"default": false
+		},
+		"instant_respawn": {
+			"name": "Instant Respawn",
+			"description": "Makes the player respawn instantly on death; useful when speedhacking.",
+			"type": "bool",
+			"default": false
+		},
+		"disable_death_effect": {
+			"name": "Disable Death Effect",
+			"description": "Disables the death effect.",
+			"type": "bool",
+			"default": false
+		},
+		"ignore_inputs": {
+			"name": "Ignore Inputs",
+			"description": "Ignores your inputs while playing a macro.",
+			"type": "bool",
+			"default": true
+		},
 		"auto_safe_mode": {
 			"name": "Auto Safe Mode",
-			"description": "<cr>WINDOWS ONLY</c>\nDisables level progress when playing a macro to prevent accidental hacking.\nAdds a water mark at the end if disabled.",
+			"description": "Disables level progress when playing a macro to prevent accidental hacking.\nAdds a water mark at the end if disabled.",
 			"type": "bool",
-			"default": {
-				"win": true,
-				"android": false
-			}
+			"default": true
 		},
 		"auto_enable_play": {
 			"name": "Auto Play",
