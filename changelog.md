@@ -1,3 +1,7 @@
+# v1.5.1
+
+ * Temporarily disabled Ignore Inputs on Android to fix major bugs, will re-implement in the future.
+
 # v1.5.0
 
  * Added NoClip setting.
@@ -13,7 +17,7 @@
  * Fixed frame label sometimes not showing.
  * Fixed some platformer macro bugs.
  * Slightly improved Android performace when loading frame fixes macros.
- * Possibly fixed crash on restart one more crash on restart.
+ * Possibly fixed one more crash on restart.
  
 # v1.4.8
 
