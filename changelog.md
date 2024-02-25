@@ -1,3 +1,20 @@
+# v1.5.0
+
+ * Added NoClip setting.
+ * Added Instant Respawn setting.
+ * Added Instant Mirror Portal setting.
+ * Added Instant Disable Death Effect setting.
+ * Added Ignore Inputs setting.
+ * Added Clear All Macros button.
+ * Added ignore click on play on Android.
+ * Added Auto Safe Mode on Android.
+ * Added a warning when saving a macro with an existing name.
+ * Made Android buttons slightly bigger.
+ * Fixed frame label sometimes not showing.
+ * Fixed some platformer macro bugs.
+ * Slightly improved Android performace when loading frame fixes macros.
+ * Possibly fixed crash on restart one more crash on restart.
+ 
 # v1.4.8
 
  * Fixed some macro bugs on Android.
