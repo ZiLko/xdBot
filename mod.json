@@ -1,6 +1,6 @@
 {
 	"geode": "2.0.0-beta.13",
-	"version": "v1.5.0",
+	"version": "v1.5.1",
 	"id": "zilko.xdbot",
 	"gd": {
 		"win": "2.204",
@@ -55,7 +55,7 @@
 		},
 		"ignore_inputs": {
 			"name": "Ignore Inputs",
-			"description": "Ignores your inputs while playing a macro.",
+			"description": "<cr>WINDOWS ONLY</c>\nIgnores your inputs while playing a macro.",
 			"type": "bool",
 			"default": true
 		},
