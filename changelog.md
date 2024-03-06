@@ -1,3 +1,7 @@
+# v1.5.2
+
+* Remove Discord.
+
 # v1.5.1
 
  * Temporarily disabled Ignore Inputs on Android to fix major bugs, will re-implement in the future.
