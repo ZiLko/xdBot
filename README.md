@@ -17,10 +17,6 @@
 
 All you have to do is open <cg>xdBot</c> by clicking the new button in the pause menu, and toggle "<cl>Record</c>" or "<cl>Play</c>" depending on what you want to do.
 
-# Discord
-
-[Join the Discord](https://discord.gg/dwk5whfeu2) for support, macro sharing, and suggesting features!
-
 
 ![Image of xdBot's menu.](https://media.discordapp.net/attachments/1064726420632371249/1201671960841683004/20240129171944_1.jpg?ex=65caab39&is=65b83639&hm=85b2ba8ff125c563b65923893252163ea4380b7449e89f96ac97a4815bc0fb47&=&format=webp&width=809&height=455)
 
