@@ -1018,14 +1018,13 @@ void onReset() {
 
 class $modify(PlayerObject) {
 void playerDestroyed(bool p0) {
-	PlayerObject::playerDestroyed(p0);
 	if (isAndroid) androidAction = nullptr;
 	if  (isAndroid && mod->getSettingValue<bool>("auto_safe_mode") && playedMacro) {
 		noDelayedReset = true;
 		onReset();
 		return PlayLayer::get()->resetLevel();
 	}
-	if ((!mod->getSettingValue<bool>("instant_respawn") || recorder.state == state::off))
+	if (!mod->getSettingValue<bool>("instant_respawn") || recorder.state == state::off)
 		return PlayerObject::playerDestroyed(p0);
 	onReset();
 	return PlayLayer::get()->resetLevel();
