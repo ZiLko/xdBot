@@ -236,13 +236,6 @@ protected:
     	btn->setPosition(winSize/2.f-ccp(m_size.width/2.f,m_size.height/2.f) + ccp(325, 20));
     	menu->addChild(btn);
 
-		spr = CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png");
-    	spr->setScale(0.8f);
-    	btn = CCMenuItemSpriteExtra::create(
-        	spr,
-        	this,
-        	menu_selector(RecordLayer::discordPopup)
-    	);
     	btn->setPosition(winSize/2.f-ccp(-m_size.width/2.f,m_size.height/2.f) + ccp(-315, 20));
     	menu->addChild(btn);
 
@@ -378,17 +371,6 @@ public:
 		mod->setSavedValue<float>("previous_fps", fpsIndex);
 	}
 
-	void discordPopup(CCObject*) {
-		geode::createQuickPopup(
-    	"Join Discord",     
-    	"Join the <cb>Discord</c> server?\n(<cl>discord.gg/dwk5whfeu2</c>)", 
-    	"No", "Yes",  
-    	[this](auto, bool btn2) {
-        	if (btn2) {
-				geode::utils::web::openLinkInBrowser("https://discord.gg/dwk5whfeu2");
-			}
-    	});
-	}
 
 	void keyInfo(CCObject*) {
 		FLAlertLayer::create(
