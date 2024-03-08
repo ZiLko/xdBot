@@ -1,3 +1,8 @@
+# v1.5.3
+
+* Fixed settings button position.
+* Fixed player death being called twice or something.
+
 # v1.5.2
 
 * Remove Discord.
