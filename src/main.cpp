@@ -236,9 +236,6 @@ protected:
     	btn->setPosition(winSize/2.f-ccp(m_size.width/2.f,m_size.height/2.f) + ccp(325, 20));
     	menu->addChild(btn);
 
-    	btn->setPosition(winSize/2.f-ccp(-m_size.width/2.f,m_size.height/2.f) + ccp(-315, 20));
-    	menu->addChild(btn);
-
 		spr = CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png");
     	spr->setScale(0.8f);
     	btn = CCMenuItemSpriteExtra::create(
