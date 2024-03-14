@@ -1506,7 +1506,6 @@ class $modify(PlayLayer) {
 		if (stateLabel != nullptr) stateLabel->removeFromParent();
 		if (isAndroid && mod->getSettingValue<bool>("auto_safe_mode") && playedMacro) {
 			PlayLayer::get()->m_isTestMode = true;
-			return;
 		}
 		PlayLayer::levelComplete();
 		if (recorder.state != state::off)
