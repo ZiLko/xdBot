@@ -1,3 +1,6 @@
+# v1.5.4
+* Better Mobile Safe Mode (By viper)
+
 # v1.5.3
 
 * Fixed settings button position.
