@@ -70,53 +70,7 @@ CCMenuItemSpriteExtra* speedhackBtn = nullptr;
 
 using namespace geode::prelude;
 
-namespace safeMode {
-using opcode = std::pair<unsigned long, std::vector<uint8_t>>;
-
-	inline const std::array<opcode, 15> codes{
-		opcode{ 0x2DDC7E, { 0x0F, 0x84, 0xCA, 0x00, 0x00, 0x00 } },
-		{ 0x2DDD6A, { 0x0F, 0x84, 0xEA, 0x01, 0x00, 0x00 } },
-		{ 0x2DDD70, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 } },
-		{ 0x2DDD77, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 } },
-		{ 0x2DDEE5, { 0x90 } },
-		{ 0x2DDF6E, { 0x0F, 0x84, 0xC2, 0x02, 0x00, 0x00 } },
-
-		{ 0x2E6BDE, { 0x90, 0xE9, 0xAD, 0x00, 0x00, 0x00 } },
-		{ 0x2E6B32, { 0xEB, 0x0D } },
-		{ 0x2E69F4, { 0x0F, 0x4C, 0xC1 } },
-		{ 0x2E6993, { 0x90, 0xE9, 0x85, 0x01, 0x00, 0x00 } },
-
-		{ 0x2EACD0, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 } },
-		{ 0x2EACD6, { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 } },
-		{ 0x2EACF7, { 0x90 } },
-		
-		{ 0x2EA81F, { 0x6A, 0x00 } },
-		{ 0x2EA83D, { 0x90 } }
-	};
-	inline std::array<geode::Patch*, 15> patches;
-
-	void updateSafeMode() {
-		for (auto& patch : patches) {
-		if (safeModeEnabled && !isAndroid) {
-			if (!patch->isEnabled()) {
-				try {
-					patch->enable();
-				} catch(const std::exception& e) {
-					log::debug("wtf? - {}", e);
-				}
-			}
-		} else {
-			if (patch->isEnabled()) {
-				try {
-					patch->disable();
-				} catch(const std::exception& e) {
-					log::debug("wtf 2? - {}", e);
-				}
-			}
-		}
-	}
-	}
-}
+	
 
 struct playerData {
 	float xPos;
@@ -727,9 +681,8 @@ void clearState(bool safeMode) {
 	mod->setSettingValue("frame_stepper", false);
 	if (!safeMode) {
 		playedMacro = false;
-		if (!isAndroid && mod->getSettingValue<bool>("auto_safe_mode")) {
+		if ( mod->getSettingValue<bool>("auto_safe_mode")) {
 			safeModeEnabled = false;
-			safeMode::updateSafeMode();
 		}
 	}
 }
@@ -992,9 +945,8 @@ void onReset() {
 
 		if (isAndroid) androidAction = nullptr;
 
-		if (safeModeEnabled && !isAndroid && mod->getSettingValue<bool>("auto_safe_mode")) {
+		if (safeModeEnabled  && mod->getSettingValue<bool>("auto_safe_mode")) {
 			safeModeEnabled = false;
-			safeMode::updateSafeMode();
 		}
 		
 		if (playedMacro) playedMacro = false;
@@ -1311,9 +1263,8 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 			frame >= recorder.macro[recorder.currentAction].frame && !self->m_player1->m_isDead) {
             	auto& currentActionIndex = recorder.macro[recorder.currentAction];
 
-				if (!safeModeEnabled && !isAndroid && mod->getSettingValue<bool>("auto_safe_mode")) {
+				if (!safeModeEnabled && mod->getSettingValue<bool>("auto_safe_mode")) {
 					safeModeEnabled = true;
-					safeMode::updateSafeMode();
 				}
 				playedMacro = true;
 				if (!mod->getSettingValue<bool>("override_macro_mode") && currentActionIndex.p1.xPos != 0) {
@@ -1421,9 +1372,8 @@ class $modify(PlayLayer) {
 
 		if (isAndroid) androidAction = nullptr;
 
-		if (safeModeEnabled && !isAndroid && mod->getSettingValue<bool>("auto_safe_mode")) {
+		if (safeModeEnabled && mod->getSettingValue<bool>("auto_safe_mode")) {
 			safeModeEnabled = false;
-			safeMode::updateSafeMode();
 		}
 		
 		if (playedMacro) playedMacro = false;
@@ -1538,7 +1488,7 @@ class $modify(EndLevelLayer) {
         	menu->addChild(btn);
 			layer->addChild(menu);
 		}
-		if ((!mod->getSettingValue<bool>("auto_safe_mode") || isAndroid) && playedMacro) {
+		if ((!mod->getSettingValue<bool>("auto_safe_mode")) && playedMacro) {
 			auto winSize = CCDirector::sharedDirector()->getWinSize();
 			auto layer = reinterpret_cast<CCLayer*>(this->getChildren()->objectAtIndex(0));
 			auto watermarkxd = CCLabelBMFont::create("Recorded with xdBot.", "chatFont.fnt");
@@ -1692,3 +1642,13 @@ $execute {
 		safeMode::patches[i]->disable();
 	}
 }
+
+
+// safe Mode new doesn't kick you out :p
+ void levelComplete() {
+        if (safeModeEnabled)  {
+            PlayLayer::get()->m_isTestMode = true;     
+        }
+        
+        PlayLayer::levelComplete();
+    };
