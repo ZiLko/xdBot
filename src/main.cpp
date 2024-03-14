@@ -1345,6 +1345,7 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 }
 
 class $modify(PlayLayer) {
+	
 	void destroyPlayer(PlayerObject* p1, GameObject* p2) {
 		if (!mod->getSettingValue<bool>("noclip") || recorder.state == state::off)
 			PlayLayer::destroyPlayer(p1,p2);
@@ -1454,9 +1455,9 @@ class $modify(PlayLayer) {
 
 	void levelComplete() {
 		if (stateLabel != nullptr) stateLabel->removeFromParent();
-		if (isAndroid && mod->getSettingValue<bool>("auto_safe_mode") && playedMacro) {
-			clearState(false);
-			this->onQuit();
+		// safe Mode new doesn't kick you out :p
+		if (mod->getSettingValue<bool>("auto_safe_mode") && playedMacro) {
+			PlayLayer::get()->m_isTestMode = true; 
 			return;
 		}
 		PlayLayer::levelComplete();
@@ -1644,11 +1645,4 @@ $execute {
 }
 
 
-// safe Mode new doesn't kick you out :p
- void levelComplete() {
-        if (safeModeEnabled)  {
-            PlayLayer::get()->m_isTestMode = true;     
-        }
-        
-        PlayLayer::levelComplete();
-    };
+
