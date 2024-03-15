@@ -11,6 +11,14 @@
 	bool isAndroid = false;
 #endif
 
+bool refreshMenu = false;
+std::string searchString = "";
+
+std::string toLower(std::string str) {
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+    return str;
+}
+
 #define CCPOINT_CREATE(__X__,__Y__) cocos2d::CCPointMake((float)(__X__), (float)(__Y__))
 
 using namespace geode::prelude;
@@ -114,6 +122,77 @@ public:
     }
 };
 
+class searchMacroPopup : public geode::Popup<std::string const&> {
+public:
+    CCTextInputNode* macroNameInput = nullptr;
+
+    bool setup(std::string const& value) override {
+        auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+        auto inputBg = CCScale9Sprite::create("square02b_001.png", {0, 0, 80, 80});
+
+        inputBg->setScale(0.7f);
+        inputBg->setColor({ 0, 0, 0 });
+        inputBg->setOpacity(75);
+        inputBg->setPosition(winSize/2 + CCPOINT_CREATE(0,7));
+        inputBg->setContentSize({ 235, 54 });
+
+        macroNameInput = CCTextInputNode::create(150, 30, "Search", "bigFont.fnt");
+        macroNameInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
+        macroNameInput->ignoreAnchorPointForPosition(true);
+        macroNameInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
+        macroNameInput->setPosition(winSize/2 + CCPOINT_CREATE(0,7));
+        macroNameInput->setMaxLabelScale(0.7f);
+        macroNameInput->setLabelPlaceholderColor(ccc3(163, 135, 121));
+        macroNameInput->setMouseEnabled(true);
+        macroNameInput->setTouchEnabled(true);
+
+        auto title = CCLabelBMFont::create("Search Macro", "bigFont.fnt");
+        title->setPosition(winSize/2 + CCPOINT_CREATE(0,50));
+        title->setScale(0.6f);
+        m_mainLayer->addChild(title);
+
+        auto btnSpr = ButtonSprite::create("Search");
+        btnSpr->setScale(0.9f);
+        auto menu = CCMenu::create();
+        menu->setPosition({0,0});
+        auto btn = CCMenuItemSpriteExtra::create(
+            btnSpr,
+            this,
+            menu_selector(searchMacroPopup::searchMacro)
+        );
+
+        btn->setPosition(winSize/2 + CCPOINT_CREATE(0,-40));
+        menu->addChild(btn);
+        m_mainLayer->addChild(menu);
+
+        m_mainLayer->addChild(inputBg);
+        m_mainLayer->addChild(macroNameInput);
+        return true;
+    }
+
+    static searchMacroPopup* create() {
+        auto ret = new searchMacroPopup();
+        if (ret && ret->init(220, 140, "")) {
+            ret->autorelease();
+            return ret;
+        }
+        CC_SAFE_DELETE(ret);
+        return nullptr;
+    }
+
+    void clearSearch(CCObject*) {
+        if (searchString == "") return;
+        searchString = "";
+        refreshMenu = true;
+    }
+
+	void openSearchMacro(CCObject*);
+
+    void searchMacro(CCObject*);
+   
+};
+
 class loadMacroPopup : public geode::Popup<std::string const&> {
 public:
     void importMacro(CCObject*) {
@@ -159,7 +238,7 @@ public:
 			)->show();
         });
     }
-//i
+
     bool setup(std::string const& value) override {
         CCArray* macroList = CCArray::create();
         auto winSize = CCDirector::sharedDirector()->getWinSize();
@@ -199,7 +278,7 @@ public:
         
         auto emptyBtn = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
         emptyBtn->setScale(0.75f);
-        auto folderIcon = CCSprite::createWithSpriteFrameName("folderIcon_001.png");
+        auto folderIcon = CCSprite::createWithSpriteFrameName("folderIcon_001.png");// gj_findBtn_001 | gj_findBtnOff_001
         folderIcon->setPosition(emptyBtn->getContentSize() / 2);
         folderIcon->setScale(0.8f);
         emptyBtn->addChild(folderIcon);
@@ -211,23 +290,45 @@ public:
         openFolderBtn->setPosition(corner + CCPOINT_CREATE(380,20));
         menu->addChild(openFolderBtn);
 
+        tSprite = CCSprite::createWithSpriteFrameName("gj_findBtnOff_001.png");
+        tSprite->setScale(0.8f);
+        button = CCMenuItemSpriteExtra::create(
+            tSprite,
+            this,
+            menu_selector(searchMacroPopup::clearSearch)
+        );
+        button->setPosition(corner + CCPOINT_CREATE(-20, 65));
+        menu->addChild(button);
+
+        if (searchString == "") button->setVisible(false);
+
+        tSprite = CCSprite::createWithSpriteFrameName("gj_findBtn_001.png");
+        tSprite->setScale(0.8f);
+        button = CCMenuItemSpriteExtra::create(
+            tSprite,
+            this,
+            menu_selector(searchMacroPopup::openSearchMacro)
+        );
+        button->setPosition(corner + CCPOINT_CREATE(-20, 20));
+        menu->addChild(button);
 
         if (isAndroid) {
             for (int i = macros.value().size() - 1; i >= 0; --i) {
                 std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-            std::wstring wideString = converter.from_bytes(macros.value()[i].string());
-            std::locale utf8_locale(std::locale(), new std::codecvt_utf8<wchar_t>);
+                std::wstring wideString = converter.from_bytes(macros.value()[i].string());
+                std::locale utf8_locale(std::locale(), new std::codecvt_utf8<wchar_t>);
 
-            std::wifstream file;
-
-            if (macros.value()[i].extension() == ".xd") {
-                file.open(wideString);
-                file.imbue(utf8_locale);
-                if (file){
-                    macroCell* cell = macroCell::create(macros.value()[i].filename().string().substr(0, macros.value()[i].filename().string().find_last_of('.')));
-                    macroList->addObject(cell);
+                std::wifstream file;
+                
+                if (macros.value()[i].extension() == ".xd"
+                && (toLower(macros.value()[i].filename().string()).find(toLower(searchString)) != std::string::npos || searchString == "")) {
+                    file.open(wideString);
+                    file.imbue(utf8_locale);
+                    if (file){
+                        macroCell* cell = macroCell::create(macros.value()[i].filename().string().substr(0, macros.value()[i].filename().string().find_last_of('.')));
+                        macroList->addObject(cell);
+                    }
                 }
-            }
             }
         } else {
         for (int i = 0; i < macros.value().size(); ++i) {
@@ -238,10 +339,11 @@ public:
 
             std::wifstream file;
 
-            if (macros.value()[i].extension() == ".xd") {
+            if (macros.value()[i].extension() == ".xd"
+            && (toLower(macros.value()[i].filename().string()).find(toLower(searchString)) != std::string::npos || searchString == "")) {
                 file.open(wideString);
                 file.imbue(utf8_locale);
-                if (file){
+                if (file) {
                     macroCell* cell = macroCell::create(macros.value()[i].filename().string().substr(0, macros.value()[i].filename().string().find_last_of('.')));
                     macroList->addObject(cell);
                 }
@@ -254,7 +356,10 @@ public:
         mcrList->setScaleX(0.89f);
         mcrList->setPosition({-14, -9.5f});
 
-        auto list = GJListLayer::create(mcrList, "Load Macro", {0, 0, 0, 0}, 280, 180, 2);
+        std::string title = "Load Macro";
+        if (searchString != "") title += (" (" + searchString + ")"); 
+
+        auto list = GJListLayer::create(mcrList, title.c_str(), {0, 0, 0, 0}, 280, 180, 2);
 
         m_mainLayer->addChild(list);
 
