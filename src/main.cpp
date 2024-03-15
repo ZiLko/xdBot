@@ -28,8 +28,10 @@ int fixedFps = 240;
 int androidFps = 60;
 int fpsIndex = 0;
 
-#ifdef GEODE_IS_ANDROID
+#ifdef GEODE_IS_ANDROID32
 	int offset = 0x320;
+#elif defined(GEODE_IS_ANDROID64)
+	int offset = 0x3B8;
 #else
 	int offset = 0x328;
 #endif
@@ -1710,10 +1712,5 @@ $execute {
 
 	if (!isAndroid)
 		mod->hook(reinterpret_cast<void *>(base::get() + 0x1BD240), &GJBaseGameLayerProcessCommands, "GJBaseGameLayer::processCommands", tulip::hook::TulipConvention::Thiscall);
-	else {
-		if (sizeof(void*) == 8) {
-        	offset = 0x3B8;
-    	}
-	}
 
 }
