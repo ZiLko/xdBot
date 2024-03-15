@@ -1,3 +1,10 @@
+# v1.5.4
+
+* Added layout mode.
+* Added search button.
+* Slightly improved respawn lag when recording.
+* Made safe mode better in Android (thanks to viper).
+
 # v1.5.3
 
 * Fixed settings button position.
