@@ -10,8 +10,9 @@
  * Speedhack.
  * Frame Stepper.
  * Info labels.
+ * Safe Mode to prevent accidentally hacking a level (thanks viper).
  * Different accuracy types (<cr>Windows only</c>).
- * Safe Mode to prevent accidentally hacking a level (<cr>Windows only</c>).
+ * And more xd.
 
 # How to use
 
