@@ -1,3 +1,7 @@
+# v1.5.5
+
+* Fixed spider animation not showing when playing a frame fixes macro.
+
 # v1.5.4
 
 * Added layout mode.

@@ -202,7 +202,7 @@ class RecordLayer : public geode::Popup<std::string const&> {
 protected:
     bool setup(std::string const& value) override {
         auto winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
-		auto versionLabel = CCLabelBMFont::create("xdBot v1.5.4 - made by Zilko", "chatFont.fnt");
+		auto versionLabel = CCLabelBMFont::create("xdBot v1.5.5 - made by Zilko", "chatFont.fnt");
 		versionLabel->setOpacity(60);
 		versionLabel->setAnchorPoint(ccp(0.0f,0.5f));
 		versionLabel->setPosition(winSize/2 + ccp(-winSize.width/2, -winSize.height/2) + ccp(3, 6));
@@ -1333,6 +1333,30 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 
 				if (!playedMacro) playedMacro = true;
 
+				if (!currentActionIndex.posOnly) {
+					playingAction = true;
+
+					self->handleButton(
+    				currentActionIndex.holding,
+    				((currentActionIndex.button < 4 && currentActionIndex.button > 0) ? currentActionIndex.button : 1),
+    				currentActionIndex.player1
+					);
+
+					if (currentActionIndex.holding) lastHold = true;
+					else lastHold = false;
+				} else if (currentActionIndex.p1.xPos == 0) {
+					playingAction = true;
+
+					self->handleButton(
+    				false,
+    				1,
+    				true
+					);
+
+					if (currentActionIndex.holding) lastHold = true;
+					else lastHold = false;
+				}
+
 				if (!mod->getSettingValue<bool>("override_macro_mode") && currentActionIndex.p1.xPos != 0) {
 						if (!areEqual(self->m_player1->getPositionX(), currentActionIndex.p1.xPos) ||
 						!areEqual(self->m_player1->getPositionY(), currentActionIndex.p1.yPos))
@@ -1376,29 +1400,7 @@ void GJBaseGameLayerProcessCommands(GJBaseGameLayer* self) {
 					}
 				}
 				}
-				if (!currentActionIndex.posOnly) {
-					playingAction = true;
-
-					self->handleButton(
-    				currentActionIndex.holding,
-    				((currentActionIndex.button < 4 && currentActionIndex.button > 0) ? currentActionIndex.button : 1),
-    				currentActionIndex.player1
-					);
-
-					if (currentActionIndex.holding) lastHold = true;
-					else lastHold = false;
-				} else if (currentActionIndex.p1.xPos == 0) {
-					playingAction = true;
-
-					self->handleButton(
-    				false,
-    				1,
-    				true
-					);
-
-					if (currentActionIndex.holding) lastHold = true;
-					else lastHold = false;
-				}
+				
 
             	recorder.currentAction++;
         	}
@@ -1446,7 +1448,7 @@ class $modify(PlayLayer) {
                     obj->m_isHide = false;
                     obj->setOpacity(255);
 			        obj->setVisible(true);
-			        if (!obj->getParent()) {
+			        if (!obj->getParent() && !isAndroid) {
                         CCSpriteBatchNode* bn1 = MBO(CCSpriteBatchNode* , PlayLayer::get(), 0x760);
                         bn1->addChild(obj);
                     }
@@ -1458,7 +1460,7 @@ class $modify(PlayLayer) {
 		PlayLayer::postUpdate(dt);
 
         // thaks gdmo creator for the offsets (i stole them)
-		if (mod->getSettingValue<bool>("layout_mode")) {
+		if (mod->getSettingValue<bool>("layout_mode") && !isAndroid) {
 		    CCSprite* background = MBO(CCSprite*, this, 0x9C4);
 		    GJGroundLayer* groundLayer1 = MBO(GJGroundLayer*, this, 0x9CC);
 		    GJGroundLayer* groundLayer2 = MBO(GJGroundLayer*, this, 0x9D0);
