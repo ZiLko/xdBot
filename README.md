@@ -1,5 +1,5 @@
 # xdBot
 
-xdBot will not get any more updates.
+xdBot is deprecated.
 
-ignore the updates that happened after this message
+Please ignore the updates that happened after this message.
