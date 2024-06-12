@@ -3,7 +3,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-project(xdBot VERSION 1.3.7)
+project(xdBot VERSION 1.5.6)
 
 add_library(${PROJECT_NAME} SHARED
     src/main.cpp
