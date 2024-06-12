@@ -1,21 +1,21 @@
 # xdBot
 
-<cl>xdBot</c> is a simple botting tool designed to be easy for anyone to use; intended for <cg>showcases</c>.
+**xdBot** is a simple botting tool designed to be easy for anyone to use, intended for **showcases**.
 
-<cr>Warning:</c> Macros recorded on Windows might not work on Android.
+**Warning:** Macros recorded on Windows might not work on Android.
 
-# Features
+## Features
 
- * Macro saving and loading system.
- * Speedhack.
- * Frame Stepper.
- * Info labels.
- * Safe Mode to prevent accidentally hacking a level (thanks viper).
- * Different accuracy types (<cr>Windows only</c>).
- * And more xd.
+- Macro saving and loading system.
+- Speedhack.
+- Frame Stepper.
+- Info labels.
+- Safe Mode to prevent accidentally hacking a level (thanks viper).
+- Different accuracy types (**Windows only**).
+- And more.
 
-# How to use
+## How to use
 
-All you have to do is open <cg>xdBot</c> by clicking the new button in the pause menu, and toggle "<cl>Record</c>" or "<cl>Play</c>" depending on what you want to do.
+All you have to do is open **xdBot** by clicking the new button in the pause menu, and toggle "**Record**" or "**Play**" depending on what you want to do.
 
-Thanks to CatXus and Aadam_yes for helping me test the android version.
+Thanks to CatXus and Aadam_yes for helping me test the Android version.

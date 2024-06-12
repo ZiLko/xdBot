@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "wa"
+      - "main"
 
 jobs:
   build:
@@ -27,10 +27,11 @@ jobs:
     runs-on: ${{ matrix.config.os }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
       - name: Build the mod
-        uses: geode-sdk/build-geode-mod@v1
+        uses: geode-sdk/build-geode-mod@main
         with:
           combine: true
           target: ${{ matrix.config.target }}
@@ -41,10 +42,11 @@ jobs:
     needs: ['build']
 
     steps:
-      - uses: geode-sdk/build-geode-mod/combine@v1.0.0
+      - name: Combine builds
+        uses: geode-sdk/build-geode-mod/combine@main
         id: build
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Build Output
           path: ${{ steps.build.outputs.build-output }}
