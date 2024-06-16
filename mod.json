@@ -1,10 +1,10 @@
 {
-	"geode": "2.0.0-beta.13",
-	"version": "v1.5.5",
+	"geode": "3.0.0-beta.1",
+	"version": "v1.6.0",
 	"id": "zilko.xdbot",
 	"gd": {
-		"win": "2.204",
-		"android": "2.205"
+		"win": "2.206",
+		"android": "2.206"
 	},
 	"repository": "https://github.com/ZiLko/xdBot/",
 	"name": "xdBot",
@@ -29,27 +29,9 @@
 			"type": "bool",
 			"default": false
 		},
-		"noclip": {
-			"name": "NoClip",
-			"description": "Stops the player from dying.",
-			"type": "bool",
-			"default": false
-		},
-		"layout_mode": {
-			"name": "Layout Mode",
-			"description": "Shows the layout of the level.",
-			"type": "bool",
-			"default": false
-		},
 		"instant_mirror": {
 			"name": "Instant Mirror Portal",
 			"description": "Disables mirror portal transition animation.",
-			"type": "bool",
-			"default": false
-		},
-		"instant_respawn": {
-			"name": "Instant Respawn",
-			"description": "Makes the player respawn instantly on death; useful when speedhacking.",
 			"type": "bool",
 			"default": false
 		},
@@ -64,18 +46,6 @@
 			"description": "<cr>WINDOWS ONLY</c>\nIgnores your inputs while playing a macro.",
 			"type": "bool",
 			"default": true
-		},
-		"auto_safe_mode": {
-			"name": "Auto Safe Mode",
-			"description": "Disables level progress when playing a macro to prevent accidental hacking.\nAdds a water mark at the end if disabled.",
-			"type": "bool",
-			"default": true
-		},
-		"auto_enable_play": {
-			"name": "Auto Play",
-			"description": "Toggles playing the macro automatically when you finish recording a level.",
-			"type": "bool",
-			"default": false
 		},
 		"end_button": {
 			"name": "Show Button At End",
@@ -131,6 +101,12 @@
 		"override_macro_mode": {
 			"name": "Override Macro Mode",
 			"description": "<cr>WINDOWS ONLY</c>\nIgnores the mode the macro was originally recorded in and uses the current mode.",
+			"type": "bool",
+			"default": false
+		},
+		"lock_delta": {
+			"name": "Lock Delta",
+			"description": "Locks delta time.",
 			"type": "bool",
 			"default": false
 		}

@@ -1,8 +1,6 @@
 # xdBot
 
-<cl>xdBot</c> is a simple botting tool designed to be easy for anyone to use; intended for <cg>showcases</c>.
-
-<cr>Warning:</c> Macros recorded on Windows might not work on Android.
+<cl>xdBot</c> is a simple botting tool designed to be easy for anyone to use; intended for <cg>showcases</c> not for TASes cry.
 
 # Features
 
@@ -10,9 +8,8 @@
  * Speedhack.
  * Frame Stepper.
  * Info labels.
- * Safe Mode to prevent accidentally hacking a level (thanks viper).
- * Different accuracy types (<cr>Windows only</c>).
- * And more xd.
+ * Different accuracy types.
+ * Thats it?.
 
 # How to use
 

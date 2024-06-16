@@ -196,14 +196,15 @@ public:
 class loadMacroPopup : public geode::Popup<std::string const&> {
 public:
     void importMacro(CCObject*) {
-        file::FilePickOptions fileOptions;
+        /*
+file::FilePickOptions fileOptions;
         file::FilePickOptions::Filter textFilter;
         textFilter.description = "Macro Files";
         textFilter.files = {"*.xd"};
         fileOptions.filters.push_back(textFilter);
 
-        file::pickFile(file::PickMode::OpenFile , fileOptions, [this](ghc::filesystem::path result) {
-            auto path = ghc::filesystem::path(result.c_str());
+       auto result = file::pick(file::PickMode::OpenFile, fileOptions);
+            auto path = std::filesystem::path(result);
             
             std::ifstream sourceMacro(path);
             if (!sourceMacro.is_open()) {
@@ -236,13 +237,13 @@ public:
     		    "Macro imported <cg>successfully</c>.",  
     		    "OK"      
 			)->show();
-        });
+*/
     }
 
     bool setup(std::string const& value) override {
         CCArray* macroList = CCArray::create();
         auto winSize = CCDirector::sharedDirector()->getWinSize();
-        Result<std::vector<ghc::filesystem::path>> macros;
+        Result<std::vector<std::filesystem::path>> macros;
         std::string titleLol;
         std::string noBUMessage;
         CCPoint corner = winSize/2.f-CCPOINT_CREATE(m_size.width/2.f,m_size.height/2.f);
@@ -409,7 +410,7 @@ public:
     }
 
     void handleClear() {
-        Result<std::vector<ghc::filesystem::path>> macros;
+        Result<std::vector<std::filesystem::path>> macros;
         macros = file::readDirectory(Mod::get()->getSaveDir());
         int del = 0;
         for (int i = 0; i < macros.value().size(); ++i) {

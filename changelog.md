@@ -1,3 +1,16 @@
+# v1.6.1
+
+* geode 3.0.0 beta 1
+
+# v1.6.0
+
+* Frame fixes for android
+* Pc macros work on android
+* Old macros dont work cus i changed the frames thing
+* broke settings button position
+* got rid of a bunch of stuff
+* geode 3.0.0 alpha 2
+
 # v1.5.5
 
 * Fixed spider animation not showing when playing a frame fixes macro.
