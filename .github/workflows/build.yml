@@ -41,7 +41,7 @@ jobs:
 
     steps:
       - name: Combine builds
-        uses: geode-sdk/build-geode-mod/combine@v1
+        uses: geode-sdk/build-geode-mod/combine@main
         id: build
 
       - name: Upload build output
