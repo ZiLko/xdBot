@@ -1,5 +1,18 @@
 # Change Log
 
+## v1.6.1
+
+- Geode 3.0.0 Beta 1
+
+## v1.6.0
+
+- Frame fixes for Android.
+- Desktop macros work on Android.
+- Old macros no longer work in the new version due to changes in the frame aligment.
+- Broke settings button position.
+- Got rid of a bunch of stuff.
+- Geode 3.0.0 Alpha 2
+
 ## v1.5.5
 - Fixed spider animation not showing when playing a frame fixes macro.
 
