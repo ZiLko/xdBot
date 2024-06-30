@@ -15,4 +15,4 @@
 
 All you have to do is open **xdBot** by clicking the new button in the pause menu, and toggle "**Record**" or "**Play**" depending on what you want to do.
 
-Thanks to CatXus and Aadam_yes for helping me test the Android version.
+Thanks to CatXus and Aadam_yes for helping for the testing of Android version.
