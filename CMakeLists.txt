@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64")
 set(CMAKE_CXX_VISIBILITY_PRESET hidden)
 
-project(xdBot VERSION 1.3.6)
+project(xdBot VERSION 1.6.2)
 
 add_library(${PROJECT_NAME} SHARED
     src/main.cpp
