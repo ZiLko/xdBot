@@ -1,218 +1,223 @@
-# v1.6.1
+# Changelog
 
-* geode 3.0.0 beta 1
+## 1.6.2
 
-# v1.6.0
+- Geode 3.1.1
 
-* Frame fixes for android
-* Pc macros work on android
-* Old macros dont work cus i changed the frames thing
-* broke settings button position
-* got rid of a bunch of stuff
-* geode 3.0.0 alpha 2
+## v1.6.1
 
-# v1.5.5
+- Geode 3.0.0 Beta 1
 
-* Fixed spider animation not showing when playing a frame fixes macro.
+## v1.6.0
 
-# v1.5.4
+- Added Frame Fixes for Android
+- PC macros now work on Android
+- Old macros no longer work due to frame changes
+- Broke settings button position
+- Removed a bunch of features
+- Geode 3.0.0 Alpha 2
 
-* Added layout mode.
-* Added search button.
-* Slightly improved respawn lag when recording.
-* Made safe mode better in Android (thanks to viper).
+## v1.5.5
 
-# v1.5.3
+- Fixed spider animation not showing when playing a frame fixes macro
 
-* Fixed settings button position.
-* Fixed player death being called twice or something.
+## v1.5.4
 
-# v1.5.2
+- Added layout mode
+- Added search button
+- Slightly improved respawn lag when recording
+- Improved safe mode for Android (thanks to Viper)
 
-* Remove Discord.
+## v1.5.3
 
-# v1.5.1
+- Fixed settings button position
+- Fixed player death being called twice
 
- * Temporarily disabled Ignore Inputs on Android to fix major bugs, will re-implement in the future.
+## v1.5.2
 
-# v1.5.0
+- Removed Discord
 
- * Added NoClip setting.
- * Added Instant Respawn setting.
- * Added Instant Mirror Portal setting.
- * Added Instant Disable Death Effect setting.
- * Added Ignore Inputs setting.
- * Added Clear All Macros button.
- * Added ignore click on play on Android.
- * Added Auto Safe Mode on Android.
- * Added a warning when saving a macro with an existing name.
- * Made Android buttons slightly bigger.
- * Fixed frame label sometimes not showing.
- * Fixed some platformer macro bugs.
- * Slightly improved Android performace when loading frame fixes macros.
- * Possibly fixed one more crash on restart.
- 
-# v1.4.8
+## v1.5.1
 
- * Fixed some macro bugs on Android.
- * Added Auto Safe Mode setting.
+- Temporarily disabled Ignore Inputs on Android to fix major bugs; will re-implement in the future
 
-# v1.4.7
+## v1.5.0
 
- * Fixed speedhack audio staying after toggling play macro.
- * Fixed macro not recording a release when you place a checkpoint while holding.
+- Added NoClip setting
+- Added Instant Respawn setting
+- Added Instant Mirror Portal setting
+- Added Instant Disable Death Effect setting
+- Added Ignore Inputs setting
+- Added Clear All Macros button
+- Added ignore click on play on Android
+- Added Auto Safe Mode on Android
+- Added warning when saving a macro with an existing name
+- Made Android buttons slightly bigger
+- Fixed frame label sometimes not showing
+- Fixed some platformer macro bugs
+- Slightly improved Android performance when loading frame fixes macros
+- Possibly fixed one more crash on restart
 
-# v1.4.6
+## v1.4.8
 
- * Fixed occasional crash on restart.
- * Fixed macros ignoring frame fixes when loaded.
- * Made it so speedhack sets to 1 when you play a macro to avoid confusion.
- * Made it so xdBot button always appears at the end screen if the setting is enabled.
+- Fixed some macro bugs on Android
+- Added Auto Safe Mode setting
 
-# v1.4.5
+## v1.4.7
 
- * Fixed some Android macros crashing.
- * Fixed frame stepper button being misaligned on Android.
- * Fixed music unsyncing when resuming the game.
- * Fixed music unsyncing when using speedhack.
- * Added Speedhack Audio setting.
- * Added Show Button at End setting.
- * Added ignore click on play on Windows.
- * You can now hold the frame stepper key on Windows.
- * Made speedhack limit 2 instead of 1.
- * Speedhack now also works while playing a level.
+- Fixed speedhack audio staying after toggling play macro
+- Fixed macro not recording a release when placing a checkpoint while holding
 
-# v1.4.4
+## v1.4.6
 
- * Fixed Android macros recording incorrectly.
+- Fixed occasional crash on restart
+- Fixed macros ignoring frame fixes when loaded
+- Speedhack sets to 1 when you play a macro to avoid confusion
+- xdBot button always appears at the end screen if the setting is enabled
 
-# v1.4.3
+## v1.4.5
 
- * Re-worked FPS selector.
- * Fixed frame stepper buttons conflicting with platformer buttons on Android.
- * Fixed incompatibility with BetterPause.
- 
+- Fixed some Android macros crashing
+- Fixed frame stepper button misalignment on Android
+- Fixed music unsyncing when resuming the game
+- Fixed music unsyncing when using speedhack
+- Added Speedhack Audio setting
+- Added Show Button at End setting
+- Added ignore click on play on Windows
+- Frame stepper key can now be held on Windows
+- Increased speedhack limit to 2 from 1
+- Speedhack now works while playing a level
 
-# v1.4.2
+## v1.4.4
 
- * Added FPS selector to both platforms. Higher FPS might make the game slow down on Android.
- * Fixed not being able to hold at the beginning of an attempt on Android.
- * Moved the disable button away from the advance frame one to prevent misclicks on Android.
- * Removed size macro info because it was too cluttered.
+- Fixed Android macros recording incorrectly
 
-# v1.4.1
+## v1.4.3
 
- * Fixed layering issues with labels and 2.2 shaders.
- * Fixed playing label not working on Windows.
- * Fixed Vanilla macros not saving correctly.
- * Fixed Android buttons staying after completing a level.
- * Fixed spider teleport animation not showing on Android.
+- Re-worked FPS selector
+- Fixed frame stepper buttons conflicting with platformer buttons on Android
+- Fixed incompatibility with BetterPause
 
-# v1.4.0
+## v1.4.2
 
- * Added android support.
- * Slightly improved respawn lag while recording.
- * Changed the menu button sprite.
- * Added discord button.
+- Added FPS selector to both platforms. Higher FPS might slow down the game on Android
+- Fixed inability to hold at the beginning of an attempt on Android
+- Moved disable button away from advance frame button to prevent misclicks on Android
+- Removed macro size info due to clutter
 
-# v1.3.10
- 
- * Fixed macros working different when loaded.
+## v1.4.1
 
-# v1.3.9
+- Fixed layering issues with labels and 2.2 shaders
+- Fixed playing label not working on Windows
+- Fixed Vanilla macros not saving correctly
+- Fixed Android buttons staying after completing a level
+- Fixed spider teleport animation not showing on Android
 
- * Fixed crash i think xd
- * You can now add inputs to a macro by recording over it (again).
+## v1.4.0
 
-# v1.3.8
+- Added Android support
+- Slightly improved respawn lag while recording
+- Changed menu button sprite
+- Added Discord button
 
- * Fixed occasional crash on restart again.
+## v1.3.10
 
-# v1.3.7
+- Fixed macros working differently when loaded
 
- * Added bugs.
- * Fixed mysterious bug.
- * Removed some features temporarily to fix mysterious bug.
+## v1.3.9
 
-# v1.3.6
+- Fixed a crash
+- Can now add inputs to a macro by recording over it
 
- * Air update.
+## v1.3.8
 
-# v1.3.5
+- Fixed occasional crash on restart
 
- * Fixed macros saving with "WA" at the end lmao.
- * Fixed Delete Macro pop up title being Load Macro instead of Delete Macro.
- * Fixed macros not saving if the path contains non-english characters. 
- * Fixed crash when opening the pause menu.
+## v1.3.7
 
-# v1.3.4
+- Added bugs
+- Fixed mysterious bug
+- Removed some features temporarily to fix mysterious bug
 
- * Fixed occasional crash when restarting in practice mode.
- * Added auto music sync (bad) while playing a macro.
- * User inputs now are ignored while playing a macro.
- * You can now add inputs to a macro by recording over it (macro merger soon).
+## v1.3.6
 
-# v1.3.3
+- Air update
 
- * Added override macro mode setting.
- * Fixed labels not disappearing after disabling recording or playing.
- * Previous version never came out but fixed a crash xd.
+## v1.3.5
 
-# v1.3.2
+- Fixed macros saving with "WA" at the end
+- Fixed Delete Macro pop-up title being Load Macro instead of Delete Macro
+- Fixed macros not saving if the path contains non-English characters
+- Fixed crash when opening the pause menu
 
- * Added version label on the menu.
- * Saved macros list is now in the correct alphabetical order.
+## v1.3.4
 
-# v1.3.1
+- Fixed occasional crash when restarting in practice mode
+- Added auto music sync while playing a macro
+- User inputs are now ignored while playing a macro
+- Can now add inputs to a macro by recording over it (macro merger soon)
 
- * Fixed rotation bug on input fix and frame fix modes.
- * Added "Auto-Enable Play" setting.
- * Speedhack shortcut value now saves after restarting the game.
- * Fixed frame stepper advancing two frames instead of one.
- * Added toggleable frame and macro state labels.
- * Vanilla and Frame Fix settings now also change the way the macro plays.
+## v1.3.3
 
-# v1.3.0
+- Added override macro mode setting
+- Fixed labels not disappearing after disabling recording or playing
+- Previous version never released but fixed a crash
 
- * Removed lock delta (it was useless).
- * Added clicks to the macro info label.
- * Added Input Fixes and Frame Fixes. Input Fixes is on by default, "vanilla" option disables it.
- * Fixed teleport orb bug for real.
+## v1.3.2
 
-# v1.2.1
+- Added version label on the menu
+- Saved macros list is now in correct alphabetical order
 
- * Added (forced) safe mode when playing a macro.
+## v1.3.1
 
-# v1.2.0
+- Fixed rotation bug on input fix and frame fix modes
+- Added "Auto-Enable Play" setting
+- Speedhack shortcut value now saves after restarting the game
+- Fixed frame stepper advancing two frames instead of one
+- Added toggleable frame and macro state labels
+- Vanilla and Frame Fix settings now change the way the macro plays
 
- * Added speedhack key shortcut.
- * Added Frame Stepper.
+## v1.3.0
 
-# v1.1.1
+- Removed lock delta
+- Added clicks to the macro info label
+- Added Input Fixes and Frame Fixes; Input Fixes is on by default, "Vanilla" option disables it
+- Fixed teleport orb bug for real
 
- * Small bugfixes.
+## v1.2.1
 
-# v1.1.0
+- Added (forced) safe mode when playing a macro
 
- * Added speedhack.
- * Added lock delta.
- * Bugfixes.
+## v1.2.0
 
-# v1.0.2
+- Added speedhack key shortcut
+- Added Frame Stepper
 
- * Reworked the macro saving and loading system.
+## v1.1.1
 
-# v1.0.12
+- Small bugfixes
 
- * Fixed teleport orb not working while playing a macro.
- * Now targetting correct geode version.
+## v1.1.0
 
-# v1.0.1
+- Added speedhack
+- Added lock delta
+- Bugfixes
 
- * Fixed GUI breaking on different aspect ratios.
- * Improved macro recording accuracy.
- * Made code look less ugly.
+## v1.0.2
 
-# v1.0.0
+- Reworked the macro saving and loading system
 
- * First release
+## v1.0.12
+
+- Fixed teleport orb not working while playing a macro
+- Now targeting correct Geode version
+
+## v1.0.1
+
+- Fixed GUI breaking on different aspect ratios
+- Improved macro recording accuracy
+- Made code less ugly
+
+## v1.0.0
+
+- First release
