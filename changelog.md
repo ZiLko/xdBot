@@ -1,17 +1,21 @@
 # Changelog
 
+## 1.6.2
+
+- Geode 3.1.1
+
 ## v1.6.1
 
-- Geode 3.0.0 beta 1
+- Geode 3.0.0 Beta 1
 
 ## v1.6.0
 
-- Frame fixes for Android
-- PC macros work on Android
+- Added Frame Fixes for Android
+- PC macros now work on Android
 - Old macros no longer work due to frame changes
 - Broke settings button position
 - Removed a bunch of features
-- Geode 3.0.0 alpha 2
+- Geode 3.0.0 Alpha 2
 
 ## v1.5.5
 
@@ -22,7 +26,7 @@
 - Added layout mode
 - Added search button
 - Slightly improved respawn lag when recording
-- Improved safe mode for Android (thanks to viper)
+- Improved safe mode for Android (thanks to Viper)
 
 ## v1.5.3
 
@@ -99,7 +103,7 @@
 - Added FPS selector to both platforms. Higher FPS might slow down the game on Android
 - Fixed inability to hold at the beginning of an attempt on Android
 - Moved disable button away from advance frame button to prevent misclicks on Android
-- Removed size macro info due to clutter
+- Removed macro size info due to clutter
 
 ## v1.4.1
 
@@ -122,12 +126,12 @@
 
 ## v1.3.9
 
-- Fixed crash (I think)
-- Can now add inputs to a macro by recording over it (again)
+- Fixed a crash
+- Can now add inputs to a macro by recording over it
 
 ## v1.3.8
 
-- Fixed occasional crash on restart (again)
+- Fixed occasional crash on restart
 
 ## v1.3.7
 
@@ -149,7 +153,7 @@
 ## v1.3.4
 
 - Fixed occasional crash when restarting in practice mode
-- Added auto music sync (bad) while playing a macro
+- Added auto music sync while playing a macro
 - User inputs are now ignored while playing a macro
 - Can now add inputs to a macro by recording over it (macro merger soon)
 
@@ -175,9 +179,9 @@
 
 ## v1.3.0
 
-- Removed lock delta (it was useless)
+- Removed lock delta
 - Added clicks to the macro info label
-- Added Input Fixes and Frame Fixes; Input Fixes is on by default, "vanilla" option disables it
+- Added Input Fixes and Frame Fixes; Input Fixes is on by default, "Vanilla" option disables it
 - Fixed teleport orb bug for real
 
 ## v1.2.1
