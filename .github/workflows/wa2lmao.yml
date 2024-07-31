@@ -30,7 +30,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Build the mod
-        uses: geode-sdk/build-geode-mod@v1
+        uses: geode-sdk/build-geode-mod@v4
         with:
           combine: true
           target: ${{ matrix.config.target }}
@@ -41,7 +41,7 @@ jobs:
     needs: ['build']
 
     steps:
-      - uses: geode-sdk/build-geode-mod/combine@v1
+      - uses: geode-sdk/build-geode-mod/combine@v4
         id: build
 
       - uses: actions/upload-artifact@v3
