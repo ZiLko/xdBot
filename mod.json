@@ -1,12 +1,12 @@
 {
-	"geode": "3.0.0-beta.1",
-	"version": "v1.6.0",
+	"geode": "3.0.0",
+	"version": "2.6.0",
 	"id": "zilko.xdbot",
 	"gd": {
 		"win": "2.206",
 		"android": "2.206"
 	},
-	"repository": "https://github.com/ZiLko/xdBot/",
+	"repository": "https://github.com/Naxrin/xdBot/",
 	"name": "xdBot",
 	"settings": {
 		"speedhack": {
@@ -114,7 +114,7 @@
 	"dependencies": [
 		{
 			"id": "geode.node-ids",
-			"version": ">=v1.1.4",
+			"version": ">=v1.12.0",
 			"importance": "required"
 		}
 	],
