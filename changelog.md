@@ -1,3 +1,154 @@
+# v2.0.0-beta.2
+
+* A bunch of small changes that are not even worth putting here.
+
+# v2.0.0-beta.1
+
+* Remove NodeIDs dependency.
+
+# v2.0.0-alpha.14
+
+* Actually remove Click on Steps incompatibility.
+
+# v2.0.0-alpha.13
+
+* Fixed Macro Editor and Noclip Settings popups not changing color.
+* Remove click on steps incompatibility and replaced it for a warning.
+
+# v2.0.0-alpha.12
+
+* Fixed speedhack bug.
+* Added Noclip settings.
+
+# v2.0.0-alpha.11
+
+* Fixed bug when toggling "Fix Shaders".
+* Fixed bug when replaying macros on the first attempt.
+* Fixed bug where the player wouldn't do the first jump of the macro.
+* Fixed render song being offsync when starting from a startpos.
+* Fixed render recording frames while player is dead.
+* Added Macro Editor.
+* Added macro count in load macro layer.
+* Added render video args.
+* Added render restore default settings button. 
+* Added incompatibility warning if BetterInputs is installed.
+* Added click on steps incompatibility just in case lol.
+* Added GDH Tps Bypass incompatibility.
+* Improved .xd macros compatibility a bit.
+* Improved layout mode load time.
+* Made layout mode hide solid objects with negative scales.
+* Removed JSON toggle (now it always saves as JSON).
+* Slightly decreased respawn lag while recording.
+
+# v2.0.0-alpha.10
+
+* Fixed crash when trying to record or play a macro.
+
+# v2.0.0-alpha.9
+
+* Removed tps bypass detector because it was NOT detecting.
+* Added Prism Menu TPS bypass to incompatibilities;
+
+# v2.0.0-alpha.8
+
+* Fixed freezing when recording in platformer mode.
+* Fixed crash when opening menu after switching scene while it was open.
+* Fixed crash when opening the menu after closing it with back button in android.
+
+# v2.0.0-alpha.7
+
+* Fix QOLMod tps bypass detector being inverted.
+
+# v2.0.0-alpha.6
+
+* Fixed koad.
+* Fixed load layer button touch priority bug.
+* Fixed "always practice fixes" not working (no one noticed).
+* Fixed clear button not working.
+* Added sort direction button in load layer.
+* Added extension text when loading macros.
+* Added TPS / Physics bypass **DETECTOR**.
+* Made macros save as .gdr.json when saving as json.
+* Improved incompatibility system.
+* Removed Android custom keybinds dependency.
+* Removed Windows-only settings on Android.
+* Removed Old Loading setting.
+
+# v2.0.0-alpha.5
+
+* Fixed crash with death replay on platformer mode.
+* Fixed level restarting when toggling playing on after finishing the level.
+* Fixed layout mode removing deco objects that are linked to a teleport orb or portal.
+* Fixed crash when loading a macro in android.
+* Fixed some inconsistent casing xd.
+* Fixed default clickbot click sound only sounding on the left.
+* Made layout mode remove objects with "NoTouch" on.
+
+# v2.0.0-alpha.4
+
+* Fixed visual bug in load macro list with happy textures mod.
+* Fixed screen freezing when opening a level while frame stepper was on.
+* Fixed pause not unpausing visually when frame stepper was on.
+* Fixed editor playtest freezing when frame stepper was on.
+* Fixed occasional crash when typing in any of the render inputs.
+* Fixed crash when rendering.
+* Fixed bug where layout mode would remove orange portal.
+* Added page indicator dots.
+* Added Button Editor for Android users.
+* Added speedhack and coin finder to auto safe mode too.
+* Made it so frame stepper auto disables when opening a level to avoid confusion.
+
+# v2.0.0-alpha.3
+
+* Fixed crash on android when respawning from a checkpoint.
+* Fixed renderer song offset.
+
+# v2.0.0-alpha.2
+
+* Fixed percentage bug.
+* Fixed crash on checkpoint restart for some users.
+* Fixed one of the crashes when searching for a macro.
+* Fixed checkpoint incompatibility with QOLMod.
+* Fixed crash when loading a macro on Android.
+* Fixed robot sprite transferring to player 2 when show trajectory is on.
+* Fixed speed changing when show trajectory is on.
+* Fixed player sprite flipping vertically when show trajectory goes through a gravity portal.
+* Fixed music sounding strange when rendering.
+* Fixed bug where replaying macros only worked in the same session.
+* Fixed macro breaking when respawning in speed portals.
+* Fixed .xd macros loading incorrectly.
+* Fixed error when saving or loading for some users.
+* Fixed frame stepper advancing two frames instead of one.
+* Fixed frame stepper behaving strangely with speedhack on.
+* Fixed frame stepper not freezing robot/spider animation.
+* Fixed layout mode occasionally breaking rotate triggers.
+* Fixed menu color looking weird for the first time after applying changes.
+* Fixed some touch priority issue after loading a macro.
+* Added Coin Finder.
+* Added JSON saving toggle.
+* Added render codec info popup.
+* Added button to open menu in mod settings.
+* Added song re-sync when toggling frame stepper off.
+* Added ffmpeg download link popup.
+* Removed "Lock Delta FPS" setting because it was unnecessary.
+* Improved layout mode load time.
+* Changed how frame stepper keybinds work, now one key toggles and another advances frame.
+* Slightly increased frame advance repeat speed when holding.
+
+# v2.0.0-alpha.1
+
+* Completely rewrote the bot.
+* Now saves macros as '.gdr' instead of '.xd' (you are still able to load '.xd' files, but not save them).
+* Added Practice Pixes.
+* Added Auto Saving.
+* Added Renderer.
+* Added a basic ClickBot.
+* Added Seed Modifier.
+* Added Show Trajectory.
+* Added Frame Offset setting.
+* Added Customizable Keybinds.
+* Plus every feature from xdBot v1 (except frame fixes).
+
 # v1.6.1
 
 * geode 3.0.0 beta 1

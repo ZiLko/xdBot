@@ -1,18 +1,39 @@
 # xdBot
 
-<cl>xdBot</c> is a simple botting tool designed to be easy for anyone to use; intended for <cg>showcases</c> not for TASes cry.
+<cl>xdBot</c> is a simple botting tool designed to be easy for anyone to use; intended for <cg>showcases</c>.
 
 # Features
 
- * Macro saving and loading system.
+ * Basic ClickBot.
+ * Practice Fixes.
+ * Seed Modifier.
+ * Noclip.
+ * Show Trajectory.
+ * Layout Mode.
  * Speedhack.
  * Frame Stepper.
- * Info labels.
- * Different accuracy types.
- * Thats it?.
+ * Safe Mode.
+ * Renderer.
+ * Instant Respawn.
+ * No respawn flash.
+ * No death effect.
+ * Macro saving and loading system.
+ * Macro Auto Saving.
 
 # How to use
 
-All you have to do is open <cg>xdBot</c> by clicking the new button in the pause menu, and toggle "<cl>Record</c>" or "<cl>Play</c>" depending on what you want to do.
+* Open the menu using the Open Menu Keybind or the button in the Pause Menu.
 
-Thanks to CatXus and Aadam_yes for helping me test the android version.
+* Click the 'Record' toggle in the menu to start recording.
+
+* Finish a practice run of the level.
+
+* Play the macro by clicking the 'Play' toggle in the menu and going into the level.
+
+# Thanks
+
+* Thanks to Viper for letting me use their Safe Mode implementation.
+
+* Thanks to ReplayBot for being open source and letting me steal the code for the renderer.
+
+* Thanks to CatXus and Aadam_yes for helping me test the early android versions.

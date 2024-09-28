@@ -1,3 +1,10 @@
+build/
+build-android32/
+build-android64/
+
+test.txt
+test.cpp
+
 # Prerequisites
 *.d
 
@@ -41,6 +48,8 @@
 
 # Ignore build folders
 **/build
+# Ignore platform specific build folders
+build-*/
 
 # Workspace files are user-specific
 *.sublime-workspace
@@ -51,3 +60,9 @@
 
 # clangd
 .cache/
+
+# Visual Studio
+.vs/
+
+# CLion
+/cmake-build-*/
