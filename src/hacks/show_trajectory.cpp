@@ -42,14 +42,31 @@ void ShowTrajectory::updateTrajectory(PlayLayer* pl) {
     t.trajectoryNode()->setVisible(true);
     t.trajectoryNode()->clear();
 
+     float clickerDistance = 0;
+    float releaseDistance = 0;
+
     if (t.fakePlayer1 && pl->m_player1) {
         createTrajectory(pl, t.fakePlayer1, pl->m_player1, true);
+        clickerDistance = t.fakePlayer1->getPosition().x - t.fakePlayer1->getInitialPosition().x;
+
         createTrajectory(pl, t.fakePlayer2, pl->m_player1, false);
+        releaseDistance = t.fakePlayer2->getPosition().x - t.fakePlayer2->getInitialPosition().x;
     }
 
     if (pl->m_gameState.m_isDualMode && pl->m_player2) {
         createTrajectory(pl, t.fakePlayer2, pl->m_player2, true);
+        clickerDistance = std::max(clickerDistance, t.fakePlayer2->getPosition().x - t.fakePlayer2->getInitialPosition().x);
+
         createTrajectory(pl, t.fakePlayer1, pl->m_player2, false);
+        releaseDistance = std::max(releaseDistance, t.fakePlayer1->getPosition().x - t.fakePlayer1->getInitialPosition().x);
+    }
+
+    if (clickerDistance > releaseDistance) {
+        // Clicker is longer
+    } else if (releaseDistance > clickerDistance) {
+        // Release is longer
+    } else {
+        // Both are equal
     }
 
     t.creatingTrajectory = false;
@@ -64,6 +81,9 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
     PlayerPracticeFixes::applyData(fakePlayer, playerData, pl->m_player2, true);
 
     t.cancelTrajectory = false;
+
+    // Auto-play option
+    bool autoPlay = Mod::get()->getSettingValue<bool>("show_trajectory_auto_play");
 
     for (int i = 0; i < t.length; i++) {
         CCPoint prevPos = fakePlayer->getPosition();
@@ -89,7 +109,17 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
         }
 
         if (i == 0) {
-            hold ? fakePlayer->pushButton(static_cast<PlayerButton>(1)) : fakePlayer->releaseButton(static_cast<PlayerButton>(1));
+            if (autoPlay) {
+                // Simulate player input
+                if (Mod::get()->getSettingValue<bool>("show_trajectory_auto_play_clicker")) {
+                    fakePlayer->pushButton(static_cast<PlayerButton>(1));
+                } else {
+                    fakePlayer->releaseButton(static_cast<PlayerButton>(1));
+                }
+            } else {
+                hold ? fakePlayer->pushButton(static_cast<PlayerButton>(1)) : fakePlayer->releaseButton(static_cast<PlayerButton>(1));
+            }
+
             if (pl->m_levelSettings->m_platformerMode)
                 realPlayer->m_isGoingLeft ? fakePlayer->pushButton(static_cast<PlayerButton>(2)) : fakePlayer->pushButton(static_cast<PlayerButton>(3));
         }
