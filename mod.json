@@ -1,8 +1,8 @@
 {
 	"geode": "3.7.1",
 	"gd": {
-		"win": "2.206",
-		"android": "2.206"
+	  "win": "2.206",
+	  "android": "2.206"
 	},
 	"version": "v2.0.0-beta.3",
 	"id": "zilko.xdbot",
@@ -10,97 +10,108 @@
 	"developer": "Zilko",
 	"description": "Best Free Bot fr",
 	"dependencies": [
-		{
-			"id": "geode.custom-keybinds",
-			"version": ">=v1.9.0",
-			"importance": "required",
-			"platforms": ["win"]
-		}
+	  {
+		"id": "geode.custom-keybinds",
+		"version": ">=v1.9.0",
+		"importance": "required",
+		"platforms": ["win"]
+	  }
 	],
 	"settings": {
-		"button": {
-			"type": "custom"
-	 	},
-		"frame_fixes": {
-			"name": "Frame Fixes",
-			"description": "Records the players position every frame",
-			"type": "bool",
-			"default": true
-		},
-		"frame_offset": {
-			"name": "Frame Offset",
-			"description": "Adds a frame offset when recording or playing macros",
-			"type": "int", 
-			"default": 0,
-			"min": -60,
-			"max": 60
-		},
-		"ffmpeg_path": {
-			"name": "ffmpeg.exe Path",
-			"description": "The path for ffmpeg.exe, needed to use render.",
-			"type": "file",
-			"default": "",
-			"platforms": ["win"]
-		},
-		"background_color": {
-            "name": "Menu background color",
-            "type": "color",
-            "default": "#334499"
-        },
-		"show_trajectory_color1": {
-            "name": "Trajectory Primary Color",
-            "type": "color",
-            "default": "#820808"
-        },
-		"show_trajectory_color2": {
-            "name": "Trajectory Secondary Color",
-            "type": "color",
-            "default": "#4ae255"
-        },
-		"show_trajectory_length": {
-            "name": "Trajectory Length",
-			"description": "How long will the Show Trajectory be.",
-            "type": "int",
-            "default": 240,
-			"min": 60,
-			"max": 480
-        },
-		"editor_keybinds": {
-			"name": "Keybinds on editor",
-			"description": "Enables keybinds while on the level editor.",
-			"type": "bool",
-			"default": false,
-			"platforms": ["win"]
-		},
-		"disable_keybinds": {
-			"name": "Disable keybinds",
-			"description": "Disables all keybinds.",
-			"type": "bool",
-			"default": false,
-			"platforms": ["win"]
-		},
-		"restore_page": {
-			"name": "Restore Settings Page",
-			"description": "Saves the page you were in when you closed the menu.",
-			"type": "bool",
-			"default": false
-		}
+	  "button": {
+		"type": "custom"
+	  },
+	  "frame_fixes": {
+		"name": "Frame Fixes",
+		"description": "Records the players position every frame",
+		"type": "bool",
+		"default": true
+	  },
+	  "frame_offset": {
+		"name": "Frame Offset",
+		"description": "Adds a frame offset when recording or playing macros",
+		"type": "int",
+		"default": 0,
+		"min": -60,
+		"max": 60
+	  },
+	  "ffmpeg_path": {
+		"name": "ffmpeg.exe Path",
+		"description": "The path for ffmpeg.exe, needed to use render.",
+		"type": "file",
+		"default": "",
+		"platforms": ["win"]
+	  },
+	  "background_color": {
+		"name": "Menu background color",
+		"type": "color",
+		"default": "#334499"
+	  },
+	  "show_trajectory_color1": {
+		"name": "Trajectory Primary Color",
+		"type": "color",
+		"default": "#820808"
+	  },
+	  "show_trajectory_color2": {
+		"name": "Trajectory Secondary Color",
+		"type": "color",
+		"default": "#4ae255"
+	  },
+	  "show_trajectory_length": {
+		"name": "Trajectory Length",
+		"description": "How long will the Show Trajectory be.",
+		"type": "int",
+		"default": 240,
+		"min": 60,
+		"max": 480
+	  },
+	  "editor_keybinds": {
+		"name": "Keybinds on editor",
+		"description": "Enables keybinds while on the level editor.",
+		"type": "bool",
+		"default": false,
+		"platforms": ["win"]
+	  },
+	  "disable_keybinds": {
+		"name": "Disable keybinds",
+		"description": "Disables all keybinds.",
+		"type": "bool",
+		"default": false,
+		"platforms": ["win"]
+	  },
+	  "restore_page": {
+		"name": "Restore Settings Page",
+		"description": "Saves the page you were in when you closed the menu.",
+		"type": "bool",
+		"default": false
+	  },
+	  "show_trajectory_auto_play": {
+		"name": "Auto-play",
+		"description": "Enables auto-play for the Show Trajectory.",
+		"type": "bool",
+		"default": false
+	  },
+	  "show_trajectory_auto_play_clicker": {
+		"name": "Auto-play clicker",
+		"description": "Enables auto-play clicker for the Show Trajectory.",
+		"type": "bool",
+		"default": true
+	  }
 	},
 	"resources": {
-        "sprites": [
-            "resources/GJ_commentSide2_001_White.png",
-            "resources/GJ_commentTop2_001_White.png"
-        ],
-		"files": [
-            "resources/default_hold_click.mp3",
-            "resources/default_release_click.mp3",
-			"resources/default_hold_left.mp3",
-            "resources/default_release_left.mp3",
-            "resources/default_hold_right.mp3",
-            "resources/default_release_right.mp3"
-        ]
-    },
+	  "sprites": [
+		"resources/GJ_commentSide2_001_White.png",
+		"resources/GJ_commentTop2_001_White.png"
+	  ],
+	  "files": [
+		"resources/default_hold_click.mp3",
+		"resources/default_release_click.mp3",
+		"resources/default_hold_left.mp3",
+		"resources/default_release_left.mp3",
+		"resources/default_hold_right.mp3",
+		"resources/default_release_right.mp3"
+	  ]
+	},
 	"repository": "https://github.com/ZiLko/xdBot/",
 	"tags": ["gameplay", "utility", "cheats"]
-
-}
+  }
