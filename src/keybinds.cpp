@@ -176,7 +176,7 @@ $execute{
         "toggle_recording"_spr,
         "Record macro",
         "Toggles recording.",
-        { Keybind::create(KEY_G) },
+        { Keybind::create(KEY_G, Modifier::Alt) },
         "xdBot",
         false
     });
@@ -185,7 +185,7 @@ $execute{
       "toggle_playing"_spr,
       "Play macro",
       "Toggles playing.",
-      { Keybind::create(KEY_H) },
+      { Keybind::create(KEY_H, Modifier::Alt) },
       "xdBot",
         false
     });
@@ -194,7 +194,7 @@ $execute{
       "toggle_speedhack"_spr,
       "Speedhack",
       "Toggles speedhack.",
-      { Keybind::create(KEY_S) },
+      { Keybind::create(KEY_S, Modifier::Alt) },
       "xdBot",
         false
     });
@@ -203,7 +203,7 @@ $execute{
       "toggle_noclip"_spr,
       "NoClip",
       "Toggles NoClip.",
-      { Keybind::create(KEY_N) },
+      { Keybind::create(KEY_N, Modifier::Alt) },
       "xdBot",
         false
     });
@@ -212,7 +212,7 @@ $execute{
       "toggle_frame_stepper"_spr,
       "Toggle Frame Stepper",
       "Toggles frame stepper..",
-      { Keybind::create(KEY_C) },
+      { Keybind::create(KEY_C, Modifier::Alt) },
       "xdBot",
       false
     });
@@ -221,7 +221,7 @@ $execute{
       "step_frame"_spr,
       "Advance frame",
       "Advances one frame if frame stepper is on.",
-      { Keybind::create(KEY_V), Keybind::create(KEY_C, Modifier::Alt) },
+      { Keybind::create(KEY_V) },
       "xdBot"
     });
 
@@ -231,7 +231,7 @@ $execute{
       "show_trajectory"_spr,
       "Show Trajectory",
       "Toggles Show Trajectory.",
-      { Keybind::create(KEY_T) },
+      { Keybind::create(KEY_T, Modifier::Alt) },
       "xdBot"
     });
 

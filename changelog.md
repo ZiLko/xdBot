@@ -1,3 +1,10 @@
+# v2.0.0-beta.3
+
+* Fixed rotation bug.
+* Fixed crash on load macro if node ids wasnt installed.
+* Fixed a few undisclosed bugs.
+* Added Alt modifier to default keybinds.
+
 # v2.0.0-beta.2
 
 * A bunch of small changes that are not even worth putting here.

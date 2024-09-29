@@ -394,17 +394,18 @@ class $modify(BGLHook, GJBaseGameLayer) {
       cocos2d::CCPoint pos1 = p1->getPosition();
       cocos2d::CCPoint pos2 = p2->getPosition();
 
-      // if (DIF(pos1.x, fix.p1.pos.x) || DIF(pos1.y, fix.p1.pos.y)) {
+      if (fix.p1.pos.x != 0.f && fix.p1.pos.y != 0.f)
         p1->setPosition(fix.p1.pos);
         
-        if (fix.p1.rotate)
-          p1->setRotation(fix.p1.rotation);
-      // }
+      if (fix.p1.rotate && fix.p1.rotation != 0.f)
+        p1->setRotation(fix.p1.rotation);
 
-      if (m_gameState.m_isDualMode/* && pos2.y != 0.f && (DIF(pos2.x, fix.p2.pos.x) || DIF(pos2.y, fix.p2.pos.y))*/) {
-        p2->setPosition(fix.p2.pos);
+      if (m_gameState.m_isDualMode) {
 
-        if (fix.p2.rotate)
+        if (fix.p2.pos.x != 0.f && fix.p2.pos.y != 0.f)
+          p2->setPosition(fix.p2.pos);
+
+        if (fix.p2.rotate && fix.p2.rotation != 0.f)
           p2->setRotation(fix.p2.rotation);
       }
 

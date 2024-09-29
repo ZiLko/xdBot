@@ -175,7 +175,7 @@ class $modify(EndLevelLayer) {
         lbl->setScale(0.55f);
         lbl->setAnchorPoint({ 0, 0.5 });
 
-        this->getChildByID("main-layer")->addChild(lbl);
+        getChildOfType<CCLayer>(this, 0)->addChild(lbl);
 
     }
 

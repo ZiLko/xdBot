@@ -63,7 +63,7 @@ void LoadMacroLayer::reloadList(int amount) {
 		lbl->removeFromParentAndCleanup(true);
 
 	CCNode* listLayer = m_mainLayer->getChildByID("list-layer");
-	ListView* listView = static_cast<ListView*>(listLayer->getChildByID("list-view"));
+	ListView* listView = getChildOfType<ListView>(listLayer, 0);
 
 	CCLayer* contentLayer = nullptr;
 	contentLayer = typeinfo_cast<CCLayer*>(listView->m_tableView->getChildren()->objectAtIndex(0));
@@ -467,10 +467,10 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 
 	listLayer->setUserObject("dont-correct-borders", cocos2d::CCBool::create(true));
 
-	CCSprite* topBorder = static_cast<CCSprite*>(listLayer->getChildByID("top-border"));
-	CCSprite* bottomBorder = static_cast<CCSprite*>(listLayer->getChildByID("bottom-border"));
-	CCSprite* rightBorder = static_cast<CCSprite*>(listLayer->getChildByID("right-border"));
-	CCSprite* leftBorder = static_cast<CCSprite*>(listLayer->getChildByID("left-border"));
+	CCSprite* topBorder = getChildOfType<CCSprite>(listLayer, 1);
+	CCSprite* bottomBorder = getChildOfType<CCSprite>(listLayer, 0);
+	CCSprite* rightBorder = getChildOfType<CCSprite>(listLayer, 3);
+	CCSprite* leftBorder = getChildOfType<CCSprite>(listLayer, 2);
 
 	if (color != ccc3(51, 68, 153)) {
 		CCSprite* topSprite = CCSprite::create("GJ_commentTop2_001_White.png"_spr);

@@ -468,7 +468,7 @@ void Renderer::handleRecording(PlayLayer* pl, int frame) {
 }
 
 void Renderer::startAudio(PlayLayer* pl) {
-    bool endLevelLayer = pl->getChildByID("EndLevelLayer") != nullptr;
+    bool endLevelLayer = getChildOfType<EndLevelLayer>(pl, 0) != nullptr;
     if (dontRecordAudio) return;
 
     if (pl->m_levelEndAnimationStarted && endLevelLayer) {
