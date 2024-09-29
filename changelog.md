@@ -1,3 +1,8 @@
+# v2.0.0-beta.4
+
+* Fixed dual bug when replaying a macro.
+* Fixed not being able to import .json macros (with the import button).
+
 # v2.0.0-beta.3
 
 * Fixed rotation bug.

@@ -401,7 +401,6 @@ class $modify(BGLHook, GJBaseGameLayer) {
         p1->setRotation(fix.p1.rotation);
 
       if (m_gameState.m_isDualMode) {
-
         if (fix.p2.pos.x != 0.f && fix.p2.pos.y != 0.f)
           p2->setPosition(fix.p2.pos);
 
