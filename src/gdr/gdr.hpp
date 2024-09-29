@@ -167,7 +167,7 @@ namespace gdr {
 			for (json const& frameFixJson : replayJson["frameFixes"]) {
 				FrameFix frameFix;
 
-				if (!frameFixJson.contains("frame")) break;
+				if (!frameFixJson.contains("frame")) continue;
 
 				frameFix.frame = frameFixJson["frame"];
 
@@ -189,14 +189,26 @@ namespace gdr {
 					frameFix.p2.rotate = false;
 
 				} else if (frameFixJson.contains("p1")) {
-					frameFix.p1.pos = ccp(frameFixJson["p1"]["x"], frameFixJson["p1"]["y"]);
-					frameFix.p1.rotation= frameFixJson["p1"]["r"];
+					if (frameFixJson["p1"].contains("x"))
+						frameFix.p1.pos.x = frameFixJson["p1"]["x"];
+
+					if (frameFixJson["p1"].contains("y"))
+						frameFix.p1.pos.y = frameFixJson["p1"]["y"];
+
+					if (frameFixJson["p1"].contains("r"))
+						frameFix.p1.rotation = frameFixJson["p1"]["r"];
 
 					if (frameFixJson.contains("p2")) {
-						frameFix.p2.pos = ccp(frameFixJson["p2"]["x"], frameFixJson["p2"]["y"]);
-						frameFix.p2.rotation= frameFixJson["p2"]["r"];
+						if (frameFixJson["p2"].contains("x"))
+							frameFix.p2.pos.x = frameFixJson["p2"]["x"];
+
+						if (frameFixJson["p2"].contains("y"))
+							frameFix.p2.pos.y = frameFixJson["p2"]["y"];
+
+						if (frameFixJson["p2"].contains("r"))
+							frameFix.p2.rotation= frameFixJson["p2"]["r"];
 					}
-				} else break;
+				} else continue;
 
 				replay.frameFixes.push_back(frameFix);
 			}
@@ -236,13 +248,15 @@ namespace gdr {
 				json p1Json;
 				json p2Json;
 
-				p1Json["x"] = frameFix.p1.pos.x;
-				p1Json["y"] = frameFix.p1.pos.y;
-				p1Json["r"] = frameFix.p1.rotation;
+				if (frameFix.p1.pos.x != 0.f) p1Json["x"] = frameFix.p1.pos.x;
+				if (frameFix.p1.pos.y != 0.f) p1Json["y"] = frameFix.p1.pos.y;
+				if (frameFix.p1.rotation != 0.f) p1Json["r"] = frameFix.p1.rotation;
 
-				p2Json["x"] = frameFix.p2.pos.x;
-				p2Json["y"] = frameFix.p2.pos.y;
-				p2Json["r"] = frameFix.p2.rotation;
+				if (frameFix.p2.pos.x != 0.f) p2Json["x"] = frameFix.p2.pos.x;
+				if (frameFix.p2.pos.y != 0.f) p2Json["y"] = frameFix.p2.pos.x;
+				if (frameFix.p2.rotation != 0.f) p2Json["r"] = frameFix.p2.rotation;
+
+				if (p1Json.empty() && p2Json.empty()) continue;
 
 				frameFixJson["frame"] = frameFix.frame;
 				frameFixJson["p1"] = p1Json;
