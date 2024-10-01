@@ -30,7 +30,7 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
         [this](auto, bool btn2) {
             auto& g = Global::get();
             
-            g.mod->setSavedValue("render_args", std::string("pix_fmt yuv420p"));
+            g.mod->setSavedValue("render_args", std::string("-pix_fmt yuv420p"));
 	        g.mod->setSavedValue("render_audio_args", std::string(""));
             g.mod->setSavedValue("render_video_args", std::string("colorspace=all=bt709:iall=bt470bg:fast=1"));
             g.mod->setSavedValue("render_fix_shaders", false);

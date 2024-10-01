@@ -16,8 +16,10 @@ void Macro::recordAction(int frame, int button, bool player2, bool hold) {
 void Macro::tryAutosave(GJGameLevel* level, CheckpointObject* cp) {
     auto& g = Global::get();
 
-    if (g.state != state::recording || !g.checkpoints.contains(cp)) return;
-    if (!g.mod->getSavedValue<bool>("macro_auto_save") || g.checkpoints[cp].frame < g.lastAutoSave) return;
+    if (g.state != state::recording) return;
+    if (!Mod::get()->getSavedValue<bool>("macro_auto_save")) return;
+    if (!g.checkpoints.contains(cp)) return;
+    if (g.checkpoints[cp].frame < g.lastAutoSave) return;
 
     std::filesystem::path autoSavesPath = g.mod->getSaveDir() / "autosaves";
 

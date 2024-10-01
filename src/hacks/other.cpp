@@ -155,6 +155,11 @@ class $modify(PlayLayer) {
 };
 
 class $modify(EndLevelLayer) {
+
+    static void onModify(auto & self) {
+        if (!self.setHookPriority("EndLevelLayer::customSetup", -1))
+            log::warn("EndLevelLayer::customSetup hook priority fail xD.");
+    }
     
     void customSetup() {
         EndLevelLayer::customSetup();
@@ -170,13 +175,12 @@ class $modify(EndLevelLayer) {
 
         CCLabelBMFont* lbl = CCLabelBMFont::create("Auto-safe-mode", "goldFont.fnt");
         lbl->setPosition({ 3.5, 5 });
-        lbl->setOpacity(170);
+        lbl->setOpacity(155);
         lbl->setID("safe-mode-label"_spr);
         lbl->setScale(0.55f);
         lbl->setAnchorPoint({ 0, 0.5 });
 
-        getChildOfType<CCLayer>(this, 0)->addChild(lbl);
-
+        addChild(lbl);
     }
 
 };

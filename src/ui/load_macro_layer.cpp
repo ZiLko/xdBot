@@ -135,7 +135,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 	file::FilePickOptions::Filter textFilter;
 	file::FilePickOptions fileOptions;
 	textFilter.description = "Macro Files";
-	textFilter.files = { "*.gdr", "*.xd" };
+	textFilter.files = { "*.gdr", "*.xd", "*.json" };
 	fileOptions.filters.push_back(textFilter);
 
 	file::pick(file::PickMode::OpenFile, { dirs::getGameDir(), { textFilter } }).listen([this](Result<std::filesystem::path>* res) {

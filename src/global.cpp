@@ -328,7 +328,7 @@ $execute{
     g.mod->setSavedValue("macro_noclip_p2", true);
   }
 
-  if (!g.mod->setSavedValue("defaults_set5", true))
+  if (!g.mod->setSavedValue("defaults_set6", true))
     g.mod->setSavedValue("render_args", std::string("-pix_fmt yuv420p"));
 
   if (!g.mod->setSavedValue("defaults_set3", true)) {

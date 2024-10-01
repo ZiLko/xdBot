@@ -1,3 +1,11 @@
+# v2.0.0-beta.5
+
+* Fixed render restore defaults button setting the wrong args.
+* Fixed triggers stopping on death when not recording a macro.
+* Fixed crash on level complete if you had practice attempts installed.
+* Fixed holding on checkpoint respawn bug.
+* Made auto safe mode text appear instantly instead of dropping down and lowered its opacity.
+
 # v2.0.0-beta.4
 
 * Fixed dual bug when replaying a macro.
