@@ -4,7 +4,7 @@
 		"win": "2.206",
 		"android": "2.206"
 	},
-	"version": "v2.0.0-beta.5",
+	"version": "v2.0.0-beta.6",
 	"id": "zilko.xdbot",
 	"name": "xdBot",
 	"developer": "Zilko",
@@ -34,6 +34,12 @@
 			"default": 0,
 			"min": -60,
 			"max": 60
+		},
+		"endscreen_button": {
+			"name": "Button at Endscreen",
+			"description": "Shows the menu button at the endscreen.",
+			"type": "bool",
+			"default": false
 		},
 		"ffmpeg_path": {
 			"name": "ffmpeg.exe Path",
@@ -75,6 +81,13 @@
 		"disable_keybinds": {
 			"name": "Disable keybinds",
 			"description": "Disables all keybinds.",
+			"type": "bool",
+			"default": false,
+			"platforms": ["win"]
+		},
+		"recording_only_keybinds": {
+			"name": "Keybinds only while recording",
+			"description": "Keybinds only work while recording a macro.",
 			"type": "bool",
 			"default": false,
 			"platforms": ["win"]

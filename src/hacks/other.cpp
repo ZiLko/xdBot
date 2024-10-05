@@ -1,17 +1,11 @@
 #include "../includes.hpp"
 #include "../ui/record_layer.hpp"
-#include "../ui/load_macro_layer.hpp"
-#include "../ui/save_macro_layer.hpp"
-#include "../ui/clickbot_layer.hpp"
-#include "../ui/macro_info_layer.hpp"
-#include "../ui/render_settings_layer.hpp"
 
 #include <Geode/modify/PlayerObject.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/EndLevelLayer.hpp>
 #include <Geode/modify/GJGameLevel.hpp>
 #include <Geode/modify/CCScheduler.hpp>
-#include <Geode/Geode.hpp>
 
 class $modify(CCScheduler) {
 
@@ -155,15 +149,32 @@ class $modify(PlayLayer) {
 };
 
 class $modify(EndLevelLayer) {
-
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("EndLevelLayer::customSetup", -1))
-            log::warn("EndLevelLayer::customSetup hook priority fail xD.");
-    }
     
     void customSetup() {
         EndLevelLayer::customSetup();
         auto& g = Global::get();
+
+        if (g.mod->getSettingValue<bool>("endscreen_button")) {
+			auto winSize = CCDirector::sharedDirector()->getWinSize();
+
+			CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+			sprite->setScale(0.350f);
+            
+        	CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
+                sprite,
+			    this,
+			    menu_selector(RecordLayer::openMenu2
+            ));
+			btn->setPosition({160, -99});
+
+			CCLayer* layer = getChildOfType<CCLayer>(this, 0);
+
+			CCMenu* menu = CCMenu::create();
+            menu->setID("button-menu"_spr);
+			layer->addChild(menu);
+
+        	menu->addChild(btn);
+		}
 
         if (g.layer) {
             static_cast<RecordLayer*>(g.layer)->cursorWasHidden = false;
@@ -174,13 +185,20 @@ class $modify(EndLevelLayer) {
         if (!g.mod->getSavedValue<bool>("macro_auto_safe_mode")) return;
 
         CCLabelBMFont* lbl = CCLabelBMFont::create("Auto-safe-mode", "goldFont.fnt");
-        lbl->setPosition({ 3.5, 5 });
+        lbl->setPosition({ 3.5, 10 });
         lbl->setOpacity(155);
         lbl->setID("safe-mode-label"_spr);
         lbl->setScale(0.55f);
         lbl->setAnchorPoint({ 0, 0.5 });
 
         addChild(lbl);
+    }
+
+    void onHideLayer(CCObject* obj) {
+        EndLevelLayer::onHideLayer(obj);
+
+        if (CCNode* lbl = getChildByID("safe-mode-label"_spr))
+            lbl->setVisible(!lbl->isVisible());
     }
 
 };

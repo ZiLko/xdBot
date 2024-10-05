@@ -33,18 +33,6 @@ class $modify(PlayLayer) {
 
   }
 
-  void removeCheckpoint(bool b1) {
-    auto& g = Global::get();
-
-    if (g.previousCheckpoints.empty()) return PlayLayer::removeCheckpoint(b1);
-
-    if (typeinfo_cast<CheckpointObject*>(this->m_checkpointArray->lastObject()) == g.previousCheckpoints.back())
-      g.previousCheckpoints.pop_back();
-
-    PlayLayer::removeCheckpoint(b1);
-
-  }
-
   void pauseGame(bool b1) {
     Global::updateKeybinds();
 
@@ -115,7 +103,6 @@ class $modify(PlayLayer) {
     auto& g = Global::get();
 
     g.firstAttempt = true;
-    g.previousCheckpoints.clear();
 
     Global::updateKeybinds();
 
@@ -160,7 +147,6 @@ class $modify(PlayLayer) {
       g.macro.inputs.clear();
       g.macro.frameFixes.clear();
       g.checkpoints.clear();
-      g.previousCheckpoints.clear();
 
       g.macro.canChangeFPS = true;
 
@@ -468,7 +454,6 @@ class $modify(PauseLayer) {
     auto& g = Global::get();
 
     g.checkpoints.clear();
-    g.previousCheckpoints.clear();
 
     if (g.restart) {
       g.restart = false;

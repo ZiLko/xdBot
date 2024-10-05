@@ -72,9 +72,6 @@ class $modify(CheckpointObject) {
     auto& g = Global::get();
     PlayLayer* pl = PlayLayer::get();
 
-    if (!g.cancelCheckpoint)
-      g.previousCheckpoints.push_back(cp);
-
     PlayerData p1Data = PlayerPracticeFixes::saveData(pl->m_player1);
     PlayerData p2Data = PlayerPracticeFixes::saveData(pl->m_player2);
 
@@ -135,8 +132,8 @@ class $modify(PlayLayer) {
 
       g.respawnFrame = g.checkpoints[cp].frame;
       g.previousFrame = g.checkpoints[cp].previousFrame;
-      PlayerPracticeFixes::applyData(this->m_player1, p1Data, m_player2);
-      PlayerPracticeFixes::applyData(this->m_player2, p2Data, m_player2);
+      PlayerPracticeFixes::applyData(this->m_player1, p1Data, false);
+      PlayerPracticeFixes::applyData(this->m_player2, p2Data, true);
 
       return;
     }
@@ -169,8 +166,8 @@ class $modify(PlayLayer) {
 
     PlayLayer::loadFromCheckpoint(cp);
 
-    PlayerPracticeFixes::applyData(this->m_player1, p1Data, m_player2);
-    PlayerPracticeFixes::applyData(this->m_player2, p2Data, m_player2);
+    PlayerPracticeFixes::applyData(this->m_player1, p1Data, false);
+    PlayerPracticeFixes::applyData(this->m_player2, p2Data, true);
 
     if (g.state != state::recording && g.mod->getSavedValue<bool>("macro_always_practice_fixes")) {
       this->m_player1->releaseButton(static_cast<PlayerButton>(1));

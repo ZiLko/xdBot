@@ -256,11 +256,6 @@ void Global::toggleFrameStepper() {
 }
 
 void Global::frameStepperOn() {
-  if (Loader::get()->isModLoaded("zmx.cbf-lite")) {
-    if (!Mod::get()->setSavedValue("frame_stepper_warning", true))
-      FLAlertLayer::create("Warning", "<cr>Click on Steps</c> might cause input delay when using frame stepper.", "Ok")->show();
-  }
-
   auto& g = Global::get();
 
   g.mod->setSavedValue("macro_frame_stepper", true);

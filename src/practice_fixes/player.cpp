@@ -264,8 +264,10 @@ PlayerData PlayerPracticeFixes::saveData(PlayerObject* player) {
     return data;
 }
 
-void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, PlayerObject* player2, bool isFakePlayer) {
-    bool isPlayer2 = player == player2;
+void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, bool isPlayer2, bool isFakePlayer) {
+    if (isPlayer2 && !PlayLayer::get()->m_gameState.m_isDualMode)
+        return;
+
     auto& g = Global::get();
     if (g.addSideHoldingMembers[static_cast<int>(isPlayer2)] && !isFakePlayer) {
         player->m_holdingLeft = data.m_holdingLeft;

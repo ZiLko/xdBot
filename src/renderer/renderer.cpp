@@ -189,7 +189,9 @@ void Renderer::start() {
     if (pl->m_level->m_songID == 0)
         songFile = cocos2d::CCFileUtils::sharedFileUtils()->fullPathForFilename(songFile.c_str(), false);
 
-    auto songOffset = pl->m_levelSettings->m_songOffset + (fmod->m_unkInt1a4 / 1000.f) + (levelStartFrame / 240.f);
+    float songOffset = pl->m_levelSettings->m_songOffset + (fmod->m_unkInt1a4 / 1000.f) + (levelStartFrame / 240.f);
+    bool fadeIn = pl->m_levelSettings->m_fadeIn;
+    bool fadeOut = pl->m_levelSettings->m_fadeOut;
 
     currentFrame.resize(width * height * 3, 0);
     renderedFrames.clear();
@@ -197,7 +199,7 @@ void Renderer::start() {
     renderer.begin();
 
 
-    std::thread([&, path, songFile, songOffset]() {
+    std::thread([&, path, songFile, songOffset, fadeIn, fadeOut]() {
 
         if (!codec.empty()) codec = "-c:v " + codec + " ";
         if (!bitrate.empty()) bitrate = "-b:v " + bitrate + " ";
@@ -293,16 +295,22 @@ void Renderer::start() {
         // }
 
         {
+
+            std::string fadeInString = fadeIn ? ", afade=t=in:d=2" : "";
+            std::string fadeOutString = fadeOut ? fmt::format(", afade=t=out:d=2:st={}", totalTime - stopAfter - 3.5f) : "";
+
             if (!extraAudioArgs.empty()) extraAudioArgs += " ";
 
             command = std::format(
-                "\"{}\" -y -ss {} -i \"{}\" -i \"{}\" -t {} -c:v copy {}-filter:a \"[1:a]adelay=0|0[aud]\" \"{}\"",
+                "\"{}\" -y -ss {} -i \"{}\" -i \"{}\" -t {} -c:v copy {} -filter:a \"[1:a]adelay=0|0{}{}\" \"{}\"",
                 ffmpegPath,
                 songOffset,
                 songFile,
                 path,
                 totalTime,
                 extraAudioArgs,
+                fadeInString,
+                fadeOutString,
                 tempPath
             );
 

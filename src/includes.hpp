@@ -85,12 +85,10 @@ public:
     Renderer renderer;
     state state = none;
 
-    std::map<CheckpointObject*, CheckpointData> checkpoints;
-    std::vector<CheckpointObject*> previousCheckpoints;
-
-    std::vector<int> keybinds[6];
+    std::unordered_map<CheckpointObject*, CheckpointData> checkpoints;
     std::unordered_set<int> allKeybinds;
     std::unordered_set<int> playedFrames;
+    std::vector<int> keybinds[6];
 
     int lastAutoSave = 0;
     std::string currentSession = "";

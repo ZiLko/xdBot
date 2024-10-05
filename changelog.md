@@ -1,3 +1,12 @@
+# v2.0.0-beta.6
+
+* Fixed more settings popup being brown.
+* Fixed crash when searching macros in the merge layer.
+* Added recording only keybinds setting.
+* Added button in endscreen setting.
+* Added fade in and fade out to renderer videos if the level has it.
+* Made auto safe mode text hide when hiding the endscreen.
+
 # v2.0.0-beta.5
 
 * Fixed render restore defaults button setting the wrong args.

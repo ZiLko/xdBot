@@ -76,13 +76,14 @@ void LoadMacroLayer::reloadList(int amount) {
 
 		posY = contentLayer->getPositionY();
 	}
-
 	listLayer->removeFromParentAndCleanup(true);
 	m_mainLayer->getChildByID("background")->removeFromParentAndCleanup(true);
 
 	selectedMacros.clear();
 	allMacros.clear();
-	selectAllToggle->toggle(false);
+
+	if (!isMerge)
+		selectAllToggle->toggle(false);
 
 	addList(childrenCount > 7 && amount != 0, posY + (35.f * amount));
 }

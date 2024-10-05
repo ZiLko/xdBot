@@ -96,6 +96,9 @@ void onKeybind(bool down, ActionID id) {
   if (!down || (LevelEditorLayer::get() && !g.mod->getSettingValue<bool>("editor_keybinds")) || g.mod->getSettingValue<bool>("disable_keybinds"))
     return;
 
+  if (g.state != state::recording && g.mod->getSettingValue<bool>("recording_only_keybinds"))
+    return;
+
   if (id == "open_menu"_spr) {
     if (g.layer) {
       static_cast<RecordLayer*>(g.layer)->onClose(nullptr);

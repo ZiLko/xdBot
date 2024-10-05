@@ -15,7 +15,7 @@ public:
 class PlayerPracticeFixes {
 public:
 
-    static void applyData(PlayerObject* player, PlayerData data, PlayerObject* player2, bool isFakePlayer = false);
+    static void applyData(PlayerObject* player, PlayerData data, bool isPlayer2, bool isFakePlayer = false);
 
     static PlayerData saveData(PlayerObject* player);
 

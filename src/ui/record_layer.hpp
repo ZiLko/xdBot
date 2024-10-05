@@ -132,7 +132,7 @@ public:
 	}
 
 	void moreSettings(CCObject*) {
-		geode::openSettingsPopup(mod);
+		geode::openSettingsPopup(mod, false);
 	}
 
 	void updateDots();
