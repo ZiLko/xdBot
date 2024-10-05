@@ -295,7 +295,9 @@ void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, bool 
 
     #endif
 
-    player->m_mainLayer = data.m_mainLayer;
+    if (!isFakePlayer)
+        player->m_mainLayer = data.m_mainLayer;
+    
     player->m_wasTeleported = data.m_wasTeleported; 
     player->m_fixGravityBug = data.m_fixGravityBug;
     player->m_reverseSync = data.m_reverseSync;

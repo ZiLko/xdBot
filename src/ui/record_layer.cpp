@@ -501,7 +501,7 @@ bool RecordLayer::setup() {
     CCSprite* spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
     CCSprite* spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
 
-    CCLabelBMFont* versionLabel = CCLabelBMFont::create("xdBot v2.0.0-beta.6", "chatFont.fnt");
+    CCLabelBMFont* versionLabel = CCLabelBMFont::create("xdBot v2.0.0-beta.7", "chatFont.fnt");
     versionLabel->setOpacity(63);
     versionLabel->setPosition(ccp(-217, -125));
     versionLabel->setAnchorPoint({ 0, 0.5 });

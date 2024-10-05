@@ -61,7 +61,7 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
     bool player2 = pl->m_player2 == realPlayer;
 
     PlayerData playerData = PlayerPracticeFixes::saveData(realPlayer);
-    PlayerPracticeFixes::applyData(fakePlayer, playerData, pl->m_player2, true);
+    PlayerPracticeFixes::applyData(fakePlayer, playerData, false, true);
 
     t.cancelTrajectory = false;
 

@@ -1,3 +1,8 @@
+# v2.0.0-beta.7
+
+* Fixed show trajectory not working.
+* Fixed spider being flipped when show trajectory is on.
+
 # v2.0.0-beta.6
 
 * Fixed more settings popup being brown.
