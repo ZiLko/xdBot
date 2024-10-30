@@ -24,7 +24,7 @@ class $modify(GJBaseGameLayer) {
 
         if ((!g.renderer.recording && !g.renderer.recordingAudio) || !pl) return;
 
-        if (g.renderer.recording && frame % static_cast<int>(240.f / g.renderer.fps) == 1)
+        if (g.renderer.recording && frame % static_cast<int>(240.f / g.renderer.fps) == 0)
             return g.renderer.handleRecording(pl, frame);
 
         if (g.renderer.recordingAudio && !g.renderer.startedAudio) {

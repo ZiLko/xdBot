@@ -4,6 +4,7 @@
 * Fixed macro bot info saving bug.
 * Fixed practice rotation bug.
 * Actually capped render fps to 240 now lmao.
+* I think render fps were never saving so it was always 60 no matter what u set it to.
 
 # v2.0.0
 

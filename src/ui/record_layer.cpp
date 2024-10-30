@@ -300,6 +300,7 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
     if (std::string_view(fpsInput->getString()) != "" && node == fpsInput) {
         if (std::stoi(fpsInput->getString()) > 240)
             return fpsInput->setString(mod->getSavedValue<std::string>("render_fps").c_str());
+        mod->setSavedValue("render_fps", std::string(fpsInput->getString()));
     }
 
     if (!speedhackInput) return;
