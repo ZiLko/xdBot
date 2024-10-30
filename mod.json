@@ -1,10 +1,10 @@
 {
-	"geode": "3.8.0",
+	"geode": "3.8.1",
 	"gd": {
 		"win": "2.206",
 		"android": "2.206"
 	},
-	"version": "v2.0.0-beta.7",
+	"version": "v2.0.0",
 	"id": "zilko.xdbot",
 	"name": "xdBot",
 	"developer": "Zilko",
@@ -32,20 +32,26 @@
 			"description": "Adds a frame offset when recording or playing macros",
 			"type": "int", 
 			"default": 0,
-			"min": -60,
-			"max": 60
+			"min": -8,
+			"max": 8
 		},
 		"endscreen_button": {
 			"name": "Button at Endscreen",
 			"description": "Shows the menu button at the endscreen.",
 			"type": "bool",
-			"default": false
+			"default": false 
 		},
 		"ffmpeg_path": {
 			"name": "ffmpeg.exe Path",
 			"description": "The path for ffmpeg.exe, needed to use render.",
 			"type": "file",
 			"default": "",
+			"platforms": ["win"]
+		},
+		"render_folder": {
+			"name": "Render Save Location",
+			"type": "folder",
+			"default": "{gd_dir}/renders",
 			"platforms": ["win"]
 		},
 		"background_color": {

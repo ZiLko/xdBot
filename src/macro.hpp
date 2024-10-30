@@ -8,14 +8,6 @@
 
 using namespace geode::prelude;
 
-#ifdef GEODE_IS_WINDOWS
-const int timeOffset = 968;
-#elif defined(GEODE_IS_ANDROID32)
-const int timeOffset = 800;
-#elif defined(GEODE_IS_ANDROID64)
-const int timeOffset = 952;
-#endif
-
 #define DIF(a, b) (std::fabs((a) - (b)) > 0.001f)
 
 const std::vector<float> safeValues = {

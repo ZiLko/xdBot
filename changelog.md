@@ -1,3 +1,14 @@
+# v2.0.0
+
+* Changed render FPS cap to 240 (more than 240 fps would need tps bypass lol).
+* Changed speedhack limit to 10 (it was 9 for some reason).
+* Changed frame offset setting limit to 8 instead of 60.
+* Changed render error id 12 message.
+* Made speedhack work everywhere.
+* Fixed macros importing as .gdr instead of .gdr.json.
+* Added warning when rendering if CBF is loaded.
+* Added render save location setting.
+
 # v2.0.0-beta.7
 
 * Fixed show trajectory not working.

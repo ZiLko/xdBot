@@ -298,7 +298,7 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
         mod->setSavedValue("render_bitrate", std::string(bitrateInput->getString()));
 
     if (std::string_view(fpsInput->getString()) != "" && node == fpsInput) {
-        if (std::stoi(fpsInput->getString()) > 60)
+        if (std::stoi(fpsInput->getString()) > 240)
             return fpsInput->setString(mod->getSavedValue<std::string>("render_fps").c_str());
     }
 
@@ -309,7 +309,7 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
 
         if (value == ".")
             speedhackInput->setString("0.");
-        else if (std::count(value.begin(), value.end(), '.') == 2 || std::stof(value) > 9)
+        else if (std::count(value.begin(), value.end(), '.') == 2 || std::stof(value) > 10)
             return speedhackInput->setString(mod->getSavedValue<std::string>("macro_speedhack").c_str());
     }
 
@@ -417,7 +417,7 @@ void RecordLayer::openKeybinds(CCObject*) {
 }
 
 void RecordLayer::openRendersFolder(CCObject*) {
-    std::filesystem::path path = Global::get().mod->getSaveDir() / "renders";
+    std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
 
     if (std::filesystem::exists(path))
         file::openFolder(path);

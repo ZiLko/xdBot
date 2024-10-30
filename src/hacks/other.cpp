@@ -19,7 +19,7 @@ class $modify(CCScheduler) {
             return CCScheduler::update(dt);
         }
 
-        if (!PlayLayer::get() || g.renderer.recording || g.renderer.recordingAudio) {
+        if (g.renderer.recording || g.renderer.recordingAudio) {
             if (g.currentPitch != 1.f)
                 Global::updatePitch(1.f);
 
@@ -58,7 +58,7 @@ class $modify(CCScheduler) {
             Global::updatePitch(speedhack);
         }
 
-        if (speedhack != 1.f)
+        if (speedhack != 1.f && PlayLayer::get())
             g.safeMode = true;
 
         CCScheduler::update(dt * speedhack);

@@ -43,6 +43,8 @@ class $modify(CCScheduler) {
     void update(float dt) {
         if (!Global::get().renderer.recording) return CCScheduler::update(dt);
 
+        // CCScheduler::update(1.f / 240.f);
+
         using namespace std::literals;
         
         float newDt = 1.f / 240.f;
@@ -67,12 +69,15 @@ class $modify(CCScheduler) {
 
 bool Renderer::toggle() {
     auto& g = Global::get();
+    if (Loader::get()->isModLoaded("syzzi.click_between_frames")) {
+        FLAlertLayer::create("Render", "Disable CBF in Geode to render a level.", "OK");
+        return false;
+    }
+
     std::filesystem::path ffmpegPath = g.mod->getSettingValue<std::filesystem::path>("ffmpeg_path");
 
     if (g.renderer.recording || g.renderer.recordingAudio) {
-
         g.renderer.recordingAudio ? g.renderer.stopAudio() : g.renderer.stop(Global::getCurrentFrame());
-
     }
     else if (std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe") {
         if (!PlayLayer::get()) {
@@ -81,19 +86,17 @@ bool Renderer::toggle() {
         }
 
         g.renderer.ffmpegPath = ffmpegPath.string();
-        std::filesystem::path path = g.mod->getSaveDir() / "renders";
+        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
 
         if (std::filesystem::exists(path))
             g.renderer.start();
         else {
-
             if (std::filesystem::create_directory(path))
                 g.renderer.start();
             else {
                 FLAlertLayer::create("Error", "There was an error getting the renders folder. ID: 11", "Ok")->show();
                 return false;
             }
-
         }
 
     }
@@ -146,7 +149,7 @@ void Renderer::start() {
     auto now = std::chrono::system_clock::now();
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     std::string filename = fmt::format("render_{}_{}.mp4", std::string_view(pl->m_level->m_levelName), std::to_string(timestamp));
-    std::string path = (mod->getSaveDir() / "renders" / filename).string();
+    std::string path = (Mod::get()->getSettingValue<std::filesystem::path>("render_folder") / filename).string();
 
     if (mod->getSavedValue<bool>("render_fix_shaders")) {
         HWND hwnd = GetForegroundWindow();
@@ -189,7 +192,7 @@ void Renderer::start() {
     if (pl->m_level->m_songID == 0)
         songFile = cocos2d::CCFileUtils::sharedFileUtils()->fullPathForFilename(songFile.c_str(), false);
 
-    float songOffset = pl->m_levelSettings->m_songOffset + (fmod->m_unkInt1a4 / 1000.f) + (levelStartFrame / 240.f);
+    float songOffset = pl->m_levelSettings->m_songOffset + (fmod->m_musicOffset / 1000.f) + (levelStartFrame / 240.f);
     bool fadeIn = pl->m_levelSettings->m_fadeIn;
     bool fadeOut = pl->m_levelSettings->m_fadeOut;
 
@@ -235,7 +238,7 @@ void Renderer::start() {
 
         if (process.close()) {
             Loader::get()->queueInMainThread([] {
-                FLAlertLayer::create("Error", "There was an error saving the render. ID: 12", "Ok")->show();
+                FLAlertLayer::create("Error", "There was an error saving the render. Wrong render args.", "Ok")->show();
             });
             return;
         }
@@ -462,7 +465,7 @@ void Renderer::handleRecording(PlayLayer* pl, int frame) {
             lastFrame_t = pl->m_gameState.m_levelTime;
 
             int correctMusicTime = static_cast<int>((frame / 240.f + pl->m_levelSettings->m_songOffset) * 1000);
-            correctMusicTime += fmod->m_unkInt1a4; // Global music offset
+            correctMusicTime += fmod->m_musicOffset; // Global music offset
 
             if (fmod->getMusicTimeMS(0) - correctMusicTime >= 110)
                 fmod->setMusicTimeMS(correctMusicTime, true, 0);

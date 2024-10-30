@@ -180,7 +180,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 
 			std::string pathString = newPath.string();
 
-			while (std::filesystem::exists(pathString + ".gdr")) {
+			while (std::filesystem::exists(pathString + ".gdr.json")) {
 				iterations++;
 
 				if (iterations > 1) {
@@ -191,10 +191,10 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 				pathString += fmt::format(" ({})", std::to_string(iterations));
 			}
 
-			pathString += ".gdr";
+			pathString += ".gdr.json";
 
 			std::ofstream f2(Utils::widen(pathString), std::ios::binary);
-			auto data = tempMacro.exportData(false);
+			auto data = tempMacro.exportData(true);
 
 			f2.write(reinterpret_cast<const char*>(data.data()), data.size());
 			f2.close();

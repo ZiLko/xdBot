@@ -151,8 +151,7 @@ int Global::getCurrentFrame() {
 
   auto& g = Global::get();
 
-  double time = *reinterpret_cast<double*>(reinterpret_cast<char*>(pl) + timeOffset);
-  int frame = static_cast<int>(time * 240.0);
+  int frame = static_cast<int>(pl->m_gameState.m_levelTime * 240.0);
 
   frame -= g.frameOffset;
 
@@ -317,6 +316,11 @@ $on_mod(Loaded) {
 
 $execute{
     auto & g = Global::get();
+
+  if (!g.mod->setSavedValue("defaults_set5", true)) {
+    g.mod->setSettingValue<std::filesystem::path>("render_folder", g.mod->getSaveDir() / "renders");
+    g.mod->setSavedValue("macro_hide_playing_label", true);
+  }
 
   if (!g.mod->setSavedValue("defaults_set4", true)) {
     g.mod->setSavedValue("macro_noclip_p1", true);
