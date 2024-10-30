@@ -3,6 +3,7 @@
 * Fixed crash if some macro info was null for whatever reason.
 * Fixed macro bot info saving bug.
 * Fixed practice rotation bug.
+* Actually capped render fps to 240 now lmao.
 
 # v2.0.0
 

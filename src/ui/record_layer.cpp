@@ -818,7 +818,7 @@ bool RecordLayer::setup() {
     fpsInput->setMouseEnabled(true);
     fpsInput->setTouchEnabled(true);
     fpsInput->setContentSize({ 32, 20 });
-    fpsInput->setMaxLabelLength(2);
+    fpsInput->setMaxLabelLength(3);
     fpsInput->setAllowedChars("0123456789");
     fpsInput->setString(mod->getSavedValue<std::string>("render_fps").c_str());
     fpsInput->setDelegate(this);
