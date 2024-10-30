@@ -70,7 +70,7 @@ class $modify(CCScheduler) {
 bool Renderer::toggle() {
     auto& g = Global::get();
     if (Loader::get()->isModLoaded("syzzi.click_between_frames")) {
-        FLAlertLayer::create("Render", "Disable CBF in Geode to render a level.", "OK");
+        FLAlertLayer::create("Render", "Disable CBF in Geode to render a level.", "OK")->show();
         return false;
     }
 

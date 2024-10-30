@@ -23,7 +23,7 @@ PlayerData PlayerPracticeFixes::saveData(PlayerObject* player) {
     #endif
 
     data.position = player->getPosition();
-    data.rotationX = player->getRotationX();
+    data.rotation = player->getRotation();
     data.m_holdingRight = player->m_holdingRight;
     data.m_holdingLeft = player->m_holdingLeft;
     data.m_mainLayer = player->m_mainLayer;
@@ -522,5 +522,5 @@ void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, bool 
     player->m_enable22Changes = data.m_enable22Changes;
 
     player->setPosition(data.position);
-    player->setRotationX(data.rotationX);
+    player->setRotation(data.rotation);
 }

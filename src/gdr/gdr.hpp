@@ -5,7 +5,6 @@
 #include <optional>
 
 #include "json.hpp"
-#include <Geode/Geode.hpp>
 
 cocos2d::CCPoint dataFromString(std::string dataString);
 
@@ -133,21 +132,27 @@ namespace gdr {
 			// 	replayJson = json::parse(data);
 			// }
 
-			replay.gameVersion = replayJson["gameVersion"];
-			replay.description = replayJson["description"];
-			replay.version = replayJson["version"];
-			replay.duration = replayJson["duration"];
-			replay.botInfo.name = replayJson["bot"]["name"];
-			replay.botInfo.version = replayJson["bot"]["version"];
-			replay.levelInfo.id = replayJson["level"]["id"];
-			replay.levelInfo.name = replayJson["level"]["name"];
-			replay.author = replayJson["author"];
-			replay.seed = replayJson["seed"];
-			replay.coins = replayJson["coins"];
-			replay.ldm = replayJson["ldm"];
+			if (!replayJson["gameVersion"].is_null()) replay.gameVersion = replayJson["gameVersion"];
+			if (!replayJson["description"].is_null()) replay.description = replayJson["description"];
+			if (!replayJson["version"].is_null()) replay.version = replayJson["version"];
+			if (!replayJson["duration"].is_null()) replay.duration = replayJson["duration"];
+			if (!replayJson["author"].is_null()) replay.author = replayJson["author"];
+			if (!replayJson["seed"].is_null()) replay.seed = replayJson["seed"];
+			if (!replayJson["coins"].is_null()) replay.coins = replayJson["coins"];
+			if (!replayJson["ldm"].is_null()) replay.ldm = replayJson["ldm"];
+
+			if (!replayJson["bot"]["name"].is_null()) replay.botInfo.name = replayJson["bot"]["name"];
+			if (!replayJson["bot"]["version"].is_null()) replay.botInfo.version = replayJson["bot"]["version"];
+			if (!replayJson["level"]["id"].is_null()) replay.levelInfo.id = replayJson["level"]["id"];
+			if (!replayJson["level"]["name"].is_null()) replay.levelInfo.name = replayJson["level"]["name"];
 
 			if (replayJson.contains("framerate"))
 				replay.framerate = replayJson["framerate"];
+
+			bool xd = replay.botInfo.version.find("beta.") == std::string::npos;
+			bool rotation = replay.botInfo.version.find("beta.") == std::string::npos && replay.botInfo.version.find("alpha.") == std::string::npos;
+			if (replay.botInfo.name != "xdBot" || (replay.botInfo.name == "xdBot" && replay.botInfo.version == "v2.0.0")) rotation = true;
+
 			replay.parseExtension(replayJson.get<json::object_t>());
 
 			if (!importInputs)
@@ -155,6 +160,10 @@ namespace gdr {
 
 			for (json const& inputJson : replayJson["inputs"]) {
 				InputType input;
+
+				if (!inputJson.contains("frame")) continue;
+				if (inputJson["frame"].is_null()) continue;
+
 				input.frame = inputJson["frame"];
 				input.button = inputJson["btn"];
 				input.player2 = inputJson["2p"];
@@ -164,10 +173,13 @@ namespace gdr {
 				replay.inputs.push_back(input);
 			}
 
+			if (!replayJson.contains("frameFixes")) return replay;
+
 			for (json const& frameFixJson : replayJson["frameFixes"]) {
 				FrameFix frameFix;
 
 				if (!frameFixJson.contains("frame")) continue;
+				if (frameFixJson["frame"].is_null()) continue;
 
 				frameFix.frame = frameFixJson["frame"];
 
@@ -189,13 +201,16 @@ namespace gdr {
 					frameFix.p2.rotate = false;
 
 				} else if (frameFixJson.contains("p1")) {
+					bool rotation = replay.botInfo.version.find("beta.") == std::string::npos && replay.botInfo.version.find(".alpha") == std::string::npos;
+					if (replay.botInfo.name != "xdBot") rotation = false;
+
 					if (frameFixJson["p1"].contains("x"))
 						frameFix.p1.pos.x = frameFixJson["p1"]["x"];
 
 					if (frameFixJson["p1"].contains("y"))
 						frameFix.p1.pos.y = frameFixJson["p1"]["y"];
 
-					if (frameFixJson["p1"].contains("r"))
+					if (frameFixJson["p1"].contains("r") && rotation)
 						frameFix.p1.rotation = frameFixJson["p1"]["r"];
 
 					if (frameFixJson.contains("p2")) {
@@ -205,8 +220,8 @@ namespace gdr {
 						if (frameFixJson["p2"].contains("y"))
 							frameFix.p2.pos.y = frameFixJson["p2"]["y"];
 
-						if (frameFixJson["p2"].contains("r"))
-							frameFix.p2.rotation= frameFixJson["p2"]["r"];
+						if (frameFixJson["p2"].contains("r") && rotation)
+							frameFix.p2.rotation = frameFixJson["p2"]["r"];
 					}
 				} else continue;
 

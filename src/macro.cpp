@@ -76,6 +76,9 @@ void Macro::updateInfo(PlayLayer* pl) {
 
     if (g.macro.author == "")
         g.macro.author = "N/A";
+
+    g.macro.botInfo.name = "xdBot";
+    g.macro.botInfo.version = xdBotVersion;
 }
 
 int Macro::save(std::string author, std::string desc, std::string path, bool json) {

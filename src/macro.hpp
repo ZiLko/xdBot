@@ -17,6 +17,8 @@ const std::vector<float> safeValues = {
     1.0f / 5, 1.0f / 4, 1.0f / 3, 1.0f / 2
 };
 
+const std::string xdBotVersion = "v2.0.1";
+
 enum state {
     none,
     recording,
@@ -39,7 +41,7 @@ struct input : gdr::Input {
 
 struct Macro : gdr::Replay<Macro, input> {
 
-    Macro() : Replay("xdBot", "v2.0.0-beta.7") {}
+    Macro() : Replay("xdBot", xdBotVersion.c_str()) {}
 
 public:
 
@@ -87,7 +89,7 @@ struct PlayerData {
 #endif
     std::vector<float> m_playerFollowFloats;
     cocos2d::CCPoint position;
-    float rotationX;
+    float rotation;
     bool m_holdingRight;
     bool m_holdingLeft;
     cocos2d::CCNode* m_mainLayer;

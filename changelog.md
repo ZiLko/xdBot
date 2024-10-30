@@ -1,3 +1,9 @@
+# v2.0.1
+
+* Fixed crash if some macro info was null for whatever reason.
+* Fixed macro bot info saving bug.
+* Fixed practice rotation bug.
+
 # v2.0.0
 
 * Changed render FPS cap to 240 (more than 240 fps would need tps bypass lol).

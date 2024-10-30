@@ -299,7 +299,7 @@ class $modify(PlayLayer) {
 
     void destroyPlayer(PlayerObject * player, GameObject * gameObject) {
         if (t.creatingTrajectory || (player == t.fakePlayer1 || player == t.fakePlayer2)) {
-            t.deathRotation = player->getRotationX();
+            t.deathRotation = player->getRotation();
             t.cancelTrajectory = true;
             return;
         }
