@@ -35,21 +35,29 @@ class $modify(PlayLayer) {
 };
 
 void Interface::addLabels(PlayLayer* pl) {
-    CCLabelBMFont* stateLabel = CCLabelBMFont::create("", "chatFont.fnt");
-    stateLabel->setPosition({ CCDirector::sharedDirector()->getWinSize().width - 6.5f, 12 });
-    stateLabel->setAnchorPoint({ 1, 0.5 });
-    stateLabel->setID("state-label"_spr);
-    stateLabel->setZOrder(300);
-    stateLabel->setScale(0.625f);
-    pl->addChild(stateLabel);
+    CCLabelBMFont* lbl = CCLabelBMFont::create("", "chatFont.fnt");
+    lbl->setPosition({ CCDirector::sharedDirector()->getWinSize().width - 6.5f, 12 });
+    lbl->setAnchorPoint({ 1, 0.5 });
+    lbl->setID("state-label"_spr);
+    lbl->setZOrder(300);
+    lbl->setScale(0.625f);
+    pl->addChild(lbl);
 
-    CCLabelBMFont* frameLabel = CCLabelBMFont::create("", "chatFont.fnt");
-    frameLabel->setPosition({ 6.5f, 12 });
-    frameLabel->setAnchorPoint({ 0, 0.5 });
-    frameLabel->setID("frame-label"_spr);
-    frameLabel->setZOrder(300);
-    frameLabel->setScale(0.625f);
-    pl->addChild(frameLabel);
+    lbl = CCLabelBMFont::create("", "chatFont.fnt");
+    lbl->setPosition({ 6.5f, 12 });
+    lbl->setAnchorPoint({ 0, 0.5 });
+    lbl->setID("frame-label"_spr);
+    lbl->setZOrder(300);
+    lbl->setScale(0.625f);
+    pl->addChild(lbl);
+
+    lbl = CCLabelBMFont::create("Recording Audio", "bigFont.fnt");
+    lbl->setPosition(pl->getContentSize() / 2);
+    lbl->setID("recording-audio-label"_spr);
+    lbl->setZOrder(300);
+    lbl->setOpacity(75);
+    lbl->setVisible(false);
+    pl->addChild(lbl);
 
     Interface::updateLabels();
 }

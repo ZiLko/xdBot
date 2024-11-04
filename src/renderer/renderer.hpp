@@ -1,6 +1,10 @@
 #include "../includes.hpp"
 
-// const std::unordered_set<int> shaderRes = { 2608, 1304, 652 };
+enum AudioMode {
+    Off = 0,
+    Song = 1,
+    Record = 2
+};
 
 class MyRenderTexture {
 public:
@@ -19,11 +23,9 @@ public:
 
     volatile bool frameHasData;
     bool levelFinished = false;
-    bool visiting = false;
-    bool visitingShader = false;
-    bool addSong = true;
     bool recording = false;
     bool pause = false;
+    int audioMode = 0;
 
     bool dontRender = false;
     bool dontRecordAudio = false;
@@ -46,17 +48,12 @@ public:
     std::unordered_set<int> renderedFrames;
 
     FMODAudioEngine* fmod = nullptr;
-    ShaderLayer* shaderLayer = nullptr;
-
-    bool showError = false;
-    std::string errorMessage = "";
-
-    bool showNotif = false;
-    std::string notifMessage = "";
-
-    bool showSaving = false;
+    cocos2d::CCSize ogRes = {0, 0};
+    float ogScaleX = 1.f;
+    float ogScaleY = 1.f;
 
     void captureFrame();
+    void changeRes(bool og);
 
     void start();
     void startAudio(PlayLayer* pl);

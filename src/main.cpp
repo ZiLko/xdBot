@@ -22,16 +22,16 @@ class $modify(PlayLayer) {
     int delayedLevelRestart = -1;
   };
 
-  void postUpdate(float dt) { 
-    PlayLayer::postUpdate(dt);
-    auto& g = Global::get();
+  // void postUpdate(float dt) { 
+  //   PlayLayer::postUpdate(dt);
+  //   auto& g = Global::get();
 
-    if (m_fields->delayedLevelRestart != -1 && m_fields->delayedLevelRestart >= Global::getCurrentFrame()) {
-      m_fields->delayedLevelRestart = -1;
-      this->resetLevelFromStart();
-    }
+  //   if (m_fields->delayedLevelRestart != -1 && m_fields->delayedLevelRestart >= Global::getCurrentFrame()) {
+  //     m_fields->delayedLevelRestart = -1;
+  //     this->resetLevelFromStart();
+  //   }
 
-  }
+  // }
 
   void pauseGame(bool b1) {
     Global::updateKeybinds();
@@ -124,8 +124,8 @@ class $modify(PlayLayer) {
     if (!m_isPracticeMode)
       g.renderer.levelStartFrame = frame;
 
-    if (g.restart && m_levelSettings->m_platformerMode && g.state != state::none)
-      m_fields->delayedLevelRestart = frame + 1;
+    // if (g.restart && m_levelSettings->m_platformerMode && g.state != state::none)
+    //   m_fields->delayedLevelRestart = frame + 1;
 
     Global::updateSeed(true);
 

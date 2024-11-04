@@ -3,10 +3,16 @@
 #include "../includes.hpp"
 
 class RenderSettingsLayer : public geode::Popup<>, public TextInputDelegate {
+	
+public:
+
 	CCTextInputNode* argsInput = nullptr;
 	CCTextInputNode* audioArgsInput = nullptr;
 	CCTextInputNode* secondsInput = nullptr;
 	CCTextInputNode* videoArgsInput = nullptr;
+
+	CCMenuItemToggler* onlySongToggle = nullptr;
+	CCMenuItemToggler* recordAudioToggle = nullptr;
 
 	Mod* mod = nullptr;
 

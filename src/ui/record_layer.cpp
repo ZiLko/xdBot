@@ -77,9 +77,6 @@ class $modify(CCTextInputNode) {
     bool ccTouchBegan(cocos2d::CCTouch * v1, cocos2d::CCEvent * v2) {
         if (this->getID() == "android-disabled") return false;
 
-        if (this->getID() == "render-input" && Global::get().mod->getSavedValue<bool>("render_fix_shaders"))
-            return false;
-
         return CCTextInputNode::ccTouchBegan(v1, v2);
     }
 };
@@ -361,26 +358,22 @@ void RecordLayer::toggleSetting(CCObject* obj) {
     if (id == "macro_hide_speedhack" || id == "macro_hide_stepper" || id == "macro_always_show_buttons")
         Interface::updateButtons();
 
-    if (id == "render_fix_shaders") {
-        CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
-        CCObject* child;
-        CCARRAY_FOREACH(children, child) {
-            if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(child)) {
-                layer->onClose(nullptr);
-                break;
-            }
+    if (id == "render_only_song" && value) {
+        CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
+        if (RenderSettingsLayer* layer = getChildOfType<RenderSettingsLayer>(scene, 0)) {
+            if (!layer->recordAudioToggle) return;
+            layer->recordAudioToggle->toggle(false);
+            g.mod->setSavedValue("render_record_audio", false);
         }
+    }
 
-        // if (g.layer)
-        //     static_cast<RecordLayer*>(g.layer)->onClose(nullptr);
-
-        if (RenderSettingsLayer* layer = typeinfo_cast<RenderSettingsLayer*>(children->lastObject()))
-            layer->keyBackClicked();
-
-        RecordLayer::openMenu(true);
-        RenderSettingsLayer* layer = RenderSettingsLayer::create();
-        layer->m_noElasticity = true;
-        layer->show();
+    if (id == "render_record_audio" && value) {
+        CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
+        if (RenderSettingsLayer* layer = getChildOfType<RenderSettingsLayer>(scene, 0)) {
+            if (!layer->onlySongToggle) return;
+            layer->onlySongToggle->toggle(false);
+            g.mod->setSavedValue("render_only_song", false);
+        }
     }
 
     if (id == "menu_show_button") {

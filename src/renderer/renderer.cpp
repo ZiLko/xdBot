@@ -4,7 +4,6 @@
 
 #include <Geode/modify/GJBaseGameLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
-#include <Geode/modify/ShaderLayer.hpp>
 #include <Geode/modify/CCScheduler.hpp>
 #include <Geode/utils/web.hpp>
 
@@ -41,9 +40,12 @@ float leftOver = 0.f;
 class $modify(CCScheduler) {
 
     void update(float dt) {
-        if (!Global::get().renderer.recording) return CCScheduler::update(dt);
+        Renderer& r = Global::get().renderer;
+        if (!r.recording) return CCScheduler::update(dt);
 
         // CCScheduler::update(1.f / 240.f);
+
+        r.changeRes(false);
 
         using namespace std::literals;
         
@@ -61,6 +63,8 @@ class $modify(CCScheduler) {
         }
         
         leftOver += (dt - newDt * mult);
+
+        r.changeRes(true);
     }
 
 };
@@ -127,15 +131,6 @@ void Renderer::start() {
     GameManager* gm = GameManager::sharedState();
     Mod* mod = Mod::get();
     fmod = FMODAudioEngine::sharedEngine();
-    shaderLayer = getChildOfType<ShaderLayer>(pl, 0);
-
-    if (!mod->setSavedValue("render_shaders_warning", true)) {
-        FLAlertLayer::create(
-            "Warning",
-            "If your <cr>level has shaders</c>, consider enabling <cl>\"Fix Shaders\"</c> in render settings.",
-            "Ok"
-        )->show();
-    }
 
     fps = std::stoi(mod->getSavedValue<std::string>("render_fps"));
     codec = mod->getSavedValue<std::string>("render_codec");
@@ -144,34 +139,29 @@ void Renderer::start() {
     videoArgs = mod->getSavedValue<std::string>("render_video_args");
     extraAudioArgs = mod->getSavedValue<std::string>("render_audio_args");
     stopAfter = std::stof(mod->getSavedValue<std::string>("render_seconds_after"));
-    addSong = mod->getSavedValue<bool>("render_record_audio");
+    audioMode = AudioMode::Off;
+    if (mod->getSavedValue<bool>("render_only_song")) audioMode = AudioMode::Song;
+    if (mod->getSavedValue<bool>("render_record_audio")) audioMode = AudioMode::Record;
 
     auto now = std::chrono::system_clock::now();
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
     std::string filename = fmt::format("render_{}_{}.mp4", std::string_view(pl->m_level->m_levelName), std::to_string(timestamp));
     std::string path = (Mod::get()->getSettingValue<std::filesystem::path>("render_folder") / filename).string();
 
-    if (mod->getSavedValue<bool>("render_fix_shaders")) {
-        HWND hwnd = GetForegroundWindow();
-        RECT windowRect;
-        GetClientRect(hwnd, &windowRect);
-
-        width = std::stoi(std::to_string(static_cast<int>(windowRect.right - windowRect.left)));
-        height = std::stoi(std::to_string(static_cast<int>(windowRect.bottom - windowRect.top)));
-    }
-    else {
-        width = std::stoi(mod->getSavedValue<std::string>("render_width2"));
-        height = std::stoi(mod->getSavedValue<std::string>("render_height"));
-    }
+    width = std::stoi(mod->getSavedValue<std::string>("render_width2"));
+    height = std::stoi(mod->getSavedValue<std::string>("render_height"));
 
     if (width % 2 != 0)
         width++;
-        
     if (height % 2 != 0)
         height++;
 
     renderer.width = width;
     renderer.height = height;
+    ogRes = cocos2d::CCEGLView::get()->getDesignResolutionSize();
+    ogScaleX = cocos2d::CCEGLView::get()->m_fScaleX;
+    ogScaleY = cocos2d::CCEGLView::get()->m_fScaleY;
+    changeRes(false);
 
     dontRender = true;
     recording = true;
@@ -249,10 +239,10 @@ void Renderer::start() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        if (!addSong || !std::filesystem::exists(songFile) /*!std::filesystem::exists("fmodoutput.wav")*/) {
-            if (addSong) {
+        if (audioMode == AudioMode::Off || (audioMode == AudioMode::Song && !std::filesystem::exists(songFile)) || (audioMode == AudioMode::Record && !std::filesystem::exists("fmodoutput.wav"))) {
+            if (audioMode != AudioMode::Off) {
                 Loader::get()->queueInMainThread([] {
-                    FLAlertLayer::create("Error", "There was an error adding the song. ID: 25", "Ok")->show();
+                    FLAlertLayer::create("Error", "Song File not found.", "Ok")->show();
                 });
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -273,42 +263,43 @@ void Renderer::start() {
             return;
         }
 
-        auto tempPath = Utils::narrow(buffer) + "." + std::filesystem::path(path).filename().string();
+        std::string tempPath = Utils::narrow(buffer) + "." + std::filesystem::path(path).filename().string();
         std::filesystem::rename(buffer, tempPath);
         double totalTime = lastFrame_t;
 
-        // std::string tempPathAudio = (Mod::get()->getSaveDir() / "temp_audio_file.wav").string();
+        std::string tempPathAudio = (Mod::get()->getSaveDir() / "temp_audio_file.wav").string();
 
         // std::string tempPathAudio = tempPath;
 
-        // {
+        if (audioMode == AudioMode::Record) {
+            command = std::format("\"{}\" -i \"{}\" -acodec pcm_s16le -ar 44100 -ac 2 \"{}\"",
+                ffmpegPath,
+                "fmodoutput.wav",
+                tempPathAudio
+            );
 
-        //     command = std::format("\"{}\" -i \"{}\" -acodec pcm_s16le -ar 44100 -ac 2 \"{}\"",
-        //         ffmpegPath,
-        //         tempPath,
-        //         tempPathAudio
-        //     );
-
-        //     auto process = subprocess::Popen(command);  // Fix ffmpeg not reading it
-        //     if (process.close()) {
-        //         errorMessage = "There was an error adding the song. ID: 140";
-        //         showError = true;
-        //         return;
-        //     }
-        // }
+           process = subprocess::Popen(command);  // Fix ffmpeg not reading it
+            if (process.close()) {
+                Loader::get()->queueInMainThread([] {
+                    FLAlertLayer::create("Error", "There was an error adding the song. ID: 140", "Ok")->show();
+                });
+                return;
+            }
+        }
 
         {
-
-            std::string fadeInString = fadeIn ? ", afade=t=in:d=2" : "";
-            std::string fadeOutString = fadeOut ? fmt::format(", afade=t=out:d=2:st={}", totalTime - stopAfter - 3.5f) : "";
+            std::string fadeInString = (fadeIn && audioMode == AudioMode::Song) ? ", afade=t=in:d=2" : "";
+            std::string fadeOutString = (fadeOut && audioMode == AudioMode::Song) ? fmt::format(", afade=t=out:d=2:st={}", totalTime - stopAfter - 3.5f) : "";
+            std::string file = audioMode == AudioMode::Song ? songFile : tempPathAudio;
+            float offset = audioMode == AudioMode::Song ? songOffset : 0.28f;
 
             if (!extraAudioArgs.empty()) extraAudioArgs += " ";
 
             command = std::format(
                 "\"{}\" -y -ss {} -i \"{}\" -i \"{}\" -t {} -c:v copy {} -filter:a \"[1:a]adelay=0|0{}{}\" \"{}\"",
                 ffmpegPath,
-                songOffset,
-                songFile,
+                offset,
+                file,
                 path,
                 totalTime,
                 extraAudioArgs,
@@ -322,17 +313,16 @@ void Renderer::start() {
             auto process = subprocess::Popen(command);
             if (process.close()) {
                 Loader::get()->queueInMainThread([] {
-                    FLAlertLayer::create("Error", "There was an error adding the song. ID: 14", "Ok")->show();
+                    FLAlertLayer::create("Error", "There was an error adding the song. Wrong Audio Args.", "Ok")->show();
                 });
                 return;
             }
-
         }
 
         std::filesystem::remove(Utils::widen(path));
         std::filesystem::rename(tempPath, Utils::widen(path));
-        // std::filesystem::remove(tempPathAudio);
-        // std::filesystem::remove("fmodoutput.wav");
+        std::filesystem::remove(tempPathAudio);
+        std::filesystem::remove("fmodoutput.wav");
 
         Loader::get()->queueInMainThread([] {
             Notification::create("Render Saved With Audio", NotificationIcon::Success)->show();
@@ -345,33 +335,56 @@ void Renderer::start() {
 
 void Renderer::stop(int frame) {
 #ifdef GEODE_IS_WINDOWS
-    auto& g = Global::get();
+    pause = true;
+    recording = false;
+    timeAfter = 0.f;
+    renderedFrames.clear();
+    finishFrame = frame;
 
-    g.renderer.pause = true;
-    g.renderer.recording = false;
-    g.renderer.timeAfter = 0.f;
-    g.renderer.renderedFrames.clear();
-    // g.renderer.finishFrame = frame;
+    if (PlayLayer* pl = PlayLayer::get()) {
+        if (pl->m_hasCompletedLevel)
+            finishFrame = 0;
 
-    // if (PlayLayer* pl = PlayLayer::get()) {
-    //     if (pl->m_hasCompletedLevel)
-    //         g.renderer.finishFrame = 0;
+        if (pl->m_isPaused && audioMode == AudioMode::Record) {
+            if (PauseLayer* layer = Global::getPauseLayer()) {
+                layer->onResume(nullptr);
+                CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
+                if (RecordLayer* xdbot = getChildOfType<RecordLayer>(scene, 0))
+                    xdbot->onClose(nullptr);
+            }
+        }
+    }
 
-    //     if (pl->m_isPaused && g.renderer.addSong) {
-    //         if (PauseLayer* layer = Global::getPauseLayer())
-    //             layer->onResume(nullptr);
-    //     }
-    // }
+    if (audioMode == AudioMode::Record) {
+        recordingAudio = true;
+        dontRecordAudio = true;
+        Notification::create("Recording Audio...", NotificationIcon::Loading)->show();
+    }
 
-    // if (g.renderer.addSong) {
-        // g.renderer.recordingAudio = true;
-        // g.renderer.dontRecordAudio = true;
-        // Notification::create("Recording Audio...", NotificationIcon::Loading)->show();
-    // }
-
-    g.renderer.pause = false;
+    pause = false;
+    changeRes(true);
 
 #endif
+}
+
+void Renderer::changeRes(bool og) {
+    #ifdef GEODE_IS_WINDOWS
+    cocos2d::CCEGLView* view = cocos2d::CCEGLView::get();
+    cocos2d::CCSize res = {0, 0};
+    float scaleX = 1.f;
+    float scaleY = 1.f;
+
+    res = og ? ogRes : CCSize(320.f * (width / static_cast<float>(height)), 320.f);
+    scaleX = og ? ogScaleX : (width / res.width);
+    scaleY = og ? ogScaleY : (height / res.height);
+
+    if (res == CCSize(0, 0) && !og) return changeRes(true);
+       
+    CCDirector::sharedDirector()->m_obWinSizeInPoints = res;
+    view->setDesignResolutionSize(res.width, res.height, ResolutionPolicy::kResolutionExactFit);
+    view->m_fScaleX = scaleX;
+    view->m_fScaleY = scaleY;
+    #endif
 }
 
 void MyRenderTexture::begin() {
@@ -412,12 +425,7 @@ void MyRenderTexture::capture(std::mutex& lock, std::vector<uint8_t>& data, vola
     glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
 
     CCDirector* director = CCDirector::sharedDirector();
-
-    Global::get().renderer.visiting = true;
-
     PlayLayer::get()->visit();
-
-    Global::get().renderer.visiting = false;
 
     glPixelStorei(GL_PACK_ALIGNMENT, 1);
     lock.lock();
@@ -501,12 +509,17 @@ void Renderer::startAudio(PlayLayer* pl) {
 
         FMODAudioEngine::sharedEngine()->m_system->setOutput(FMOD_OUTPUTTYPE_WAVWRITER);
         startedAudio = true;
+        if (CCNode* lbl = pl->getChildByID("recording-audio-label"_spr))
+            lbl->setVisible(true);
     }
 }
 
 void Renderer::stopAudio() {
     FMODAudioEngine::sharedEngine()->m_system->setOutput(FMOD_OUTPUTTYPE_AUTODETECT);
     recordingAudio = false;
+    if (!PlayLayer::get()) return;
+    if (CCNode* lbl = PlayLayer::get()->getChildByID("recording-audio-label"_spr))
+            lbl->setVisible(false);
 }
 
 void Renderer::handleAudioRecording(PlayLayer* pl, int frame) {

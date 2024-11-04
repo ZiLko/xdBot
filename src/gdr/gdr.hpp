@@ -149,9 +149,9 @@ namespace gdr {
 			if (replayJson.contains("framerate"))
 				replay.framerate = replayJson["framerate"];
 
-			bool xd = replay.botInfo.version.find("beta.") == std::string::npos;
 			bool rotation = replay.botInfo.version.find("beta.") == std::string::npos && replay.botInfo.version.find("alpha.") == std::string::npos;
-			if (replay.botInfo.name != "xdBot" || (replay.botInfo.name == "xdBot" && replay.botInfo.version == "v2.0.0")) rotation = true;
+			bool addOffset = false;
+			if (replay.botInfo.name == "xdBot" && replay.botInfo.version == "v2.0.0") rotation = true;
 
 			replay.parseExtension(replayJson.get<json::object_t>());
 
@@ -164,7 +164,7 @@ namespace gdr {
 				if (!inputJson.contains("frame")) continue;
 				if (inputJson["frame"].is_null()) continue;
 
-				input.frame = inputJson["frame"];
+				input.frame = inputJson["frame"].get<int>() - (addOffset ? 1 : 0);
 				input.button = inputJson["btn"];
 				input.player2 = inputJson["2p"];
 				input.down = inputJson["down"];
@@ -181,7 +181,7 @@ namespace gdr {
 				if (!frameFixJson.contains("frame")) continue;
 				if (frameFixJson["frame"].is_null()) continue;
 
-				frameFix.frame = frameFixJson["frame"];
+				frameFix.frame = frameFixJson["frame"].get<int>() - (addOffset ? 1 : 0);
 
 				if (frameFixJson.contains("player1")) {
 

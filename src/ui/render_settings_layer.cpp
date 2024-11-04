@@ -33,8 +33,8 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
             g.mod->setSavedValue("render_args", std::string("-pix_fmt yuv420p"));
 	        g.mod->setSavedValue("render_audio_args", std::string(""));
             g.mod->setSavedValue("render_video_args", std::string("colorspace=all=bt709:iall=bt470bg:fast=1"));
-            g.mod->setSavedValue("render_fix_shaders", false);
             g.mod->setSavedValue("render_record_audio", true);
+            g.mod->setSavedValue("render_only_song", false);
 
 	        CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
             CCObject* child;
@@ -204,33 +204,33 @@ bool RenderSettingsLayer::setup() {
     lbl->setScale(0.825);
     menu->addChild(lbl);
 
-    lbl = CCLabelBMFont::create("Fix shaders:", "bigFont.fnt");
+    lbl = CCLabelBMFont::create("Only Add Song:", "bigFont.fnt");
     lbl->setPosition(ccp(-105, -32));
     lbl->setAnchorPoint({ 0, 0.5 });
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
 
-    CCMenuItemToggler* toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
-    toggle->setPosition(ccp(0, -32));
-    toggle->setScale(0.555);
-    toggle->toggle(mod->getSavedValue<bool>("render_fix_shaders"));
-    toggle->setID("render_fix_shaders");
-    menu->addChild(toggle);
+    onlySongToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    onlySongToggle->setPosition(ccp(0, -32));
+    onlySongToggle->setScale(0.555);
+    onlySongToggle->toggle(mod->getSavedValue<bool>("render_only_song"));
+    onlySongToggle->setID("render_only_song");
+    menu->addChild(onlySongToggle);
 
-    lbl = CCLabelBMFont::create("Add Song:", "bigFont.fnt");
+    lbl = CCLabelBMFont::create("Record Audio:", "bigFont.fnt");
     lbl->setPosition(ccp(-105, -58));
     lbl->setAnchorPoint({ 0, 0.5 });
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
 
-    toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
-    toggle->setPosition(ccp(0, -58));
-    toggle->setScale(0.555);
-    toggle->toggle(mod->getSavedValue<bool>("render_record_audio"));
-    toggle->setID("render_record_audio");
-    menu->addChild(toggle);
+    recordAudioToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    recordAudioToggle->setPosition(ccp(0, -58));
+    recordAudioToggle->setScale(0.555);
+    recordAudioToggle->toggle(mod->getSavedValue<bool>("render_record_audio"));
+    recordAudioToggle->setID("render_record_audio");
+    menu->addChild(recordAudioToggle);
 
     ButtonSprite* spr = ButtonSprite::create("Ok");
     spr->setScale(0.875);

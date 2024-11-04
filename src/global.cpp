@@ -330,12 +330,16 @@ $execute{
   if (!g.mod->setSavedValue("defaults_set6", true))
     g.mod->setSavedValue("render_args", std::string("-pix_fmt yuv420p"));
 
+  if (!g.mod->setSavedValue("defaults_set7", true)) {
+    g.mod->setSavedValue("render_seconds_after", std::to_string(2));
+    g.mod->setSavedValue("render_record_audio", true);
+  }
+
   if (!g.mod->setSavedValue("defaults_set3", true)) {
     g.mod->setSavedValue("render_width2", std::to_string(1920));
     g.mod->setSavedValue("render_height", std::to_string(1080));
     g.mod->setSavedValue("render_bitrate", std::to_string(12));
     g.mod->setSavedValue("render_fps", std::to_string(60));
-    g.mod->setSavedValue("render_seconds_after", std::to_string(5));
     g.mod->setSavedValue("render_video_args", std::string("colorspace=all=bt709:iall=bt470bg:fast=1"));
 
     #ifdef GEODE_IS_WINDOWS

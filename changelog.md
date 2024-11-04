@@ -1,3 +1,9 @@
+# v2.0.2
+
+* Added render audio record.
+* Improved render shaders.
+* Made it possible to continue platformer macros.
+
 # v2.0.1
 
 * Fixed crash if some macro info was null for whatever reason.
