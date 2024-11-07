@@ -42,35 +42,9 @@ class $modify(CCKeyboardDispatcher) {
     }
 
 
-    if (key == enumKeyCodes::KEY_J && !isKeyRepeat && isKeyDown) {
-      //  std::string str = ZipUtils::decompressString(PlayLayer::get()->m_level->m_levelString.c_str(), true, 0);
-    // auto strs = Utils::splitByChar(str, ';');
-
-    //   auto start = std::chrono::high_resolution_clock::now();
-
-    // std::string lole = LayoutMode::mergeVector(strs, ";");
-
-    // auto endd = std::chrono::high_resolution_clock::now();
-
-    // std::chrono::duration<double, std::milli> elapsed = endd - start;
-
-    // log::debug("{}", str);
-    
-    }
-     
-      // MacroEditLayer::create()->show();
-       
     // if (key == enumKeyCodes::KEY_J && !isKeyRepeat && isKeyDown) {
-      // CCKeyboardDispatcher::get()->dispatchKeyboardMSG(enumKeyCodes::KEY_Space, true, false);
-      // CCKeyboardDispatcher::get()->dispatchKeyboardMSG(enumKeyCodes::KEY_Space, false, false);
-      // auto layer = static_cast<EndLevelLayer*>(PlayLayer::get()->getChildByID("EndLevelLayer"));
-      // layer->onReplay(static_cast<CCObject*>(layer->m_mainLayer->getChildByID("button-menu")->getChildByID("retry-button")));
-
+    
     // }
-    /*if (key == enumKeyCodes::KEY_L && !isKeyRepeat && isKeyDown) {
-
-    }*/
-
 
     return CCKeyboardDispatcher::dispatchKeyboardMSG(key, isKeyDown, isKeyRepeat);
   }

@@ -31,6 +31,7 @@ public:
     bool dontRecordAudio = false;
     bool recordingAudio = false;
     bool startedAudio = false;
+    bool isPlatformer = false;
     int finishFrame = 0;
     int levelStartFrame = 0;
 

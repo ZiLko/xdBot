@@ -291,7 +291,7 @@ void Renderer::start() {
             std::string fadeInString = (fadeIn && audioMode == AudioMode::Song) ? ", afade=t=in:d=2" : "";
             std::string fadeOutString = (fadeOut && audioMode == AudioMode::Song) ? fmt::format(", afade=t=out:d=2:st={}", totalTime - stopAfter - 3.5f) : "";
             std::string file = audioMode == AudioMode::Song ? songFile : tempPathAudio;
-            float offset = audioMode == AudioMode::Song ? songOffset : 0.28f;
+            float offset = audioMode == AudioMode::Song ? songOffset : (isPlatformer ? 0.28f : 0.f);
 
             if (!extraAudioArgs.empty()) extraAudioArgs += " ";
 
@@ -451,6 +451,7 @@ void Renderer::handleRecording(PlayLayer* pl, int frame) {
 #ifdef GEODE_IS_WINDOWS
 
     if (!pl) stop();
+    isPlatformer = pl->m_levelSettings->m_platformerMode;
     if (dontRender || pl->m_player1->m_isDead) return;
 
     auto& g = Global::get();

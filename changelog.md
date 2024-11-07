@@ -1,3 +1,7 @@
+# v2.0.3
+
+* Fixed render record audio desync i think xD.
+
 # v2.0.2
 
 * Added render audio record.
