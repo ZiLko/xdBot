@@ -3,7 +3,7 @@
 
 #include "ui/button_setting.hpp"
 
-#include <Geode/loader/SettingNode.hpp>
+// #include <Geode/loader/SettingNode.hpp>
 
 #ifdef GEODE_IS_WINDOWS
 
@@ -37,11 +37,11 @@ bool Global::hasIncompatibleMods() {
 
   if (Mod* mod = Loader::get()->getLoadedMod("firee.prism")) {
     auto json = mod->getSavedValue<matjson::Value>("values");
-    for (const auto& obj : json.as_array()) {
+    for (const auto& obj : json.asArray().unwrap()) {
 
-      if (obj["name"] != "TPS Bypass") continue;
+      if (obj["name"].asString().unwrap() != "TPS Bypass") continue;
 
-      if (obj["value"] != 240)
+      if (obj["value"].asInt().unwrap() != 240)
         settingsToDisable.push_back("<cr>TPS Bypass (Prism Menu)</c>");
 
       break;
@@ -109,7 +109,7 @@ bool Global::hasIncompatibleMods() {
       if (sett.isModToggle)
         modsToDisable.push_back(modName);
       else {
-        std::string settName = sett.isSavedValue ? sett.ID : mod->getSettingDefinition(sett.ID)->getDisplayName();
+        std::string settName = sett.isSavedValue ? sett.ID : mod->getSetting(sett.ID)->getDisplayName();
         settingsToDisable.push_back(fmt::format("{} ({})", settName, modName));
       }
 
@@ -189,7 +189,7 @@ void Global::updateSeed(bool isRestart) {
     uintptr_t seed = static_cast<uintptr_t>(ull);
 
 #ifdef GEODE_IS_WINDOWS
-    * (uintptr_t*)((char*)geode::base::get() + seedAddr) = seed;
+    *(uintptr_t*)((char*)geode::base::get() + seedAddr) = seed;
 #else
     GameToolbox::fast_srand(seed);
 #endif
@@ -303,16 +303,16 @@ PauseLayer* Global::getPauseLayer() {
   return nullptr;
 }
 
-SettingNode* ButtonSettingValue::createNode(float width) {
-  return ButtonSettingNode::create(this, width);
-}
+// SettingNode* ButtonSettingValue::createNode(float width) {
+//   return ButtonSettingNode::create(this, width);
+// }
 
-$on_mod(Loaded) {
-  auto& g = Global::get();
-  g.mod = Mod::get();
+// $on_mod(Loaded) {
+//   auto& g = Global::get();
+//   g.mod = Mod::get();
 
-  g.mod->addCustomSetting<ButtonSettingValue>("button", "none");
-}
+//   g.mod->addCustomSetting<ButtonSettingValue>("button", "none");
+// }
 
 $execute{
     auto & g = Global::get();

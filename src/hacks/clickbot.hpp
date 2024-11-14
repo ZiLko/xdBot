@@ -16,16 +16,16 @@ struct matjson::Serialize<ClickSetting> {
     static ClickSetting from_json(matjson::Value const& value) {
         ClickSetting setts;
 
-        setts.disabled = value["disabled"].as_bool();
-        setts.path = std::filesystem::path(value["path"].as_string());
-        setts.volume = value["volume"].as_int();
-        setts.pitch = static_cast<float>(value["pitch"].as_double());
+        setts.disabled = value["disabled"].asBool().unwrap();
+        setts.path = std::filesystem::path(value["path"].asString().unwrap());
+        setts.volume = value["volume"].asInt().unwrap();
+        setts.pitch = static_cast<float>(value["pitch"].asDouble().unwrap());
 
         return setts;
     }
 
     static matjson::Value to_json(ClickSetting const& sett) {
-        auto obj = matjson::Object();
+        matjson::Value obj;
 
         obj["disabled"] = sett.disabled;
         obj["path"] = sett.path.string();

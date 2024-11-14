@@ -167,7 +167,7 @@ class $modify(EndLevelLayer) {
             ));
 			btn->setPosition({160, -99});
 
-			CCLayer* layer = getChildOfType<CCLayer>(this, 0);
+			CCLayer* layer = this->getChildByType<CCLayer>(0);
 
 			CCMenu* menu = CCMenu::create();
             menu->setID("button-menu"_spr);

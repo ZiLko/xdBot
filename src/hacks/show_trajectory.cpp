@@ -80,7 +80,7 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
         fakePlayer->m_collisionLogLeft->removeAllObjects();
         fakePlayer->m_collisionLogRight->removeAllObjects();
 
-        pl->checkCollisions(fakePlayer, delta, false);
+        pl->checkCollisions(fakePlayer, t.delta, false);
 
         if (t.cancelTrajectory) {
             fakePlayer->updatePlayerScale();
@@ -94,8 +94,8 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
                 realPlayer->m_isGoingLeft ? fakePlayer->pushButton(static_cast<PlayerButton>(2)) : fakePlayer->pushButton(static_cast<PlayerButton>(3));
         }
 
-        fakePlayer->update(delta);
-        fakePlayer->updateRotation(delta);
+        fakePlayer->update(t.delta);
+        fakePlayer->updateRotation(t.delta);
         fakePlayer->updatePlayerScale();
 
         cocos2d::ccColor4F color = hold ? t.color2 : t.color1;
@@ -111,21 +111,17 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
         t.trajectoryNode()->drawSegment(prevPos, fakePlayer->getPosition(), 0.6f, color);
 
     }
-
 }
 
 void ShowTrajectory::drawPlayerHitbox(PlayerObject* player, CCDrawNode* drawNode) {
-    cocos2d::CCRect bigRect = player->getObjectRect();
-    cocos2d::CCRect smallRect = player->getObjectRect(0.3, 0.3);
+    cocos2d::CCRect bigRect = player->GameObject::getObjectRect();
+    cocos2d::CCRect smallRect = player->GameObject::getObjectRect(0.3, 0.3);
 
     std::vector<cocos2d::CCPoint> vertices = ShowTrajectory::getVertices(player, bigRect, t.deathRotation);
-
     drawNode->drawPolygon(&vertices[0], 4, ccc4f(t.color1.r, t.color1.g, t.color1.b, 0.2f), 0.5, t.color1);
 
     vertices = ShowTrajectory::getVertices(player, smallRect, t.deathRotation);
-
     drawNode->drawPolygon(&vertices[0], 4, ccc4f(t.color3.r, t.color3.g, t.color3.b, 0.2f), 0.35, ccc4f(t.color3.r, t.color3.g, t.color3.b, 0.55f));
-
 }
 
 std::vector<cocos2d::CCPoint> ShowTrajectory::getVertices(PlayerObject* player, cocos2d::CCRect rect, float rotation) {
@@ -434,11 +430,10 @@ class $modify(GJBaseGameLayer) {
             GJBaseGameLayer::activateSongEditTrigger(p0);
 
     }
-    void activateSongTrigger(SongTriggerGameObject * p0) {
-        if (!t.creatingTrajectory)
-            GJBaseGameLayer::activateSongTrigger(p0);
-
-    }
+    // void activateSongTrigger(SongTriggerGameObject * p0) {
+    //     if (!t.creatingTrajectory)
+    //         GJBaseGameLayer::activateSongTrigger(p0);
+    // }
 
     void gameEventTriggered(GJGameEvent p0, int p1, int p2) {
         if (!t.creatingTrajectory)
@@ -461,6 +456,11 @@ class $modify(PlayerObject) {
 
         if (!self.setHookPriority("PlayerObject::ringJump", 100))
             log::warn("PlayerObject::ringJump hook priority fail xD.");
+    }
+
+    void update(float dt) {
+        PlayerObject::update(dt);
+        t.delta = dt;
     }
 
     void playSpiderDashEffect(cocos2d::CCPoint p0, cocos2d::CCPoint p1) {

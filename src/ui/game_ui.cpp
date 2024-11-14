@@ -77,7 +77,7 @@ void Interface::addButtons(PlayLayer* pl) {
     CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(spr, pl, menu_selector(Interface::onFrameStepper));
     btn->setAnchorPoint({ 0, 0 });
     btn->setID("step-frame-btn");
-    CCSprite* sprite = getChildOfType<CCSprite>(btn, 0);
+    CCSprite* sprite = btn->getChildByType<CCSprite>(0);
     sprite->setPosition({ 0, 0 });
 
     menu->addChild(btn);
@@ -87,7 +87,7 @@ void Interface::addButtons(PlayLayer* pl) {
     btn = CCMenuItemSpriteExtra::create(spr, pl, menu_selector(Interface::onFrameStepperOff));
     btn->setID("disable-stepper-btn");
     btn->setAnchorPoint({ 0, 0 });
-    sprite = getChildOfType<CCSprite>(btn, 0);
+    sprite = btn->getChildByType<CCSprite>(0);
     sprite->setPosition({ 0, 0 });
 
     menu->addChild(btn);
@@ -97,7 +97,7 @@ void Interface::addButtons(PlayLayer* pl) {
     btn = CCMenuItemSpriteExtra::create(spr, pl, menu_selector(Interface::onSpeedhack));
     btn->setAnchorPoint({ 0, 0 });
     btn->setID("speedhack-btn");
-    sprite = getChildOfType<CCSprite>(btn, 0);
+    sprite = btn->getChildByType<CCSprite>(0);
     sprite->setPosition({ 0, 0 });
 
     menu->addChild(btn);
@@ -167,7 +167,7 @@ void Interface::updateButtons() {
 
     float scale = g.mod->getSavedValue<float>("button_off_scale");
 
-    CCSprite* sprite = getChildOfType<CCSprite>(disableStepperBtn, 0);
+    CCSprite* sprite = disableStepperBtn->getChildByType<CCSprite>(0);
     sprite->setScale(scale);
     sprite->setOpacity(static_cast<int>(g.mod->getSavedValue<float>("button_off_opacity") * 255));
     sprite->setAnchorPoint({ 0, 0 });
@@ -182,7 +182,7 @@ void Interface::updateButtons() {
 
     scale = g.mod->getSavedValue<float>("button_advance_frame_scale");
 
-    sprite = getChildOfType<CCSprite>(stepFrameBtn, 0);
+    sprite = stepFrameBtn->getChildByType<CCSprite>(0);
     sprite->setScale(scale);
     sprite->setOpacity(static_cast<int>(g.mod->getSavedValue<float>("button_advance_frame_opacity") * 255));
     sprite->setAnchorPoint({ 0, 0 });
@@ -197,7 +197,7 @@ void Interface::updateButtons() {
 
     scale = g.mod->getSavedValue<float>("button_speedhack_scale");
 
-    sprite = getChildOfType<CCSprite>(speedhackBtn, 0);
+    sprite = speedhackBtn->getChildByType<CCSprite>(0);
     sprite->setScale(scale);
     sprite->setOpacity(static_cast<int>(g.mod->getSavedValue<float>("button_speedhack_opacity") * 255));
     sprite->setAnchorPoint({ 0, 0 });

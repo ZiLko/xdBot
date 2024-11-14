@@ -399,6 +399,11 @@ bool MacroEditLayer::setup() {
 }
 
 void MacroEditLayer::loadPage(int page) {
+    cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
+    m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
+    m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
+    m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
+    
     currentPage = page;
 
     pageInput->setString(std::to_string(currentPage).c_str());
@@ -421,15 +426,15 @@ void MacroEditLayer::loadPage(int page) {
 
     bool disableArrows = inputs.size() <= 6;
 
-    getChildOfType<CCSprite>(deleteBtn, 0)->setOpacity(empty ? 130 : 255);
+    deleteBtn->getChildByType<CCSprite>(0)->setOpacity(empty ? 130 : 255);
     deleteBtn->setEnabled(!empty);
 
-    getChildOfType<CCSprite>(pageLeftBtn, 0)->setOpacity((disableArrows && !empty) || inputs.empty() ? 130 : 255);
+    pageLeftBtn->getChildByType<CCSprite>(0)->setOpacity((disableArrows && !empty) || inputs.empty() ? 130 : 255);
     pageLeftBtn->setEnabled(!((disableArrows && !empty) || inputs.empty()));
 
     disableArrows = disableArrows || (empty && !inputs.empty());
 
-    getChildOfType<CCSprite>(pageRightBtn, 0)->setOpacity(disableArrows ? 130 : 255);
+    pageRightBtn->getChildByType<CCSprite>(0)->setOpacity(disableArrows ? 130 : 255);
     pageRightBtn->setEnabled(!disableArrows);
 
     for (int i = 0; i < 7; i++)
@@ -904,9 +909,9 @@ void MacroEditLayer::onSave(CCObject*) {
 }
 
 void MacroEditLayer::toggleSaveButton(bool toggle) {
-    ButtonSprite* btnSpr = getChildOfType<ButtonSprite>(saveBtn, 0);
-    CCScale9Sprite* spr = getChildOfType<CCScale9Sprite>(btnSpr, 0);
-    CCLabelBMFont* lbl = getChildOfType<CCLabelBMFont>(btnSpr, 0);
+    ButtonSprite* btnSpr = saveBtn->getChildByType<ButtonSprite>(0);
+    CCScale9Sprite* spr = btnSpr->getChildByType<CCScale9Sprite>(0);
+    CCLabelBMFont* lbl = btnSpr->getChildByType<CCLabelBMFont>(0);
 
     saveBtn->setEnabled(toggle);
     spr->setOpacity(toggle ? 255 : 130);

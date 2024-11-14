@@ -349,7 +349,7 @@ void Renderer::stop(int frame) {
             if (PauseLayer* layer = Global::getPauseLayer()) {
                 layer->onResume(nullptr);
                 CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
-                if (RecordLayer* xdbot = getChildOfType<RecordLayer>(scene, 0))
+                if (RecordLayer* xdbot = scene->getChildByType<RecordLayer>(0))
                     xdbot->onClose(nullptr);
             }
         }
@@ -488,7 +488,7 @@ void Renderer::handleRecording(PlayLayer* pl, int frame) {
 }
 
 void Renderer::startAudio(PlayLayer* pl) {
-    bool endLevelLayer = getChildOfType<EndLevelLayer>(pl, 0) != nullptr;
+    bool endLevelLayer = pl->getChildByType<EndLevelLayer>(0) != nullptr;
     if (dontRecordAudio) return;
 
     if (pl->m_levelEndAnimationStarted && endLevelLayer) {

@@ -360,7 +360,7 @@ void RecordLayer::toggleSetting(CCObject* obj) {
 
     if (id == "render_only_song" && value) {
         CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
-        if (RenderSettingsLayer* layer = getChildOfType<RenderSettingsLayer>(scene, 0)) {
+        if (RenderSettingsLayer* layer = scene->getChildByType<RenderSettingsLayer>(0)) {
             if (!layer->recordAudioToggle) return;
             layer->recordAudioToggle->toggle(false);
             g.mod->setSavedValue("render_record_audio", false);
@@ -369,7 +369,7 @@ void RecordLayer::toggleSetting(CCObject* obj) {
 
     if (id == "render_record_audio" && value) {
         CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
-        if (RenderSettingsLayer* layer = getChildOfType<RenderSettingsLayer>(scene, 0)) {
+        if (RenderSettingsLayer* layer = scene->getChildByType<RenderSettingsLayer>(0)) {
             if (!layer->onlySongToggle) return;
             layer->onlySongToggle->toggle(false);
             g.mod->setSavedValue("render_only_song", false);
@@ -393,21 +393,21 @@ void RecordLayer::toggleSetting(CCObject* obj) {
 }
 
 void RecordLayer::openKeybinds(CCObject*) {
-#ifdef GEODE_IS_WINDOWS
+// #ifdef GEODE_IS_WINDOWS
 
-    MoreOptionsLayer::create()->onKeybindings(nullptr);
-    if (!mod->setSavedValue("opened_keybinds", true))
-        FLAlertLayer::create(
-            "Warning",
-            "Scroll down to find xdBot's keybinds",
-            "Ok"
-        )->show();
+//     MoreOptionsLayer::create()->onKeybindings(nullptr);
+//     if (!mod->setSavedValue("opened_keybinds", true))
+//         FLAlertLayer::create(
+//             "Warning",
+//             "Scroll down to find xdBot's keybinds",
+//             "Ok"
+//         )->show();
 
-#else
+// #else
 
     Interface::openButtonEditor();
 
-#endif
+// #endif
 }
 
 void RecordLayer::openRendersFolder(CCObject*) {
@@ -456,6 +456,11 @@ bool RecordLayer::setup() {
     mod = g.mod;
 
     Utils::setBackgroundColor(m_bgSprite);
+    
+    cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
+    m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
+    m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
+    m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
 
     m_closeBtn->setPosition(m_closeBtn->getPosition() + ccp(-6.75, 6.75));
     m_closeBtn->setScale(0.675);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Geode/Geode.hpp>
-#include <Geode/loader/SettingEvent.hpp>
+// #include <Geode/loader/SettingEvent.hpp>
 
 #include <string>
 #include <thread>
@@ -15,7 +15,7 @@
 
 using namespace geode::prelude;
 
-const int seedAddr = 0x687dd0;
+const int seedAddr = 0x6a4e20;
 
 const int indexButton[6] = { 1, 2, 3, 1, 2, 3 };
 
@@ -37,7 +37,7 @@ const std::string buttonIDs[6] = {
 #define STATIC_CREATE(class, width, height) \
     static class* create() { \
         class* ret = new class(); \
-        if (ret->init(width, height, Utils::getTexture().c_str())) { \
+        if (ret->initAnchored(width, height, Utils::getTexture().c_str())) { \
             ret->autorelease(); \
             return ret; \
         } \

@@ -215,19 +215,6 @@ class $modify(BGLHook, GJBaseGameLayer) {
 
     if (g.state != state::none || rendering) {
 
-      // if (dt != 0.004166667f) {
-      //   if (!pl->m_isPaused)
-      //     pl->pauseGame(false);
-
-      //   g.state == state::playing ? Macro::togglePlaying() : Macro::toggleRecording();
-
-      //   FLAlertLayer::create(
-      //     "Warning",
-      //     "<cr>TPS</c> / <cr>Physics</c> bypass detected. Disable it to keep using xdBot.",
-      //     "Ok"
-      //   )->show();
-      // }
-
       if (!g.firstAttempt) {
         g.renderer.dontRender = false;
         g.renderer.dontRecordAudio = false;

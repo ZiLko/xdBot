@@ -55,11 +55,17 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
 }
 
 bool RenderSettingsLayer::setup() {
+    setTitle("Render Settings");
+
+    cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
+    m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
+    m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
+    m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
+    m_title->setPosition(m_title->getPosition() + offset);
+    
     mod = Mod::get();
     
     Utils::setBackgroundColor(m_bgSprite);
-
-    setTitle("Render Settings");
 
     if (mod->getSavedValue<std::string>("render_seconds_after") == "")
         mod->setSavedValue("render_seconds_after", std::to_string(0));

@@ -5,7 +5,7 @@
 class $modify(CCMenu) {
 	virtual bool ccTouchBegan(cocos2d::CCTouch* touch, cocos2d::CCEvent* event) {
 		CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
-		LoadMacroLayer* layer = getChildOfType<LoadMacroLayer>(scene, 0);
+		LoadMacroLayer* layer = scene->getChildByType<LoadMacroLayer>(0);
 
         if (!layer) return CCMenu::ccTouchBegan(touch, event);
 
@@ -56,14 +56,16 @@ void LoadMacroLayer::textChanged(CCTextInputNode* node) {
 }
 
 void LoadMacroLayer::reloadList(int amount) {
-	if (CCNode* scrollbar = m_mainLayer->getChildByID("scrollbar"))
+	if (CCNode* scrollbar = m_buttonMenu->getChildByID("scrollbar"))
 		scrollbar->removeFromParentAndCleanup(true);
 
-	if (CCNode* lbl = m_mainLayer->getChildByID("no-macros-label"))
+	if (CCNode* lbl = menu->getChildByID("no-macros-label"))
 		lbl->removeFromParentAndCleanup(true);
 
-	CCNode* listLayer = m_mainLayer->getChildByID("list-layer");
-	ListView* listView = getChildOfType<ListView>(listLayer, 0);
+	CCNode* listLayer = m_buttonMenu->getChildByID("list-layer");
+	if (!listLayer) return;
+
+	ListView* listView = listLayer->getChildByType<ListView>(0);
 
 	CCLayer* contentLayer = nullptr;
 	contentLayer = typeinfo_cast<CCLayer*>(listView->m_tableView->getChildren()->objectAtIndex(0));
@@ -77,7 +79,8 @@ void LoadMacroLayer::reloadList(int amount) {
 		posY = contentLayer->getPositionY();
 	}
 	listLayer->removeFromParentAndCleanup(true);
-	m_mainLayer->getChildByID("background")->removeFromParentAndCleanup(true);
+	if (CCNode* bg = m_buttonMenu->getChildByID("background"))
+		bg->removeFromParentAndCleanup(true);
 
 	selectedMacros.clear();
 	allMacros.clear();
@@ -123,7 +126,7 @@ void LoadMacroLayer::onSelectAll(CCObject* obj) {
 
 LoadMacroLayer* LoadMacroLayer::create(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves) {
 	LoadMacroLayer* ret = new LoadMacroLayer();
-	if (ret->init(385, 291, layer, layer2, autosaves, Utils::getTexture().c_str())) {
+	if (ret->initAnchored(385, 291, layer, layer2, autosaves, Utils::getTexture().c_str())) {
 		ret->autorelease();
 		return ret;
 	}
@@ -140,8 +143,8 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 	fileOptions.filters.push_back(textFilter);
 
 	file::pick(file::PickMode::OpenFile, { dirs::getGameDir(), { textFilter } }).listen([this](Result<std::filesystem::path>* res) {
-		if (res->error() != "Dialog cancelled") {
-			std::filesystem::path path = res->value();
+		if (res->isOk()) {
+			std::filesystem::path path = res->unwrap();
 
 			auto& g = Global::get();
 			Macro tempMacro;
@@ -217,6 +220,10 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	invertSort = true;
 	#endif
 
+	menu = CCMenu::create();
+	menu->setZOrder(110);
+	m_mainLayer->addChild(menu);
+
 	Utils::setBackgroundColor(m_bgSprite);
 
 	menuLayer = layer;
@@ -226,8 +233,13 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 
 	setTitle(isMerge ? "Merge Macro" : "Load Macro");
 	m_title->setPositionY(m_title->getPositionY() + 5);
-
 	m_closeBtn->setScale(0.7f);
+
+	cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
+    m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
+    m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
+    m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
+    m_title->setPosition(m_title->getPosition() + offset);
 
 	CCSprite* icon = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
 	icon->setScale(0.585f);
@@ -239,13 +251,12 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	btn->setPosition(ccp(165, -121));
 
 	if (!isMerge)
-		m_buttonMenu->addChild(btn);
+		menu->addChild(btn);
 
 	searchInput = TextInput::create(235, "Search Macro", "bigFont.fnt");
 	searchInput->setPositionY(100);
 	searchInput->setDelegate(this);
-
-	m_buttonMenu->addChild(searchInput);
+	menu->addChild(searchInput);
 
 	CCSprite* emptyBtn = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
 	emptyBtn->setScale(0.585f);
@@ -261,7 +272,7 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	btn->setPosition(ccp(115, -121));
 
 	if (!isMerge)
-		m_buttonMenu->addChild(btn);
+		menu->addChild(btn);
 
 	CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
 	spr->setScale(0.585f);
@@ -273,7 +284,7 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	btn->setPosition(ccp(65, -121));
 
 	if (!isMerge)
-		m_buttonMenu->addChild(btn);
+		menu->addChild(btn);
 
 	CCSprite* spr1 = CCSprite::create("GJ_button_01.png");
 	CCSprite* spr2 = CCSprite::createWithSpriteFrameName("GJ_sortIcon_001.png");
@@ -289,7 +300,7 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	sortToggle->setPosition({-145, 100});
 	sortToggle->setScale(0.55f);
 	sortToggle->toggle(false);
-	m_buttonMenu->addChild(sortToggle);
+	menu->addChild(sortToggle);
 
 	CCSprite* spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
 	CCSprite* spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
@@ -299,14 +310,14 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	selectAllToggle->setPosition({ -165, -121 });
 
 	if (!isMerge)
-		m_buttonMenu->addChild(selectAllToggle);
+		menu->addChild(selectAllToggle);
 
 	CCLabelBMFont* lbl = CCLabelBMFont::create("Select all", "bigFont.fnt");
 	lbl->setScale(0.4f);
 	lbl->setPosition({ -110, -121 });
 
 	if (!isMerge)
-		m_buttonMenu->addChild(lbl);
+		menu->addChild(lbl);
 
 	spr = CCSprite::createWithSpriteFrameName("gj_findBtnOff_001.png");
 	spr->setScale(0.685f);
@@ -317,49 +328,49 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	);
 	searchOff->setPosition(ccp(137, 100));
 	searchOff->setVisible(false);
-	m_buttonMenu->addChild(searchOff);
+	menu->addChild(searchOff);
 
 	macroCountLbl = CCLabelBMFont::create("13 Macros", "chatFont.fnt");
 	macroCountLbl->setOpacity(108);
 	macroCountLbl->setScale(0.55f);
 	macroCountLbl->setAnchorPoint({1.f, 0.5f});
 	macroCountLbl->setPosition({180, 130});
-	m_buttonMenu->addChild(macroCountLbl);
+	menu->addChild(macroCountLbl);
 
 	if (isMerge) {
 		p1Toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(LoadMacroLayer::onMergeToggle));
 		p1Toggle->setID("p1-toggle");
 		p1Toggle->setScale(0.675f);
 		p1Toggle->setPosition({ -23, -121 });
-		m_buttonMenu->addChild(p1Toggle);
+		menu->addChild(p1Toggle);
 
 		p2Toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(LoadMacroLayer::onMergeToggle));
 		p2Toggle->setID("p2-toggle");
 		p2Toggle->setScale(0.675f);
 		p2Toggle->setPosition({ 98, -121 });
-		m_buttonMenu->addChild(p2Toggle);
+		menu->addChild(p2Toggle);
 
 		owToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
 		owToggle->setID("ow-toggle");
 		owToggle->setScale(0.675f);
 		owToggle->setPosition({ -166, -121 });
 		owToggle->toggle(true);
-		m_buttonMenu->addChild(owToggle);
+		menu->addChild(owToggle);
 
 		lbl = CCLabelBMFont::create("Overwrite", "bigFont.fnt");
 		lbl->setPosition({ -111, -121 });
 		lbl->setScale(0.44f);
-		m_buttonMenu->addChild(lbl);
+		menu->addChild(lbl);
 
 		lbl = CCLabelBMFont::create("P1 only", "bigFont.fnt");
 		lbl->setPosition({ 21, -121 });
 		lbl->setScale(0.44f);
-		m_buttonMenu->addChild(lbl);
+		menu->addChild(lbl);
 
 		lbl = CCLabelBMFont::create("P2 only", "bigFont.fnt");
 		lbl->setPosition({ 144, -121 });
 		lbl->setScale(0.44f);
-		m_buttonMenu->addChild(lbl);
+		menu->addChild(lbl);
 	}
 
 	addList();
@@ -398,7 +409,7 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	cocos2d::CCSize winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
 	std::filesystem::path path = Mod::get()->getSaveDir() / (isAutosaves ? "autosaves" : "macros");
-	std::vector<std::filesystem::path> macros = file::readDirectory(path).value();
+	std::vector<std::filesystem::path> macros = file::readDirectory(path).unwrap();
 
 	CCArray* cells = CCArray::create();
 
@@ -431,7 +442,7 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 		lbl->setScale(0.5f);
 		lbl->setOpacity(100);
 		lbl->setID("no-macros-label");
-		m_mainLayer->addChild(lbl);
+		menu->addChild(lbl);
 	}
 
 	ListView* listView = ListView::create(cells, 35, 323, 180);
@@ -464,14 +475,14 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	listLayer->setZOrder(1);
 	listLayer->setID("list-layer");
 	listView->setPositionY(-12);
-	m_mainLayer->addChild(listLayer);
+	m_buttonMenu->addChild(listLayer);
 
 	listLayer->setUserObject("dont-correct-borders", cocos2d::CCBool::create(true));
 
-	CCSprite* topBorder = getChildOfType<CCSprite>(listLayer, 1);
-	CCSprite* bottomBorder = getChildOfType<CCSprite>(listLayer, 0);
-	CCSprite* rightBorder = getChildOfType<CCSprite>(listLayer, 3);
-	CCSprite* leftBorder = getChildOfType<CCSprite>(listLayer, 2);
+	CCSprite* topBorder = listLayer->getChildByType<CCSprite>(1);
+	CCSprite* bottomBorder = listLayer->getChildByType<CCSprite>(0);
+	CCSprite* rightBorder = listLayer->getChildByType<CCSprite>(3);
+	CCSprite* leftBorder = listLayer->getChildByType<CCSprite>(2);
 
 	if (color != ccc3(51, 68, 153)) {
 		CCSprite* topSprite = CCSprite::create("GJ_commentTop2_001_White.png"_spr);
@@ -520,13 +531,13 @@ void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	listBackground->setPosition(winSize / 2 + ccp(-0.11f - (it >= 5 ? 6 : 0), -10.5f));
 	listBackground->setContentSize({ 461.1f, 255.1f });
 	listBackground->setID("background");
-	m_mainLayer->addChild(listBackground);
+	m_buttonMenu->addChild(listBackground);
 
 	if (it >= 5) {
 		Scrollbar* scrollbar = Scrollbar::create(listView->m_tableView);
 		scrollbar->setPosition({ (winSize.width / 2) + (listLayer->getScaledContentSize().width / 2) + 4, winSize.height / 2 });
 		scrollbar->setID("scrollbar");
-		m_mainLayer->addChild(scrollbar);
+		m_buttonMenu->addChild(scrollbar);
 	}
 }
 
@@ -568,11 +579,10 @@ bool MacroCell::init(std::filesystem::path path, std::string name, std::time_t d
 				}
 			}
 		}
-
 	}
 
 	menu = CCMenu::create();
-	menu->setPosition({ 0,0 });
+	menu->setPosition({0, 0});
 	addChild(menu);
 
 	CCLabelBMFont* lbl = CCLabelBMFont::create(this->name.c_str(), "chatFont.fnt");

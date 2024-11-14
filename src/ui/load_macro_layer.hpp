@@ -44,6 +44,7 @@ public:
 
 	geode::Popup<>* menuLayer = nullptr;
 	geode::Popup<>* mergeLayer = nullptr;
+	CCMenu* menu = nullptr;
 
 	CCMenuItemToggler* selectAllToggle = nullptr;
 	CCMenuItemToggler* sortToggle = nullptr;
