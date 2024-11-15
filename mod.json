@@ -1,10 +1,10 @@
 {
-	"geode": "4.0.0-alpha.1",
+	"geode": "4.0.0-beta.1",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074"
 	},
-	"version": "v2.1.0",
+	"version": "v2.1.1",
 	"id": "zilko.xdbot",
 	"name": "xdBot",
 	"developer": "Zilko",
