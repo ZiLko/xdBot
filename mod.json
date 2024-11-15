@@ -12,7 +12,7 @@
 	"dependencies": [
 		{
 			"id": "geode.custom-keybinds",
-			"version": ">=v1.10.0-alpha.1",
+			"version": ">=v1.10.0",
 			"importance": "required",
 			"platforms": ["win"]
 		}
