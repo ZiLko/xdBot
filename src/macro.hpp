@@ -17,7 +17,7 @@ const std::vector<float> safeValues = {
     1.0f / 5, 1.0f / 4, 1.0f / 3, 1.0f / 2
 };
 
-const std::string xdBotVersion = "v2.1.1";
+const std::string xdBotVersion = "v2.1.2";
 
 enum state {
     none,

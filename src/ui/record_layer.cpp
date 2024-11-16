@@ -118,8 +118,10 @@ RecordLayer* RecordLayer::openMenu(bool instant) {
 
     g.layer = static_cast<geode::Popup<>*>(layer);
 
-    if (Loader::get()->isModLoaded("spaghettdev.betterinputs") && !instant)
-        FLAlertLayer::create("Warning", "<cr>BetterInputs</c> might cause <cr>undefined behavior</c> in xdBot's text inputs.", "Ok")->show();
+        if (Loader::get()->isModLoaded("spaghettdev.betterinputs") && !instant) {
+            if (!g.mod->setSavedValue("betterinputs-warning", true))
+                FLAlertLayer::create("Warning", "<cr>BetterInputs</c> might cause <cr>undefined behavior</c> in xdBot's text inputs.", "Ok")->show();
+        }
 
     return layer;
 }

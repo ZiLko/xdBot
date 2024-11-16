@@ -138,4 +138,3 @@ public:
     float currentPitch = 1.f;
     uintptr_t latestSeed = 0;
 };
-

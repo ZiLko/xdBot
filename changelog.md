@@ -1,3 +1,7 @@
+# v2.1.2
+
+* Made BetterInputs warning only happen for the first time.
+
 # v2.1.1
 
 * gode 4.0.0-beta.1
