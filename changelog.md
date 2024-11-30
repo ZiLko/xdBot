@@ -1,3 +1,7 @@
+# v2.1.3
+
+* Fixed GUI being shy and running a way.
+
 # v2.1.2
 
 * Made BetterInputs warning only happen for the first time.

@@ -394,16 +394,16 @@ bool MacroEditLayer::setup() {
     updateSaved();
 
     editLayer = this;
-    
-    return true;
-}
 
-void MacroEditLayer::loadPage(int page) {
     cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
     m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
     m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
     m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
     
+    return true;
+}
+
+void MacroEditLayer::loadPage(int page) {
     currentPage = page;
 
     pageInput->setString(std::to_string(currentPage).c_str());
