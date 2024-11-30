@@ -1,3 +1,75 @@
+# v2.1.3
+
+* Fixed GUI being shy and running a way.
+
+# v2.1.2
+
+* Made BetterInputs warning only happen for the first time.
+
+# v2.1.1
+
+* gode 4.0.0-beta.1
+
+# v2.1.0
+
+* 2.207
+
+# v2.0.3
+
+* Fixed render record audio desync i think xD.
+
+# v2.0.2
+
+* Added render audio record.
+* Improved render shaders.
+* Made it possible to continue platformer macros.
+
+# v2.0.1
+
+* Fixed crash if some macro info was null for whatever reason.
+* Fixed macro bot info saving bug.
+* Fixed practice rotation bug.
+* Actually capped render fps to 240 now lmao.
+* I think render fps were never saving so it was always 60 no matter what u set it to.
+
+# v2.0.0
+
+* Changed render FPS cap to 240 (more than 240 fps would need tps bypass lol).
+* Changed speedhack limit to 10 (it was 9 for some reason).
+* Changed frame offset setting limit to 8 instead of 60.
+* Changed render error id 12 message.
+* Made speedhack work everywhere.
+* Fixed macros importing as .gdr instead of .gdr.json.
+* Added warning when rendering if CBF is loaded.
+* Added render save location setting.
+
+# v2.0.0-beta.7
+
+* Fixed show trajectory not working.
+* Fixed spider being flipped when show trajectory is on.
+
+# v2.0.0-beta.6
+
+* Fixed more settings popup being brown.
+* Fixed crash when searching macros in the merge layer.
+* Added recording only keybinds setting.
+* Added button in endscreen setting.
+* Added fade in and fade out to renderer videos if the level has it.
+* Made auto safe mode text hide when hiding the endscreen.
+
+# v2.0.0-beta.5
+
+* Fixed render restore defaults button setting the wrong args.
+* Fixed triggers stopping on death when not recording a macro.
+* Fixed crash on level complete if you had practice attempts installed.
+* Fixed holding on checkpoint respawn bug.
+* Made auto safe mode text appear instantly instead of dropping down and lowered its opacity.
+
+# v2.0.0-beta.4
+
+* Fixed dual bug when replaying a macro.
+* Fixed not being able to import .json macros (with the import button).
+
 # v2.0.0-beta.3
 
 * Fixed rotation bug.

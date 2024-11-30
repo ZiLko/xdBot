@@ -23,7 +23,7 @@ PlayerData PlayerPracticeFixes::saveData(PlayerObject* player) {
     #endif
 
     data.position = player->getPosition();
-    data.rotationX = player->getRotationX();
+    data.rotation = player->getRotation();
     data.m_holdingRight = player->m_holdingRight;
     data.m_holdingLeft = player->m_holdingLeft;
     data.m_mainLayer = player->m_mainLayer;
@@ -264,8 +264,10 @@ PlayerData PlayerPracticeFixes::saveData(PlayerObject* player) {
     return data;
 }
 
-void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, PlayerObject* player2, bool isFakePlayer) {
-    bool isPlayer2 = player == player2;
+void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, bool isPlayer2, bool isFakePlayer) {
+    if (isPlayer2 && !PlayLayer::get()->m_gameState.m_isDualMode)
+        return;
+
     auto& g = Global::get();
     if (g.addSideHoldingMembers[static_cast<int>(isPlayer2)] && !isFakePlayer) {
         player->m_holdingLeft = data.m_holdingLeft;
@@ -293,7 +295,9 @@ void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, Playe
 
     #endif
 
-    player->m_mainLayer = data.m_mainLayer;
+    if (!isFakePlayer)
+        player->m_mainLayer = data.m_mainLayer;
+    
     player->m_wasTeleported = data.m_wasTeleported; 
     player->m_fixGravityBug = data.m_fixGravityBug;
     player->m_reverseSync = data.m_reverseSync;
@@ -518,5 +522,5 @@ void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, Playe
     player->m_enable22Changes = data.m_enable22Changes;
 
     player->setPosition(data.position);
-    player->setRotationX(data.rotationX);
+    player->setRotation(data.rotation);
 }

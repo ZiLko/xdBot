@@ -4,18 +4,21 @@
 #include <Geode/modify/GJBaseGameLayer.hpp>
 
 class $modify(GJBaseGameLayer) {
+    
+    struct Fields {
+        int lastClickFrame = 0;
+    };
+
     void handleButton(bool hold, int button, bool player2) {
         GJBaseGameLayer::handleButton(hold, button, player2);
-        PlayLayer* pl = PlayLayer::get();
-
-        if (!pl) return;
-
-        if (button > 3) return;
-
         auto& g = Global::get();
 
         if (!g.clickbotEnabled) return;
+        if (button > 3) return;
 
+        PlayLayer* pl = PlayLayer::get();
+
+        if (!pl) return;
         if (g.mod->getSavedValue<bool>("clickbot_playing_only") && g.state != state::playing) return;
 
         std::string buttonName = (hold ? "hold_" : "release_") + buttonInts.at(button);
@@ -24,8 +27,11 @@ class $modify(GJBaseGameLayer) {
         ClickSetting settings = matjson::Serialize<ClickSetting>::from_json(data);
 
         if (settings.disabled) return;
-
         if (!std::filesystem::exists(settings.path)) return;
+
+        int frame = Global::getCurrentFrame();
+        if (m_fields->lastClickFrame == frame) return;
+        m_fields->lastClickFrame = frame;
 
         FMODAudioEngine* fmod = FMODAudioEngine::sharedEngine();
         FMOD::System* system = fmod->m_system;

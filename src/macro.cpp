@@ -16,8 +16,10 @@ void Macro::recordAction(int frame, int button, bool player2, bool hold) {
 void Macro::tryAutosave(GJGameLevel* level, CheckpointObject* cp) {
     auto& g = Global::get();
 
-    if (g.state != state::recording || !g.checkpoints.contains(cp)) return;
-    if (!g.mod->getSavedValue<bool>("macro_auto_save") || g.checkpoints[cp].frame < g.lastAutoSave) return;
+    if (g.state != state::recording) return;
+    if (!Mod::get()->getSavedValue<bool>("macro_auto_save")) return;
+    if (!g.checkpoints.contains(cp)) return;
+    if (g.checkpoints[cp].frame < g.lastAutoSave) return;
 
     std::filesystem::path autoSavesPath = g.mod->getSaveDir() / "autosaves";
 
@@ -74,6 +76,9 @@ void Macro::updateInfo(PlayLayer* pl) {
 
     if (g.macro.author == "")
         g.macro.author = "N/A";
+
+    g.macro.botInfo.name = "xdBot";
+    g.macro.botInfo.version = xdBotVersion;
 }
 
 int Macro::save(std::string author, std::string desc, std::string path, bool json) {
@@ -280,20 +285,20 @@ bool Macro::shouldStep() {
     if (g.stepFrame) return true;
     if (Global::getCurrentFrame() == 0) return true;
 
-    if (g.ignoreFrame != -1) return true;
-    if (g.ignoreJumpButton != -1) return true;
+    // if (g.ignoreFrame != -1) return true;
+    // if (g.ignoreJumpButton != -1) return true;
 
-    if (g.delayedFrameReleaseMain[0] != -1) return true;
-    if (g.delayedFrameReleaseMain[1] != -1) return true;
+    // if (g.delayedFrameReleaseMain[0] != -1) return true;
+    // if (g.delayedFrameReleaseMain[1] != -1) return true;
 
-    if (g.delayedFrameInput[0] != -1) return true;
-    if (g.delayedFrameInput[1] != -1) return true;
+    // if (g.delayedFrameInput[0] != -1) return true;
+    // if (g.delayedFrameInput[1] != -1) return true;
 
-    for (int x = 0; x < 2; x++) {
-        for (int y = 0; y < 2; y++) {
-            if (g.delayedFrameRelease[x][y] != -1) return true;
-        }
-    }
+    // for (int x = 0; x < 2; x++) {
+    //     for (int y = 0; y < 2; y++) {
+    //         if (g.delayedFrameRelease[x][y] != -1) return true;
+    //     }
+    // }
 
     return false;
 }

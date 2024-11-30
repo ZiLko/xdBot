@@ -73,12 +73,13 @@ class $modify(GJBaseGameLayer) {
     }
 
     void update(float dt) {
+
+        if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
+
         if (this->m_player1->m_isDead) {
             if (Global::get().mod->getSavedValue<bool>("macro_instant_respawn"))
                 PlayLayer::get()->resetLevel();
         }
-
-        if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
 
         auto& g = Global::get();
 

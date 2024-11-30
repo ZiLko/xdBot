@@ -171,7 +171,12 @@ void ButtonEditLayer::updateOpacity(CCObject*) {
 bool ButtonEditLayer::setup() {
     mod = Mod::get();
 
-    Utils::setBackgroundColor(m_bgSprite);
+    cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
+    m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
+    m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
+    m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
+
+    Utils::setBackgroundColor(m_bgSprite); 
 
     m_bgSprite->setPositionY(231);
     m_closeBtn->setVisible(false);

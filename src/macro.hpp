@@ -8,14 +8,6 @@
 
 using namespace geode::prelude;
 
-#ifdef GEODE_IS_WINDOWS
-const int timeOffset = 968;
-#elif defined(GEODE_IS_ANDROID32)
-const int timeOffset = 800;
-#elif defined(GEODE_IS_ANDROID64)
-const int timeOffset = 952;
-#endif
-
 #define DIF(a, b) (std::fabs((a) - (b)) > 0.001f)
 
 const std::vector<float> safeValues = {
@@ -24,6 +16,8 @@ const std::vector<float> safeValues = {
     1.0f / 15, 1.0f / 12, 1.0f / 10, 1.0f / 8, 1.0f / 6,
     1.0f / 5, 1.0f / 4, 1.0f / 3, 1.0f / 2
 };
+
+const std::string xdBotVersion = "v2.1.3";
 
 enum state {
     none,
@@ -47,7 +41,7 @@ struct input : gdr::Input {
 
 struct Macro : gdr::Replay<Macro, input> {
 
-    Macro() : Replay("xdBot", "v2.0.0-beta.3") {}
+    Macro() : Replay("xdBot", xdBotVersion.c_str()) {}
 
 public:
 
@@ -95,7 +89,7 @@ struct PlayerData {
 #endif
     std::vector<float> m_playerFollowFloats;
     cocos2d::CCPoint position;
-    float rotationX;
+    float rotation;
     bool m_holdingRight;
     bool m_holdingLeft;
     cocos2d::CCNode* m_mainLayer;

@@ -20,10 +20,16 @@ void ClickbotLayer::updateLabels() {
 }
 
 bool ClickbotLayer::setup() {
-	Utils::setBackgroundColor(m_bgSprite);
-
 	setTitle("ClickBot");
 	m_title->setPositionY(m_title->getPositionY() + 5);
+	
+	cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
+    m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
+    m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
+    m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
+    m_title->setPosition(m_title->getPosition() + offset);
+
+	Utils::setBackgroundColor(m_bgSprite);
 
 	CCMenu* menu = CCMenu::create();
 	m_mainLayer->addChild(menu);
@@ -268,7 +274,7 @@ bool ClickbotLayer::setup() {
 
 ClickSettingsLayer* ClickSettingsLayer::create(std::string button, geode::Popup<>* layer) {
 	ClickSettingsLayer* ret = new ClickSettingsLayer();
-	if (ret->init(250, 173, button, layer, Utils::getTexture().c_str())) {
+	if (ret->initAnchored(250, 173, button, layer, Utils::getTexture().c_str())) {
 		ret->autorelease();
 		return ret;
 	}
@@ -278,6 +284,11 @@ ClickSettingsLayer* ClickSettingsLayer::create(std::string button, geode::Popup<
 }
 
 bool ClickSettingsLayer::setup(std::string button, geode::Popup<>* layer) {
+	cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
+    m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
+    m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
+    m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
+	
 	Utils::setBackgroundColor(m_bgSprite);
 
 	CCMenu* menu = CCMenu::create();
@@ -373,8 +384,8 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 	fileOptions.filters.push_back(textFilter);
 
 	file::pick(file::PickMode::OpenFile, { Mod::get()->getResourcesDir(), { textFilter } }).listen([this](Result<std::filesystem::path>* res) {
-		if (res->error() != "Dialog cancelled") {
-			std::filesystem::path path = res->value();
+		if (res->isOk()) {
+			std::filesystem::path path = res->unwrap();
 
 			this->filenameLabel->setString(path.filename().string().c_str());
 

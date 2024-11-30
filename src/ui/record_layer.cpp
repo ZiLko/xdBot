@@ -77,9 +77,6 @@ class $modify(CCTextInputNode) {
     bool ccTouchBegan(cocos2d::CCTouch * v1, cocos2d::CCEvent * v2) {
         if (this->getID() == "android-disabled") return false;
 
-        if (this->getID() == "render-input" && Global::get().mod->getSavedValue<bool>("render_fix_shaders"))
-            return false;
-
         return CCTextInputNode::ccTouchBegan(v1, v2);
     }
 };
@@ -121,8 +118,10 @@ RecordLayer* RecordLayer::openMenu(bool instant) {
 
     g.layer = static_cast<geode::Popup<>*>(layer);
 
-    if (Loader::get()->isModLoaded("spaghettdev.betterinputs") && !instant)
-        FLAlertLayer::create("Warning", "<cr>BetterInputs</c> might cause <cr>undefined behavior</c> in xdBot's text inputs.", "Ok")->show();
+        if (Loader::get()->isModLoaded("spaghettdev.betterinputs") && !instant) {
+            if (!g.mod->setSavedValue("betterinputs-warning", true))
+                FLAlertLayer::create("Warning", "<cr>BetterInputs</c> might cause <cr>undefined behavior</c> in xdBot's text inputs.", "Ok")->show();
+        }
 
     return layer;
 }
@@ -298,8 +297,9 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
         mod->setSavedValue("render_bitrate", std::string(bitrateInput->getString()));
 
     if (std::string_view(fpsInput->getString()) != "" && node == fpsInput) {
-        if (std::stoi(fpsInput->getString()) > 60)
+        if (std::stoi(fpsInput->getString()) > 240)
             return fpsInput->setString(mod->getSavedValue<std::string>("render_fps").c_str());
+        mod->setSavedValue("render_fps", std::string(fpsInput->getString()));
     }
 
     if (!speedhackInput) return;
@@ -309,7 +309,7 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
 
         if (value == ".")
             speedhackInput->setString("0.");
-        else if (std::count(value.begin(), value.end(), '.') == 2 || std::stof(value) > 9)
+        else if (std::count(value.begin(), value.end(), '.') == 2 || std::stof(value) > 10)
             return speedhackInput->setString(mod->getSavedValue<std::string>("macro_speedhack").c_str());
     }
 
@@ -360,26 +360,22 @@ void RecordLayer::toggleSetting(CCObject* obj) {
     if (id == "macro_hide_speedhack" || id == "macro_hide_stepper" || id == "macro_always_show_buttons")
         Interface::updateButtons();
 
-    if (id == "render_fix_shaders") {
-        CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
-        CCObject* child;
-        CCARRAY_FOREACH(children, child) {
-            if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(child)) {
-                layer->onClose(nullptr);
-                break;
-            }
+    if (id == "render_only_song" && value) {
+        CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
+        if (RenderSettingsLayer* layer = scene->getChildByType<RenderSettingsLayer>(0)) {
+            if (!layer->recordAudioToggle) return;
+            layer->recordAudioToggle->toggle(false);
+            g.mod->setSavedValue("render_record_audio", false);
         }
+    }
 
-        // if (g.layer)
-        //     static_cast<RecordLayer*>(g.layer)->onClose(nullptr);
-
-        if (RenderSettingsLayer* layer = typeinfo_cast<RenderSettingsLayer*>(children->lastObject()))
-            layer->keyBackClicked();
-
-        RecordLayer::openMenu(true);
-        RenderSettingsLayer* layer = RenderSettingsLayer::create();
-        layer->m_noElasticity = true;
-        layer->show();
+    if (id == "render_record_audio" && value) {
+        CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
+        if (RenderSettingsLayer* layer = scene->getChildByType<RenderSettingsLayer>(0)) {
+            if (!layer->onlySongToggle) return;
+            layer->onlySongToggle->toggle(false);
+            g.mod->setSavedValue("render_only_song", false);
+        }
     }
 
     if (id == "menu_show_button") {
@@ -399,25 +395,25 @@ void RecordLayer::toggleSetting(CCObject* obj) {
 }
 
 void RecordLayer::openKeybinds(CCObject*) {
-#ifdef GEODE_IS_WINDOWS
+// #ifdef GEODE_IS_WINDOWS
 
-    MoreOptionsLayer::create()->onKeybindings(nullptr);
-    if (!mod->setSavedValue("opened_keybinds", true))
-        FLAlertLayer::create(
-            "Warning",
-            "Scroll down to find xdBot's keybinds",
-            "Ok"
-        )->show();
+//     MoreOptionsLayer::create()->onKeybindings(nullptr);
+//     if (!mod->setSavedValue("opened_keybinds", true))
+//         FLAlertLayer::create(
+//             "Warning",
+//             "Scroll down to find xdBot's keybinds",
+//             "Ok"
+//         )->show();
 
-#else
+// #else
 
     Interface::openButtonEditor();
 
-#endif
+// #endif
 }
 
 void RecordLayer::openRendersFolder(CCObject*) {
-    std::filesystem::path path = Global::get().mod->getSaveDir() / "renders";
+    std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
 
     if (std::filesystem::exists(path))
         file::openFolder(path);
@@ -462,6 +458,11 @@ bool RecordLayer::setup() {
     mod = g.mod;
 
     Utils::setBackgroundColor(m_bgSprite);
+    
+    cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
+    m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
+    m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
+    m_bgSprite->setPosition(m_bgSprite->getPosition() + offset);
 
     m_closeBtn->setPosition(m_closeBtn->getPosition() + ccp(-6.75, 6.75));
     m_closeBtn->setScale(0.675);
@@ -501,7 +502,7 @@ bool RecordLayer::setup() {
     CCSprite* spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
     CCSprite* spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
 
-    CCLabelBMFont* versionLabel = CCLabelBMFont::create("xdBot v2.0.0-beta.3", "chatFont.fnt");
+    CCLabelBMFont* versionLabel = CCLabelBMFont::create(("xdBot " + xdBotVersion).c_str(), "chatFont.fnt");
     versionLabel->setOpacity(63);
     versionLabel->setPosition(ccp(-217, -125));
     versionLabel->setAnchorPoint({ 0, 0.5 });
@@ -818,7 +819,7 @@ bool RecordLayer::setup() {
     fpsInput->setMouseEnabled(true);
     fpsInput->setTouchEnabled(true);
     fpsInput->setContentSize({ 32, 20 });
-    fpsInput->setMaxLabelLength(2);
+    fpsInput->setMaxLabelLength(3);
     fpsInput->setAllowedChars("0123456789");
     fpsInput->setString(mod->getSavedValue<std::string>("render_fps").c_str());
     fpsInput->setDelegate(this);

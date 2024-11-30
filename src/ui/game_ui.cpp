@@ -35,21 +35,29 @@ class $modify(PlayLayer) {
 };
 
 void Interface::addLabels(PlayLayer* pl) {
-    CCLabelBMFont* stateLabel = CCLabelBMFont::create("", "chatFont.fnt");
-    stateLabel->setPosition({ CCDirector::sharedDirector()->getWinSize().width - 6.5f, 12 });
-    stateLabel->setAnchorPoint({ 1, 0.5 });
-    stateLabel->setID("state-label"_spr);
-    stateLabel->setZOrder(300);
-    stateLabel->setScale(0.625f);
-    pl->addChild(stateLabel);
+    CCLabelBMFont* lbl = CCLabelBMFont::create("", "chatFont.fnt");
+    lbl->setPosition({ CCDirector::sharedDirector()->getWinSize().width - 6.5f, 12 });
+    lbl->setAnchorPoint({ 1, 0.5 });
+    lbl->setID("state-label"_spr);
+    lbl->setZOrder(300);
+    lbl->setScale(0.625f);
+    pl->addChild(lbl);
 
-    CCLabelBMFont* frameLabel = CCLabelBMFont::create("", "chatFont.fnt");
-    frameLabel->setPosition({ 6.5f, 12 });
-    frameLabel->setAnchorPoint({ 0, 0.5 });
-    frameLabel->setID("frame-label"_spr);
-    frameLabel->setZOrder(300);
-    frameLabel->setScale(0.625f);
-    pl->addChild(frameLabel);
+    lbl = CCLabelBMFont::create("", "chatFont.fnt");
+    lbl->setPosition({ 6.5f, 12 });
+    lbl->setAnchorPoint({ 0, 0.5 });
+    lbl->setID("frame-label"_spr);
+    lbl->setZOrder(300);
+    lbl->setScale(0.625f);
+    pl->addChild(lbl);
+
+    lbl = CCLabelBMFont::create("Recording Audio", "bigFont.fnt");
+    lbl->setPosition(pl->getContentSize() / 2);
+    lbl->setID("recording-audio-label"_spr);
+    lbl->setZOrder(300);
+    lbl->setOpacity(75);
+    lbl->setVisible(false);
+    pl->addChild(lbl);
 
     Interface::updateLabels();
 }
@@ -69,7 +77,7 @@ void Interface::addButtons(PlayLayer* pl) {
     CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(spr, pl, menu_selector(Interface::onFrameStepper));
     btn->setAnchorPoint({ 0, 0 });
     btn->setID("step-frame-btn");
-    CCSprite* sprite = getChildOfType<CCSprite>(btn, 0);
+    CCSprite* sprite = btn->getChildByType<CCSprite>(0);
     sprite->setPosition({ 0, 0 });
 
     menu->addChild(btn);
@@ -79,7 +87,7 @@ void Interface::addButtons(PlayLayer* pl) {
     btn = CCMenuItemSpriteExtra::create(spr, pl, menu_selector(Interface::onFrameStepperOff));
     btn->setID("disable-stepper-btn");
     btn->setAnchorPoint({ 0, 0 });
-    sprite = getChildOfType<CCSprite>(btn, 0);
+    sprite = btn->getChildByType<CCSprite>(0);
     sprite->setPosition({ 0, 0 });
 
     menu->addChild(btn);
@@ -89,7 +97,7 @@ void Interface::addButtons(PlayLayer* pl) {
     btn = CCMenuItemSpriteExtra::create(spr, pl, menu_selector(Interface::onSpeedhack));
     btn->setAnchorPoint({ 0, 0 });
     btn->setID("speedhack-btn");
-    sprite = getChildOfType<CCSprite>(btn, 0);
+    sprite = btn->getChildByType<CCSprite>(0);
     sprite->setPosition({ 0, 0 });
 
     menu->addChild(btn);
@@ -159,7 +167,7 @@ void Interface::updateButtons() {
 
     float scale = g.mod->getSavedValue<float>("button_off_scale");
 
-    CCSprite* sprite = getChildOfType<CCSprite>(disableStepperBtn, 0);
+    CCSprite* sprite = disableStepperBtn->getChildByType<CCSprite>(0);
     sprite->setScale(scale);
     sprite->setOpacity(static_cast<int>(g.mod->getSavedValue<float>("button_off_opacity") * 255));
     sprite->setAnchorPoint({ 0, 0 });
@@ -174,7 +182,7 @@ void Interface::updateButtons() {
 
     scale = g.mod->getSavedValue<float>("button_advance_frame_scale");
 
-    sprite = getChildOfType<CCSprite>(stepFrameBtn, 0);
+    sprite = stepFrameBtn->getChildByType<CCSprite>(0);
     sprite->setScale(scale);
     sprite->setOpacity(static_cast<int>(g.mod->getSavedValue<float>("button_advance_frame_opacity") * 255));
     sprite->setAnchorPoint({ 0, 0 });
@@ -189,7 +197,7 @@ void Interface::updateButtons() {
 
     scale = g.mod->getSavedValue<float>("button_speedhack_scale");
 
-    sprite = getChildOfType<CCSprite>(speedhackBtn, 0);
+    sprite = speedhackBtn->getChildByType<CCSprite>(0);
     sprite->setScale(scale);
     sprite->setOpacity(static_cast<int>(g.mod->getSavedValue<float>("button_speedhack_opacity") * 255));
     sprite->setAnchorPoint({ 0, 0 });

@@ -3,7 +3,7 @@
 
 #include "ui/button_setting.hpp"
 
-#include <Geode/loader/SettingNode.hpp>
+// #include <Geode/loader/SettingNode.hpp>
 
 #ifdef GEODE_IS_WINDOWS
 
@@ -37,11 +37,11 @@ bool Global::hasIncompatibleMods() {
 
   if (Mod* mod = Loader::get()->getLoadedMod("firee.prism")) {
     auto json = mod->getSavedValue<matjson::Value>("values");
-    for (const auto& obj : json.as_array()) {
+    for (const auto& obj : json.asArray().unwrap()) {
 
-      if (obj["name"] != "TPS Bypass") continue;
+      if (obj["name"].asString().unwrap() != "TPS Bypass") continue;
 
-      if (obj["value"] != 240)
+      if (obj["value"].asInt().unwrap() != 240)
         settingsToDisable.push_back("<cr>TPS Bypass (Prism Menu)</c>");
 
       break;
@@ -109,7 +109,7 @@ bool Global::hasIncompatibleMods() {
       if (sett.isModToggle)
         modsToDisable.push_back(modName);
       else {
-        std::string settName = sett.isSavedValue ? sett.ID : mod->getSettingDefinition(sett.ID)->getDisplayName();
+        std::string settName = sett.isSavedValue ? sett.ID : mod->getSetting(sett.ID)->getDisplayName();
         settingsToDisable.push_back(fmt::format("{} ({})", settName, modName));
       }
 
@@ -151,8 +151,7 @@ int Global::getCurrentFrame() {
 
   auto& g = Global::get();
 
-  double time = *reinterpret_cast<double*>(reinterpret_cast<char*>(pl) + timeOffset);
-  int frame = static_cast<int>(time * 240.0);
+  int frame = static_cast<int>(pl->m_gameState.m_levelTime * 240.0);
 
   frame -= g.frameOffset;
 
@@ -190,7 +189,7 @@ void Global::updateSeed(bool isRestart) {
     uintptr_t seed = static_cast<uintptr_t>(ull);
 
 #ifdef GEODE_IS_WINDOWS
-    * (uintptr_t*)((char*)geode::base::get() + seedAddr) = seed;
+    *(uintptr_t*)((char*)geode::base::get() + seedAddr) = seed;
 #else
     GameToolbox::fast_srand(seed);
 #endif
@@ -256,11 +255,6 @@ void Global::toggleFrameStepper() {
 }
 
 void Global::frameStepperOn() {
-  if (Loader::get()->isModLoaded("zmx.cbf-lite")) {
-    if (!Mod::get()->setSavedValue("frame_stepper_warning", true))
-      FLAlertLayer::create("Warning", "<cr>Click on Steps</c> might cause input delay when using frame stepper.", "Ok")->show();
-  }
-
   auto& g = Global::get();
 
   g.mod->setSavedValue("macro_frame_stepper", true);
@@ -309,34 +303,43 @@ PauseLayer* Global::getPauseLayer() {
   return nullptr;
 }
 
-SettingNode* ButtonSettingValue::createNode(float width) {
-  return ButtonSettingNode::create(this, width);
-}
+// SettingNode* ButtonSettingValue::createNode(float width) {
+//   return ButtonSettingNode::create(this, width);
+// }
 
-$on_mod(Loaded) {
-  auto& g = Global::get();
-  g.mod = Mod::get();
+// $on_mod(Loaded) {
+//   auto& g = Global::get();
+//   g.mod = Mod::get();
 
-  g.mod->addCustomSetting<ButtonSettingValue>("button", "none");
-}
+//   g.mod->addCustomSetting<ButtonSettingValue>("button", "none");
+// }
 
 $execute{
     auto & g = Global::get();
+
+  if (!g.mod->setSavedValue("defaults_set5", true)) {
+    g.mod->setSettingValue<std::filesystem::path>("render_folder", g.mod->getSaveDir() / "renders");
+    g.mod->setSavedValue("macro_hide_playing_label", true);
+  }
 
   if (!g.mod->setSavedValue("defaults_set4", true)) {
     g.mod->setSavedValue("macro_noclip_p1", true);
     g.mod->setSavedValue("macro_noclip_p2", true);
   }
 
-  if (!g.mod->setSavedValue("defaults_set5", true))
+  if (!g.mod->setSavedValue("defaults_set6", true))
     g.mod->setSavedValue("render_args", std::string("-pix_fmt yuv420p"));
+
+  if (!g.mod->setSavedValue("defaults_set7", true)) {
+    g.mod->setSavedValue("render_seconds_after", std::to_string(2));
+    g.mod->setSavedValue("render_record_audio", true);
+  }
 
   if (!g.mod->setSavedValue("defaults_set3", true)) {
     g.mod->setSavedValue("render_width2", std::to_string(1920));
     g.mod->setSavedValue("render_height", std::to_string(1080));
     g.mod->setSavedValue("render_bitrate", std::to_string(12));
     g.mod->setSavedValue("render_fps", std::to_string(60));
-    g.mod->setSavedValue("render_seconds_after", std::to_string(5));
     g.mod->setSavedValue("render_video_args", std::string("colorspace=all=bt709:iall=bt470bg:fast=1"));
 
     #ifdef GEODE_IS_WINDOWS

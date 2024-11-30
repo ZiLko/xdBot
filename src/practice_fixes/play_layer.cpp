@@ -41,7 +41,7 @@ class $modify(GJBaseGameLayer) {
   }
 
   void processMoveActions() {
-    if (!m_player1->m_isDead || Global::get().state != state::none)
+    if (!m_player1->m_isDead || Global::get().state == state::none)
       GJBaseGameLayer::processMoveActions();
   }
 	void processMoveActionsStep(float v1, bool v2) {
@@ -71,9 +71,6 @@ class $modify(CheckpointObject) {
 
     auto& g = Global::get();
     PlayLayer* pl = PlayLayer::get();
-
-    if (!g.cancelCheckpoint)
-      g.previousCheckpoints.push_back(cp);
 
     PlayerData p1Data = PlayerPracticeFixes::saveData(pl->m_player1);
     PlayerData p2Data = PlayerPracticeFixes::saveData(pl->m_player2);
@@ -116,7 +113,7 @@ class $modify(PlayLayer) {
 
   }
 
-  void loadFromCheckpoint(CheckpointObject * cp) {
+  void loadFromCheckpoint(CheckpointObject* cp) {
     
     if (!cp) return PlayLayer::loadFromCheckpoint(cp);
 
@@ -124,24 +121,27 @@ class $modify(PlayLayer) {
 
     Macro::tryAutosave(m_level, cp);
 
-    if (g.state == state::playing && g.checkpoints.contains(cp)) {
+    if (g.state == state::playing) {
       PlayLayer::loadFromCheckpoint(cp);
 
-      if (g.checkpoints[cp].frame > 1) {
-        PlayerData p1Data = g.checkpoints[cp].p1;
-        PlayerData p2Data = g.checkpoints[cp].p2;
+      if (!g.checkpoints.contains(cp)) return;
+      if (g.checkpoints[cp].frame <= 1) return;
 
-        g.respawnFrame = g.checkpoints[cp].frame;
-        g.previousFrame = g.checkpoints[cp].previousFrame;
-        PlayerPracticeFixes::applyData(this->m_player1, p1Data, m_player2);
-        PlayerPracticeFixes::applyData(this->m_player2, p2Data, m_player2);
-      }
+      PlayerData p1Data = g.checkpoints[cp].p1;
+      PlayerData p2Data = g.checkpoints[cp].p2;
+
+      g.respawnFrame = g.checkpoints[cp].frame;
+      g.previousFrame = g.checkpoints[cp].previousFrame;
+      PlayerPracticeFixes::applyData(this->m_player1, p1Data, false);
+      PlayerPracticeFixes::applyData(this->m_player2, p2Data, true);
 
       return;
     }
 
-    if ((g.state != state::recording && !g.mod->getSavedValue<bool>("macro_always_practice_fixes")) || !g.checkpoints.contains(cp))
+    if ((g.state != state::recording && !Mod::get()->getSavedValue<bool>("macro_always_practice_fixes")))
       return PlayLayer::loadFromCheckpoint(cp);
+
+    if (!g.checkpoints.contains(cp)) return PlayLayer::loadFromCheckpoint(cp);
 
     Macro::resetVariables();
 
@@ -153,18 +153,21 @@ class $modify(PlayLayer) {
     g.previousFrame = g.checkpoints[cp].previousFrame;
 
     #ifdef GEODE_IS_WINDOWS
-    uintptr_t seed = g.checkpoints[cp].seed;
-    *(uintptr_t*)((char*)geode::base::get() + seedAddr) = seed;
-    #endif
 
+    if (g.seedEnabled) {
+      uintptr_t seed = g.checkpoints[cp].seed;
+      *(uintptr_t*)((char*)geode::base::get() + seedAddr) = seed;
+    }
+
+    #endif
 
     if (g.state == state::recording)
       InputPracticeFixes::applyFixes(this, p1Data, p2Data, frame);
 
     PlayLayer::loadFromCheckpoint(cp);
 
-    PlayerPracticeFixes::applyData(this->m_player1, p1Data, m_player2);
-    PlayerPracticeFixes::applyData(this->m_player2, p2Data, m_player2);
+    PlayerPracticeFixes::applyData(this->m_player1, p1Data, false);
+    PlayerPracticeFixes::applyData(this->m_player2, p2Data, true);
 
     if (g.state != state::recording && g.mod->getSavedValue<bool>("macro_always_practice_fixes")) {
       this->m_player1->releaseButton(static_cast<PlayerButton>(1));

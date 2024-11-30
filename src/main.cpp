@@ -22,28 +22,16 @@ class $modify(PlayLayer) {
     int delayedLevelRestart = -1;
   };
 
-  void postUpdate(float dt) { 
-    PlayLayer::postUpdate(dt);
-    auto& g = Global::get();
+  // void postUpdate(float dt) { 
+  //   PlayLayer::postUpdate(dt);
+  //   auto& g = Global::get();
 
-    if (m_fields->delayedLevelRestart != -1 && m_fields->delayedLevelRestart >= Global::getCurrentFrame()) {
-      m_fields->delayedLevelRestart = -1;
-      this->resetLevelFromStart();
-    }
+  //   if (m_fields->delayedLevelRestart != -1 && m_fields->delayedLevelRestart >= Global::getCurrentFrame()) {
+  //     m_fields->delayedLevelRestart = -1;
+  //     this->resetLevelFromStart();
+  //   }
 
-  }
-
-  void removeCheckpoint(bool b1) {
-    auto& g = Global::get();
-
-    if (g.previousCheckpoints.empty()) return PlayLayer::removeCheckpoint(b1);
-
-    if (typeinfo_cast<CheckpointObject*>(this->m_checkpointArray->lastObject()) == g.previousCheckpoints.back())
-      g.previousCheckpoints.pop_back();
-
-    PlayLayer::removeCheckpoint(b1);
-
-  }
+  // }
 
   void pauseGame(bool b1) {
     Global::updateKeybinds();
@@ -115,7 +103,6 @@ class $modify(PlayLayer) {
     auto& g = Global::get();
 
     g.firstAttempt = true;
-    g.previousCheckpoints.clear();
 
     Global::updateKeybinds();
 
@@ -137,8 +124,8 @@ class $modify(PlayLayer) {
     if (!m_isPracticeMode)
       g.renderer.levelStartFrame = frame;
 
-    if (g.restart && m_levelSettings->m_platformerMode && g.state != state::none)
-      m_fields->delayedLevelRestart = frame + 1;
+    // if (g.restart && m_levelSettings->m_platformerMode && g.state != state::none)
+    //   m_fields->delayedLevelRestart = frame + 1;
 
     Global::updateSeed(true);
 
@@ -160,7 +147,6 @@ class $modify(PlayLayer) {
       g.macro.inputs.clear();
       g.macro.frameFixes.clear();
       g.checkpoints.clear();
-      g.previousCheckpoints.clear();
 
       g.macro.canChangeFPS = true;
 
@@ -228,19 +214,6 @@ class $modify(BGLHook, GJBaseGameLayer) {
     bool rendering = g.renderer.recording || g.renderer.recordingAudio;
 
     if (g.state != state::none || rendering) {
-
-      // if (dt != 0.004166667f) {
-      //   if (!pl->m_isPaused)
-      //     pl->pauseGame(false);
-
-      //   g.state == state::playing ? Macro::togglePlaying() : Macro::toggleRecording();
-
-      //   FLAlertLayer::create(
-      //     "Warning",
-      //     "<cr>TPS</c> / <cr>Physics</c> bypass detected. Disable it to keep using xdBot.",
-      //     "Ok"
-      //   )->show();
-      // }
 
       if (!g.firstAttempt) {
         g.renderer.dontRender = false;
@@ -401,7 +374,6 @@ class $modify(BGLHook, GJBaseGameLayer) {
         p1->setRotation(fix.p1.rotation);
 
       if (m_gameState.m_isDualMode) {
-
         if (fix.p2.pos.x != 0.f && fix.p2.pos.y != 0.f)
           p2->setPosition(fix.p2.pos);
 
@@ -469,7 +441,6 @@ class $modify(PauseLayer) {
     auto& g = Global::get();
 
     g.checkpoints.clear();
-    g.previousCheckpoints.clear();
 
     if (g.restart) {
       g.restart = false;
