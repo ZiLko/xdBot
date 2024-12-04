@@ -199,7 +199,7 @@ void Renderer::start() {
         if (extraArgs.empty()) extraArgs = "-pix_fmt yuv420p";
         if (videoArgs.empty()) videoArgs = "colorspace=all=bt709:iall=bt470bg:fast=1";
 
-        std::string command = std::format(
+        std::string command = fmt::format(
             "\"{}\" -y -f rawvideo -pix_fmt rgb24 -s {}x{} -r {} -i - {}{}{} -vf \"vflip,{}\" -an \"{}\" ",
             ffmpegPath,
             std::to_string(width),
@@ -272,7 +272,7 @@ void Renderer::start() {
         // std::string tempPathAudio = tempPath;
 
         if (audioMode == AudioMode::Record) {
-            command = std::format("\"{}\" -i \"{}\" -acodec pcm_s16le -ar 44100 -ac 2 \"{}\"",
+            command = fmt::format("\"{}\" -i \"{}\" -acodec pcm_s16le -ar 44100 -ac 2 \"{}\"",
                 ffmpegPath,
                 "fmodoutput.wav",
                 tempPathAudio
@@ -295,7 +295,7 @@ void Renderer::start() {
 
             if (!extraAudioArgs.empty()) extraAudioArgs += " ";
 
-            command = std::format(
+            command = fmt::format(
                 "\"{}\" -y -ss {} -i \"{}\" -i \"{}\" -t {} -c:v copy {} -filter:a \"[1:a]adelay=0|0{}{}\" \"{}\"",
                 ffmpegPath,
                 offset,
