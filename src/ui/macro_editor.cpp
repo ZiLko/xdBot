@@ -782,7 +782,7 @@ void MacroEditLayer::flashSelected() {
     CCSequence* colorSeq = CCSequence::create(tintTo, tintFrom, nullptr);
     CCSequence* opacitySeq = CCSequence::create(fadeTo, fadeFrom, nullptr);
 
-    CCSpawn* spawn = CCSpawn::create(colorSeq, opacitySeq, nullptr);
+    CCSpawn* spawn = CCSpawn::createWithTwoActions(colorSeq, opacitySeq);
 
     selectedBg->runAction(spawn);
 

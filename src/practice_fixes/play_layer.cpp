@@ -57,7 +57,7 @@ class $modify(GJBaseGameLayer) {
 };
 
 class $modify(CheckpointObject) {
-  #ifdef GEODE_IS_WINDOWS
+  #ifndef GEODE_IS_ANDROID
   bool init() {
     bool ret = CheckpointObject::init();
     CheckpointObject* cp = this;

@@ -114,12 +114,12 @@ void ButtonEditLayer::updateSelectedLabels() {
 
     oss << std::fixed << std::setprecision(1) << scale;
 
-    scaleLbl->setString(std::format("Scale ({})", oss.str()).c_str());
+    scaleLbl->setString(fmt::format("Scale ({})", oss.str()).c_str());
 
     std::ostringstream oss2;
     oss2 << std::fixed << std::setprecision(1) << opacity;
 
-    opacityLbl->setString(std::format("Opacity ({})", oss2.str()).c_str());
+    opacityLbl->setString(fmt::format("Opacity ({})", oss2.str()).c_str());
 }
 
 void ButtonEditLayer::updateSelected(std::string selected) {
