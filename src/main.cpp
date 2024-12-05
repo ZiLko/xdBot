@@ -425,7 +425,7 @@ class $modify(BGLHook, GJBaseGameLayer) {
 
     if (!g.ignoreRecordAction && !g.creatingTrajectory && !m_player1->m_isDead)
       g.macro.recordAction(frame, button, player2, hold);
-
+      if (g.inputMirrorEnabled) g.macro.recordAction(frame, button, !player2, hold);
   }
 };
 
