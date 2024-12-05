@@ -115,6 +115,7 @@ public:
     bool seedEnabled = false;
     bool clickbotEnabled = false;
     bool frameLabel = false;
+    bool inputMirrorEnabled = false;
 
     bool ignoreStopDashing[2] = { false, false };
     bool addSideHoldingMembers[2] = { false, false };
