@@ -67,7 +67,10 @@ const std::vector<std::vector<RecordSetting>> settings{
 		{ "Show Frame Label:", "macro_show_frame_label", InputType::None },
 		{ "Ignore inputs:", "macro_ignore_inputs", InputType::None },
 		{ "Auto Stop Playing:", "macro_auto_stop_playing", InputType::None }
-	}
+	},
+	{
+		{ "Input Mirror:", "input_mirror", InputType::None }
+	{
 };
 
 class RecordLayer : public geode::Popup<>, public TextInputDelegate {
