@@ -207,7 +207,7 @@ class $modify(BGLHook, GJBaseGameLayer) {
     if (!pl)
       return GJBaseGameLayer::processCommands(dt);
 
-    Global::updateSeed();
+    // Global::updateSeed();
 
     int frame = Global::getCurrentFrame();
 
