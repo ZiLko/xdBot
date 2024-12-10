@@ -244,19 +244,19 @@ class $modify(PlayLayer) {
     void postUpdate(float dt) {
         PlayLayer::postUpdate(dt);
 
-        if (!t.trajectoryNode() || t.creatingTrajectory) return;
+        // if (!t.trajectoryNode() || t.creatingTrajectory) return;
 
-        int frame = Global::getCurrentFrame();
+        // int frame = Global::getCurrentFrame();
 
-        if (Global::get().showTrajectory && frame > 2) {
+        // if (Global::get().showTrajectory && frame > 2) {
 
-            ShowTrajectory::updateTrajectory(this);
+        //     ShowTrajectory::updateTrajectory(this);
 
-        }
-        else if (t.trajectoryNode()->isVisible()) {
-            t.trajectoryNode()->clear();
-            t.trajectoryNode()->setVisible(false);
-        }
+        // }
+        // else if (t.trajectoryNode()->isVisible()) {
+        //     t.trajectoryNode()->clear();
+        //     t.trajectoryNode()->setVisible(false);
+        // }
 
     }
 
@@ -460,7 +460,7 @@ class $modify(PlayerObject) {
 
     void update(float dt) {
         PlayerObject::update(dt);
-        t.delta = dt;
+        // t.delta = dt;
     }
 
     void playSpiderDashEffect(cocos2d::CCPoint p0, cocos2d::CCPoint p1) {

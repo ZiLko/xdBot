@@ -74,33 +74,33 @@ class $modify(GJBaseGameLayer) {
 
     void update(float dt) {
 
-        if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
+        // if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
 
-        if (this->m_player1->m_isDead) {
-            if (Global::get().mod->getSavedValue<bool>("macro_instant_respawn"))
-                PlayLayer::get()->resetLevel();
-        }
+        // if (this->m_player1->m_isDead) {
+        //     if (Global::get().mod->getSavedValue<bool>("macro_instant_respawn"))
+        //         PlayLayer::get()->resetLevel();
+        // }
 
-        auto& g = Global::get();
+        // auto& g = Global::get();
 
-        if (!g.renderer.recording && g.frameStepper) {
-            if (g.stepFrameParticle != 0)
-                g.stepFrameParticle--;
+        // if (!g.renderer.recording && g.frameStepper) {
+        //     if (g.stepFrameParticle != 0)
+        //         g.stepFrameParticle--;
 
-            if (Macro::shouldStep()) {
-                g.stepFrame = false;
+        //     if (Macro::shouldStep()) {
+        //         g.stepFrame = false;
 
-                GJBaseGameLayer::update(1.f / 240.f);
+        //         GJBaseGameLayer::update(1.f / 240.f);
 
-                g.frameStepperMusicTime = FMODAudioEngine::sharedEngine()->getMusicTimeMS(0);
+        //         g.frameStepperMusicTime = FMODAudioEngine::sharedEngine()->getMusicTimeMS(0);
 
-                return;
-            }
-            else {
-                g.safeMode = true;
-                return;
-            }
-        }
+        //         return;
+        //     }
+        //     else {
+        //         g.safeMode = true;
+        //         return;
+        //     }
+        // }
 
         GJBaseGameLayer::update(dt);
     }
@@ -109,24 +109,24 @@ class $modify(GJBaseGameLayer) {
 
 class $modify(CCParticleSystem) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("CCParticleSystem::update", -1))
-            log::warn("CCParticleSystem::update hook priority fail xD.");
-    }
+    // static void onModify(auto & self) {
+    //     if (!self.setHookPriority("CCParticleSystem::update", -1))
+    //         log::warn("CCParticleSystem::update hook priority fail xD.");
+    // }
 
     virtual void update(float dt) {
-        auto& g = Global::get();
-        if (!PlayLayer::get()) return CCParticleSystem::update(dt);
+        // auto& g = Global::get();
+        // if (!PlayLayer::get()) return CCParticleSystem::update(dt);
 
-        int frame = Global::getCurrentFrame();
+        // int frame = Global::getCurrentFrame();
 
-        if (!g.renderer.recording && g.frameStepper) {
-            if (g.stepFrameParticle != 0) {
-                CCParticleSystem::update(dt);
-            }
-            else
-                return;
-        }
+        // if (!g.renderer.recording && g.frameStepper) {
+        //     if (g.stepFrameParticle != 0) {
+        //         CCParticleSystem::update(dt);
+        //     }
+        //     else
+        //         return;
+        // }
 
         CCParticleSystem::update(dt);
     }

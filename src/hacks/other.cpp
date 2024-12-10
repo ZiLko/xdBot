@@ -10,58 +10,59 @@
 class $modify(CCScheduler) {
 
     void update(float dt) {
-        auto& g = Global::get();
+        // auto& g = Global::get();
 
-        if (g.state == state::none && !g.speedhackEnabled) {
-            if (g.currentPitch != 1.f)
-                Global::updatePitch(1.f);
+        // if (g.state == state::none && !g.speedhackEnabled) {
+        //     if (g.currentPitch != 1.f)
+        //         Global::updatePitch(1.f);
 
-            return CCScheduler::update(dt);
-        }
+        //     return CCScheduler::update(dt);
+        // }
 
-        if (g.renderer.recording || g.renderer.recordingAudio) {
-            if (g.currentPitch != 1.f)
-                Global::updatePitch(1.f);
+        // if (g.renderer.recording || g.renderer.recordingAudio) {
+        //     if (g.currentPitch != 1.f)
+        //         Global::updatePitch(1.f);
 
-            return CCScheduler::update(dt);
-        }
+        //     return CCScheduler::update(dt);
+        // }
 
-        float speedhack = 1.f;
+        // float speedhack = 1.f;
 
-        if (g.speedhackEnabled && !g.frameStepper) {
-            std::string speedhackValue = g.mod->getSavedValue<std::string>("macro_speedhack");
+        // if (g.speedhackEnabled && !g.frameStepper) {
+        //     std::string speedhackValue = g.mod->getSavedValue<std::string>("macro_speedhack");
 
-            if (speedhackValue != "0.0" && speedhackValue != "") {
-                speedhack = std::stof(speedhackValue);
-                float decimals = speedhack - static_cast<int>(speedhack);
+        //     if (speedhackValue != "0.0" && speedhackValue != "") {
+        //         speedhack = std::stof(speedhackValue);
+        //         float decimals = speedhack - static_cast<int>(speedhack);
 
-                float closest = safeValues[0];
-                float minDiff = std::abs(decimals - closest);
+        //         float closest = safeValues[0];
+        //         float minDiff = std::abs(decimals - closest);
 
-                for (float value : safeValues) {
-                    if (speedhackValue == "1.0" || g.state == state::none) {
-                        closest = decimals;
-                        break;
-                    }
+        //         for (float value : safeValues) {
+        //             if (speedhackValue == "1.0" || g.state == state::none) {
+        //                 closest = decimals;
+        //                 break;
+        //             }
 
-                    float diff = std::abs(decimals - value);
+        //             float diff = std::abs(decimals - value);
 
-                    if (diff < minDiff) {
-                        minDiff = diff;
-                        closest = value;
-                    }
-                }
+        //             if (diff < minDiff) {
+        //                 minDiff = diff;
+        //                 closest = value;
+        //             }
+        //         }
 
-                speedhack = static_cast<int>(speedhack) + closest;
-            }
+        //         speedhack = static_cast<int>(speedhack) + closest;
+        //     }
 
-            Global::updatePitch(speedhack);
-        }
+        //     Global::updatePitch(speedhack);
+        // }
 
-        if (speedhack != 1.f && PlayLayer::get())
-            g.safeMode = true;
+        // if (speedhack != 1.f && PlayLayer::get())
+        //     g.safeMode = true;
 
-        CCScheduler::update(dt * speedhack);
+        // CCScheduler::update(dt * speedhack);
+        CCScheduler::update(dt);
     }
 
 };

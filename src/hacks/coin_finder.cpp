@@ -59,23 +59,23 @@ class $modify(PlayLayer) {
     void postUpdate(float dt) {
         PlayLayer::postUpdate(dt);
 
-        if (!Global::get().coinFinder) {
-            drawNode()->setVisible(false);
-            return;
-        }
+        // if (!Global::get().coinFinder) {
+        //     drawNode()->setVisible(false);
+        //     return;
+        // }
 
-        drawNode()->clear();
-        drawNode()->setVisible(true);
+        // drawNode()->clear();
+        // drawNode()->setVisible(true);
 
-        Global::get().safeMode = true;
+        // Global::get().safeMode = true;
 
-        for (GameObject* coin : m_fields->coins) {
-            cocos2d::ccColor4F color = { 0.85f, 0.85f, 0.85f, 0.75f };
+        // for (GameObject* coin : m_fields->coins) {
+        //     cocos2d::ccColor4F color = { 0.85f, 0.85f, 0.85f, 0.75f };
 
-            if (coin->m_objectType == GameObjectType::SecretCoin)
-                color = { 0.96f, 1.f, 0.f, 0.75f };
+        //     if (coin->m_objectType == GameObjectType::SecretCoin)
+        //         color = { 0.96f, 1.f, 0.f, 0.75f };
 
-            drawNode()->drawSegment(m_player1->getPosition(), coin->getPosition(), 0.4f, color);
-        }
+        //     drawNode()->drawSegment(m_player1->getPosition(), coin->getPosition(), 0.4f, color);
+        // }
     }
 };

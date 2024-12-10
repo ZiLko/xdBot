@@ -16,10 +16,10 @@ class $modify(PlayLayer) {
 
     void postUpdate(float dt) {
         PlayLayer::postUpdate(dt);
-        auto& g = Global::get();
+        // auto& g = Global::get();
 
-        if (g.state != state::none && g.frameLabel && !g.renderer.recording)
-            m_fields->frameLabel->setString(("Frame: " + std::to_string(Global::getCurrentFrame())).c_str());
+        // if (g.state != state::none && g.frameLabel && !g.renderer.recording)
+        //     m_fields->frameLabel->setString(("Frame: " + std::to_string(Global::getCurrentFrame())).c_str());
     }
 
     bool init(GJGameLevel * level, bool b1, bool b2) {
