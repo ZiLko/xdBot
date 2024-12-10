@@ -60,10 +60,12 @@ namespace keybinds {
 
 #endif
 
+#ifdef GEODE_IS_WINDOWS
+
+
 using namespace keybinds;
 
 void onKeybind(bool down, ActionID id) {
-#ifdef GEODE_IS_WINDOWS
 
   auto& g = Global::get();
 
@@ -130,13 +132,10 @@ void onKeybind(bool down, ActionID id) {
     }
   }
 
-#endif
 
 }
 
 $execute{
-
-  #ifdef GEODE_IS_WINDOWS
 
     BindManager * bm = BindManager::get();
 
@@ -226,5 +225,6 @@ $execute{
         }, InvokeBindFilter(nullptr, (""_spr) + keybindIDs[i]));
     }
 
-  #endif
 }
+
+#endif
