@@ -343,6 +343,7 @@ void RecordLayer::toggleSetting(CCObject* obj) {
     if (id == "macro_show_trajectory") g.showTrajectory = value;
     if (id == "macro_coin_finder") g.coinFinder = value;
     if (id == "clickbot_enabled") g.clickbotEnabled = value;
+    if (id == "input_mirror") g.inputMirrorEnabled = value;
 
     if (id == "macro_show_frame_label") {
         g.frameLabel = value;
