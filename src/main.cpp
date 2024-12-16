@@ -36,6 +36,8 @@ class $modify(PlayLayer) {
   void pauseGame(bool b1) {
     Global::updateKeybinds();
 
+    if (!Global::get().renderer.tryPause()) return;
+
     auto& g = Global::get();
 
     if (!m_player1 || !m_player2) return PlayLayer::pauseGame(b1);
@@ -94,7 +96,6 @@ class $modify(PlayLayer) {
     g.ignoreRecordAction = false;
 
     PlayLayer::pauseGame(b1);
-
   }
 
   bool init(GJGameLevel * level, bool b1, bool b2) {

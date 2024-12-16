@@ -69,7 +69,7 @@ class $modify(GJBaseGameLayer) {
             return g.renderer.startAudio(pl);
         }
 
-        if (g.renderer.recordingAudio && frame % static_cast<int>(240.f / g.renderer.fps) == 1)
+        if (g.renderer.recordingAudio && frame % static_cast<int>(240.f / g.renderer.fps) == 0)
             return g.renderer.handleAudioRecording(pl, frame);
     }
 };
@@ -210,6 +210,7 @@ void Renderer::start() {
     startedAudio = false;
     timeAfter = 0.f;
     finishFrame = 0;
+    pauseAttempts = 0;
     lastFrame_t = extra_t = 0;
 
     if (!pl->m_levelEndAnimationStarted && pl->m_isPaused)
@@ -239,10 +240,10 @@ void Renderer::start() {
         if (extraArgs.empty()) extraArgs = "-pix_fmt yuv420p";
         if (videoArgs.empty()) videoArgs = "colorspace=all=bt709:iall=bt470bg:fast=1";
 
-        std::string fadeInTime = Mod::get()->getSavedValue<std::string>("render_fade_in_time");
-        bool fadeInVideo = Mod::get()->getSavedValue<bool>("render_fade_in");
-        std::string fadeOutTime = Mod::get()->getSavedValue<std::string>("render_fade_out_time");
-        bool fadeOutVideo = Mod::get()->getSavedValue<bool>("render_fade_out");
+        float fadeInTime = geode::utils::numFromString<float>(Mod::get()->getSavedValue<std::string>("render_fade_in_time")).unwrapOr(0.f);
+        bool fadeInVideo = Mod::get()->getSavedValue<bool>("render_fade_in") && fadeInTime != 0.f;
+        float fadeOutTime = geode::utils::numFromString<float>(Mod::get()->getSavedValue<std::string>("render_fade_out_time")).unwrapOr(0.f);
+        bool fadeOutVideo = Mod::get()->getSavedValue<bool>("render_fade_out") && fadeOutTime != 0.f;
 
         std::string fadeArgs;
         if (fadeInVideo)
@@ -286,13 +287,14 @@ void Renderer::start() {
         Loader::get()->queueInMainThread([] {
             Notification::create("Saving Render...", NotificationIcon::Loading)->show();
         });
-
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         double totalTime = lastFrame_t;
-        float fadeOutStart = totalTime + (levelFinished ? stopAfter : 0.f) - geode::utils::numFromString<float>(fadeOutTime).unwrapOr(2.f);
+        if (fadeOutTime > totalTime) fadeOutTime = totalTime / 2;
+        float fadeOutStart = totalTime - fadeOutTime;
+
         if (fadeOutVideo) {
-            command = fmt::format("\"{}\" -i \"{}\" -vf \"fade=t=out:st={}:d={}\" -c:a copy \"{}\"", ffmpegPath, path, fadeOutStart, fadeOutTime, path + "_temp.mp4");
+            command = fmt::format("\"{}\" -i \"{}\" -vf \"fade=t=out:st={}:d={}\" -c:a copy \"{}\"", ffmpegPath, path, fadeOutStart, std::to_string(fadeOutTime), path + "_temp.mp4");
 
 
             log::info("Executing (Fade Out): {}", command);
@@ -339,10 +341,8 @@ void Renderer::start() {
         // std::string tempPathAudio = tempPath;
 
         if (audioMode == AudioMode::Record) {
-            command = fmt::format("\"{}\" -i \"{}\" -acodec pcm_s16le -ar 44100 -ac 2 \"{}\"",
-                ffmpegPath,
-                "fmodoutput.wav",
-                tempPathAudio
+            command = fmt::format("\"{}\" -i \"fmodoutput.wav\" -acodec pcm_s16le -ar 44100 -ac 2 \"{}\"",
+                ffmpegPath, tempPathAudio
             );
 
            process = subprocess::Popen(command);  // Fix ffmpeg not reading it
@@ -358,14 +358,14 @@ void Renderer::start() {
 
             std::string fadeInString;
             if ((fadeIn && audioMode == AudioMode::Song) || fadeInVideo) 
-                fadeInString = fmt::format(", afade=t=in:d={}", fadeInVideo ? fadeInTime : "2");
+                fadeInString = fmt::format(", afade=t=in:d={}", fadeInVideo ? std::to_string(fadeInTime) : "2");
 
             std::string fadeOutString;
             if ((fadeOut && audioMode == AudioMode::Song) || fadeOutVideo) 
                 fadeOutString = fmt::format(
                     ", afade=t=out:d={}:st={}", 
-                    fadeOutVideo ? fadeOutTime : "2",
-                    fadeOutVideo ? fadeOutStart : totalTime - stopAfter - 3.5f
+                    fadeOutVideo ? std::to_string(fadeOutTime) : "2",
+                    fadeOutVideo ? fadeOutStart : totalTime - timeAfter - 3.5f
                 );
 
             std::string file = audioMode == AudioMode::Song ? songFile : tempPathAudio;
@@ -421,8 +421,10 @@ void Renderer::stop(int frame) {
     finishFrame = frame;
 
     if (PlayLayer* pl = PlayLayer::get()) {
-        if (pl->m_levelEndAnimationStarted)
+        if (pl->m_hasCompletedLevel) {
             finishFrame = 0;
+            levelFinished = true;
+        }
 
         if (pl->m_isPaused && audioMode == AudioMode::Record) {
             if (PauseLayer* layer = Global::getPauseLayer()) {
@@ -566,6 +568,20 @@ void Renderer::handleRecording(PlayLayer* pl, int frame) {
 #endif
 }
 
+bool Renderer::tryPause() {
+    if (!recordingAudio) return true;
+
+    pauseAttempts++;
+
+    if (pauseAttempts > 5) {
+        pauseAttempts = 0;
+        stopAudio();
+        return true;
+    }
+
+    return false;
+}
+
 void Renderer::startAudio(PlayLayer* pl) {
     EndLevelLayer* endLevelLayer = pl->getChildByType<EndLevelLayer>(0);
     if (dontRecordAudio) return;
@@ -593,6 +609,7 @@ void Renderer::startAudio(PlayLayer* pl) {
 
         FMODAudioEngine::sharedEngine()->m_system->setOutput(FMOD_OUTPUTTYPE_WAVWRITER);
         startedAudio = true;
+        pauseAttempts = 0;
         if (CCNode* lbl = pl->getChildByID("recording-audio-label"_spr))
             lbl->setVisible(true);
     }
@@ -605,9 +622,9 @@ void Renderer::stopAudio() {
 	fmod->m_backgroundMusicChannel->setVolume(ogMusicVol);
 
     recordingAudio = false;
-    if (!PlayLayer::get()) return;
-    if (CCNode* lbl = PlayLayer::get()->getChildByID("recording-audio-label"_spr))
-            lbl->setVisible(false);
+    if (PlayLayer* pl = PlayLayer::get())
+        if (CCNode* lbl = pl->getChildByID("recording-audio-label"_spr))
+                lbl->setVisible(false);
 }
 
 void Renderer::handleAudioRecording(PlayLayer* pl, int frame) {
@@ -626,6 +643,8 @@ void Renderer::handleAudioRecording(PlayLayer* pl, int frame) {
         g.renderer.stopAudio();
         return;
     }
+
+    log::debug("{} {}", timeAfter, stopAfter);
 
     if (!pl->m_hasCompletedLevel || timeAfter < stopAfter) {
         float dt = 1.f / static_cast<double>(fps);

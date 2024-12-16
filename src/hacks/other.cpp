@@ -107,8 +107,10 @@ class $modify(PlayLayer) {
         else
             Global::get().safeMode = true;
         
-        if (g.mod->getSavedValue<bool>("respawn_time_enabled")) {
-            if (getActionByTag(16)) {
+        if (getActionByTag(16)) {
+            if (Global::get().renderer.recordingAudio) Global::get().renderer.stopAudio();
+            
+            if (g.mod->getSavedValue<bool>("respawn_time_enabled")) {
                 stopActionByTag(16);
                 CCSequence* seq = CCSequence::create(CCDelayTime::create(g.mod->getSavedValue<double>("respawn_time")), CCCallFunc::create(this, callfunc_selector(PlayLayer::delayedResetLevel)), nullptr);
                 seq->setTag(16);

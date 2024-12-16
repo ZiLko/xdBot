@@ -431,7 +431,7 @@ void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, bool 
     player->m_maybeReverseSpeed = data.m_maybeReverseSpeed;
     player->m_maybeReverseAcceleration = data.m_maybeReverseAcceleration;
     player->m_xVelocityRelated2 = data.m_xVelocityRelated2;
-    player->m_isDashing = data.m_isDashing;
+    if (!isFakePlayer) player->m_isDashing = data.m_isDashing;
     player->m_unk9e8 = data.m_unk9e8;
     player->m_groundObjectMaterial = data.m_groundObjectMaterial;
     player->m_vehicleSize = data.m_vehicleSize;

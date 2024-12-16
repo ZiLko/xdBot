@@ -44,6 +44,7 @@ public:
     unsigned width, height;
     unsigned fps;
     double lastFrame_t, extra_t;
+    int pauseAttempts = 0;
 
     MyRenderTexture renderer;
     std::vector<uint8_t> currentFrame;
@@ -70,4 +71,5 @@ public:
     void handleAudioRecording(PlayLayer* pl, int frame);
     
     static bool toggle();
+    bool tryPause();
 };

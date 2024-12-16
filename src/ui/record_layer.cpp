@@ -466,15 +466,7 @@ void RecordLayer::openKeybinds(CCObject*) {
 #endif
 }
 
-void RecordLayer::openRendersFolder(CCObject*) {
-    // std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
-
-    // if (std::filesystem::exists(path))
-    //     file::openFolder(path);
-    // else if (std::filesystem::create_directory(path))
-    //     file::openFolder(path);
-    // else
-    //     FLAlertLayer::create("Error", "There was an error getting the folder. ID: 4", "Ok")->show();
+void RecordLayer::openPresets(CCObject*) {
     RenderPresetsLayer::create()->show();
 }
 
@@ -817,7 +809,7 @@ bool RecordLayer::setup() {
     btn = CCMenuItemSpriteExtra::create(
         emptyBtn,
         this,
-        menu_selector(RecordLayer::openRendersFolder)
+        menu_selector(RecordLayer::openPresets)
     );
     btn->setPosition(ccp(-177.5, -97));
 #ifdef GEODE_IS_ANDROID

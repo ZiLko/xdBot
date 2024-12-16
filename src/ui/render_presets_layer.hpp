@@ -61,10 +61,26 @@ private:
             m_buttonMenu->addChild(btn);
         }
 
-        ButtonSprite* spr = ButtonSprite::create("OK");
-        spr->setScale(0.75f);
-        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(RenderPresetsLayer::onClose));
+        ButtonSprite* btnSpr = ButtonSprite::create("OK");
+        btnSpr->setScale(0.75f);
+        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(btnSpr, this, menu_selector(RenderPresetsLayer::onClose));
         btn->setPosition({m_size.width / 2, 22});
+        m_buttonMenu->addChild(btn);
+
+        CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
+        spr->setScale(0.525f);
+
+        CCSprite* spr2 = CCSprite::createWithSpriteFrameName("folderIcon_001.png");
+        spr2->setPosition(spr->getContentSize() / 2);
+        spr2->setScale(0.7f);
+
+        spr->addChild(spr2);
+        btn = CCMenuItemSpriteExtra::create(
+            spr,
+            this,
+            menu_selector(RenderPresetsLayer::openRendersFolder)
+        );
+        btn->setPosition({18, 18});
         m_buttonMenu->addChild(btn);
 
         return true;
@@ -85,6 +101,17 @@ private:
                 layer->show();
             });
         });
+    }
+
+    void openRendersFolder(CCObject*) {
+        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
+
+        if (std::filesystem::exists(path))
+            file::openFolder(path);
+        else if (std::filesystem::create_directory(path))
+            file::openFolder(path);
+        else
+            FLAlertLayer::create("Error", "There was an error getting the folder. ID: 4", "Ok")->show();
     }
 
     void onLoad(CCObject* obj) {

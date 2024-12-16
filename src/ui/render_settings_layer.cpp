@@ -256,6 +256,7 @@ bool RenderSettingsLayer::setup() {
     fadeInInput->setPosition(ccp(100, -32));
     fadeInInput->setString(Mod::get()->getSavedValue<std::string>("render_fade_in_time").c_str());
     fadeInInput->getInputNode()->setDelegate(this);
+    fadeInInput->getInputNode()->setAllowedChars("0123456789.");
     menu->addChild(fadeInInput);
 
     CCMenuItemToggler* toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
@@ -277,6 +278,7 @@ bool RenderSettingsLayer::setup() {
     fadeOutInput->setPosition(ccp(100, -58));
     fadeOutInput->setString(Mod::get()->getSavedValue<std::string>("render_fade_out_time").c_str());
     fadeOutInput->getInputNode()->setDelegate(this);
+    fadeOutInput->getInputNode()->setAllowedChars("0123456789.");
     menu->addChild(fadeOutInput);
 
     toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));

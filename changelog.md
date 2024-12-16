@@ -1,3 +1,14 @@
+# v2.2.1
+
+* Added renders folder button back but inside the render presets menu.
+* Added pause retention while recording audio (spam it to actually pause).
+* Made it so render audio recording stops when the player dies.
+* Fixed dash trail looking weird with show trajectory on.
+* Fixed render audio recording not stopping on 60fps.
+* Fixed render fade out not working i think.
+* Fixed being able to type anything in fade inputs.
+* Fixed render not working when fade out time was longer than the video length.
+
 # v2.2.0
 
 * Changed the default of restore page setting.

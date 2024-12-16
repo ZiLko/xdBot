@@ -110,7 +110,7 @@ public:
 
 	void toggleRender(CCObject* btn);
 
-	void openRendersFolder(CCObject*);
+	void openPresets(CCObject*);
 
 	void onAutosaves(CCObject*);
 
