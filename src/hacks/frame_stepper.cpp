@@ -22,11 +22,6 @@ class $modify(PauseLayer) {
 
 class $modify(CCDirector) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("CCDirector::drawScene", -1))
-            log::warn("CCDirector::drawScene hook priority fail xD.");
-    }
-
     void drawScene() {
         auto& g = Global::get();
 
@@ -67,11 +62,6 @@ class $modify(PlayLayer) {
 
 class $modify(GJBaseGameLayer) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("GJBaseGameLayer::update", 100))
-            log::warn("GJBaseGameLayer::update hook priority fail xD.");
-    }
-
     void update(float dt) {
 
         if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
@@ -108,11 +98,6 @@ class $modify(GJBaseGameLayer) {
 };
 
 class $modify(CCParticleSystem) {
-
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("CCParticleSystem::update", -1))
-            log::warn("CCParticleSystem::update hook priority fail xD.");
-    }
 
     virtual void update(float dt) {
         auto& g = Global::get();

@@ -45,18 +45,28 @@ void ShowTrajectory::updateTrajectory(PlayLayer* pl) {
     if (t.fakePlayer1 && pl->m_player1) {
         createTrajectory(pl, t.fakePlayer1, pl->m_player1, true);
         createTrajectory(pl, t.fakePlayer2, pl->m_player1, false);
+
+        if (g.trajectoryBothSides) {
+            createTrajectory(pl, t.fakePlayer1, pl->m_player1, true, true);
+            createTrajectory(pl, t.fakePlayer2, pl->m_player1, false, true);
+        }
     }
 
     if (pl->m_gameState.m_isDualMode && pl->m_player2) {
         createTrajectory(pl, t.fakePlayer2, pl->m_player2, true);
         createTrajectory(pl, t.fakePlayer1, pl->m_player2, false);
+
+        if (g.trajectoryBothSides) {
+            createTrajectory(pl, t.fakePlayer2, pl->m_player2, true, true);
+            createTrajectory(pl, t.fakePlayer1, pl->m_player2, false, true);
+        }
     }
 
     t.creatingTrajectory = false;
     g.creatingTrajectory = false;
 }
 float rot = 0.f;
-void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, PlayerObject* realPlayer, bool hold) {
+void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, PlayerObject* realPlayer, bool hold, bool inverted) {
 
     bool player2 = pl->m_player2 == realPlayer;
 
@@ -91,7 +101,7 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
         if (i == 0) {
             hold ? fakePlayer->pushButton(static_cast<PlayerButton>(1)) : fakePlayer->releaseButton(static_cast<PlayerButton>(1));
             if (pl->m_levelSettings->m_platformerMode)
-                realPlayer->m_isGoingLeft ? fakePlayer->pushButton(static_cast<PlayerButton>(2)) : fakePlayer->pushButton(static_cast<PlayerButton>(3));
+                (inverted ? !realPlayer->m_isGoingLeft : realPlayer->m_isGoingLeft) ? fakePlayer->pushButton(static_cast<PlayerButton>(2)) : fakePlayer->pushButton(static_cast<PlayerButton>(3));
         }
 
         fakePlayer->update(t.delta);
@@ -109,8 +119,8 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
             color.a = (t.length - i) / 40.f;
 
         t.trajectoryNode()->drawSegment(prevPos, fakePlayer->getPosition(), 0.6f, color);
-
     }
+
 }
 
 void ShowTrajectory::drawPlayerHitbox(PlayerObject* player, CCDrawNode* drawNode) {
@@ -233,14 +243,6 @@ cocos2d::CCDrawNode* ShowTrajectory::trajectoryNode() {
 
 class $modify(PlayLayer) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("PlayLayer::destroyPlayer", 100))
-            log::warn("PlayLayer::destroyPlayer hook priority fail xD.");
-
-        if (!self.setHookPriority("PlayLayer::playEndAnimationToPos", 100))
-            log::warn("PlayLayer::playEndAnimationToPos hook priority fail xD.");
-    }
-
     void postUpdate(float dt) {
         PlayLayer::postUpdate(dt);
 
@@ -338,32 +340,6 @@ class $modify(PauseLayer) {
 
 class $modify(GJBaseGameLayer) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("GJBaseGameLayer::canBeActivatedByPlayer", 100))
-            log::warn("GJBaseGameLayer::canBeActivatedByPlayer hook priority fail xD.");
-
-        if (!self.setHookPriority("GJBaseGameLayer::canBeActivatedByPlayer", 100))
-            log::warn("GJBaseGameLayer::canBeActivatedByPlayer hook priority fail xD.");
-
-        if (!self.setHookPriority("GJBaseGameLayer::playerTouchedRing", 100))
-            log::warn("GJBaseGameLayer::playerTouchedRing hook priority fail xD.");
-
-        if (!self.setHookPriority("GJBaseGameLayer::playerTouchedTrigger", 100))
-            log::warn("GJBaseGameLayer::playerTouchedTrigger hook priority fail xD.");
-
-        if (!self.setHookPriority("GJBaseGameLayer::activateSFXTrigger", 100))
-            log::warn("GJBaseGameLayer::activateSFXTrigger hook priority fail xD.");
-
-        if (!self.setHookPriority("GJBaseGameLayer::activateSongEditTrigger", 100))
-            log::warn("GJBaseGameLayer::activateSongEditTrigger hook priority fail xD.");
-
-        if (!self.setHookPriority("GJBaseGameLayer::activateSongTrigger", 100))
-            log::warn("GJBaseGameLayer::activateSongTrigger hook priority fail xD.");
-
-        if (!self.setHookPriority("GJBaseGameLayer::gameEventTriggered", 100))
-            log::warn("GJBaseGameLayer::gameEventTriggered hook priority fail xD.");
-    }
-
     void collisionCheckObjects(PlayerObject * p0, gd::vector<GameObject*>*objects, int p2, float p3) {
         if (t.creatingTrajectory) {
             std::vector<GameObject*> disabledObjects;
@@ -444,20 +420,6 @@ class $modify(GJBaseGameLayer) {
 
 class $modify(PlayerObject) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("PlayerObject::playDynamicSpiderRun", 100))
-            log::warn("PlayerObject::playDynamicSpiderRun hook priority fail xD.");
-        
-        if (!self.setHookPriority("PlayerObject::playSpiderDashEffect", 100))
-            log::warn("PlayerObject::playSpiderDashEffect hook priority fail xD.");
-
-        if (!self.setHookPriority("PlayerObject::incrementJumps", 100))
-            log::warn("PlayerObject::incrementJumps hook priority fail xD.");
-
-        if (!self.setHookPriority("PlayerObject::ringJump", 100))
-            log::warn("PlayerObject::ringJump hook priority fail xD.");
-    }
-
     void update(float dt) {
         PlayerObject::update(dt);
         t.delta = dt;
@@ -482,11 +444,6 @@ class $modify(PlayerObject) {
 
 class $modify(HardStreak) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("HardStreak::addPoint", 100))
-            log::warn("HardStreak::addPoint hook priority fail xD.");
-    }
-
     void addPoint(cocos2d::CCPoint p0) {
         if (!t.creatingTrajectory)
             HardStreak::addPoint(p0);
@@ -495,11 +452,6 @@ class $modify(HardStreak) {
 
 class $modify(GameObject) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("GameObject::playShineEffect", 100))
-            log::warn("GameObject::playShineEffect hook priority fail xD.");
-    }
-
     void playShineEffect() {
         if (!t.creatingTrajectory)
             GameObject::playShineEffect();
@@ -507,11 +459,6 @@ class $modify(GameObject) {
 };
 
 class $modify(EffectGameObject) {
-
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("EffectGameObject::triggerObject", 100))
-            log::warn("EffectGameObject::triggerObject hook priority fail xD.");
-    }
 
     void triggerObject(GJBaseGameLayer * p0, int p1, const gd::vector<int>*p2) {
         if (!t.creatingTrajectory)

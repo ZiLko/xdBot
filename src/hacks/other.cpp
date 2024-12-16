@@ -6,6 +6,8 @@
 #include <Geode/modify/EndLevelLayer.hpp>
 #include <Geode/modify/GJGameLevel.hpp>
 #include <Geode/modify/CCScheduler.hpp>
+#include <Geode/modify/EffectGameObject.hpp>
+#include <Geode/modify/GameLevelOptionsLayer.hpp>
 
 class $modify(CCScheduler) {
 
@@ -68,14 +70,6 @@ class $modify(CCScheduler) {
 
 class $modify(PlayerObject) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("PlayerObject::playDeathEffect", -1))
-            log::warn("PlayerObject::playDeathEffect hook priority fail xD.");
-
-        if (!self.setHookPriority("PlayerObject::playSpawnEffect", -1))
-            log::warn("PlayerObject::playSpawnEffect hook priority fail xD.");
-    }
-
     void playDeathEffect() {
         if (!Global::get().mod->getSavedValue<bool>("macro_no_death_effect"))
             PlayerObject::playDeathEffect();
@@ -94,14 +88,6 @@ class $modify(PlayLayer) {
         CCObject* slopeFix = nullptr;
     };
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("PlayLayer::destroyPlayer", -1))
-            log::warn("PlayLayer::destroyPlayer hook priority fail xD.");
-
-        if (!self.setHookPriority("PlayLayer::showNewBest", -1))
-            log::warn("PlayLayer::showNewBest hook priority fail xD.");
-    }
-
     void destroyPlayer(PlayerObject * p0, GameObject * p1) {
         if (p0 != m_player1 && p0 != m_player2) return PlayLayer::destroyPlayer(p0, p1);
         
@@ -113,15 +99,22 @@ class $modify(PlayLayer) {
         bool player2 = p0 == m_player2;
 
         if (!g.mod->getSavedValue<bool>("macro_noclip_p1") && !player2)
-            return PlayLayer::destroyPlayer(p0, p1);
-
-        if (!g.mod->getSavedValue<bool>("macro_noclip_p2") && player2)
-            return PlayLayer::destroyPlayer(p0, p1);
-
-        if (!g.mod->getSavedValue<bool>("macro_noclip") || m_fields->slopeFix == p1)
+            PlayLayer::destroyPlayer(p0, p1);
+        else if (!g.mod->getSavedValue<bool>("macro_noclip_p2") && player2)
+            PlayLayer::destroyPlayer(p0, p1);
+        else if (!g.mod->getSavedValue<bool>("macro_noclip") || m_fields->slopeFix == p1)
             PlayLayer::destroyPlayer(p0, p1);
         else
             Global::get().safeMode = true;
+        
+        if (g.mod->getSavedValue<bool>("respawn_time_enabled")) {
+            if (getActionByTag(16)) {
+                stopActionByTag(16);
+                CCSequence* seq = CCSequence::create(CCDelayTime::create(g.mod->getSavedValue<double>("respawn_time")), CCCallFunc::create(this, callfunc_selector(PlayLayer::delayedResetLevel)), nullptr);
+                seq->setTag(16);
+                runAction(seq);
+            }
+        }
     }
 
     void showNewBest(bool po, int p1, int p2, bool p3, bool p4, bool p5) {
@@ -205,13 +198,49 @@ class $modify(EndLevelLayer) {
 
 class $modify(GJGameLevel) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("GJGameLevel::savePercentage", -1))
-            log::warn("GJGameLevel::savePercentage hook priority fail xD.");
-    }
-
     void savePercentage(int p0, bool p1, int p2, int p3, bool p4) {
         if (!Global::get().safeMode || !Mod::get()->getSavedValue<bool>("macro_auto_safe_mode"))
             GJGameLevel::savePercentage(p0, p1, p2, p3, p4);
     }
+};
+
+class $modify(EffectGameObject) {
+
+    void triggerObject(GJBaseGameLayer* p0, int p1, gd::vector<int> const* p2) {
+        if (!Mod::get()->getSavedValue<bool>("disable_shaders"))
+            return EffectGameObject::triggerObject(p0, p1, p2);
+
+        int id = m_objectID;
+        if (id == 30 || id == 1006 || id == 105 || id == 915 || id == 29 || id == 58 || id == 56 || id == 1007 || id == 899)
+            return;
+
+        EffectGameObject::triggerObject(p0, p1, p2);
+	}
+
+};
+
+class $modify(GameLevelOptionsLayer) {
+
+    static GameLevelOptionsLayer* create(GJGameLevel* level) {
+        GameLevelOptionsLayer* ret = GameLevelOptionsLayer::create(level);
+
+        if (!Mod::get()->getSettingValue<bool>("level_settings_button")) return ret;
+
+        CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+		sprite->setScale(0.350f);
+            
+        CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
+            sprite,
+		    ret,
+		    menu_selector(RecordLayer::openMenu2)
+        );
+		btn->setPosition({-174, -114});
+
+        if (CCLayer* layer = ret->getChildByType<CCLayer>(0))
+            if (CCMenu* menu = layer->getChildByType<CCMenu>(1))
+                menu->addChild(btn);
+
+        return ret;
+    }
+    
 };

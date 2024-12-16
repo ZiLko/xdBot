@@ -2,11 +2,6 @@
 
 class $modify(PlayLayer) {
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("PlayLayer::addObject", -1))
-            log::warn("PlayLayer::addObject hook priority fail xD.");
-    }
-
     void addObject(GameObject * obj) {
         if (!Global::get().layoutMode) return PlayLayer::addObject(obj);
 

@@ -4,7 +4,7 @@
 		"win": "2.2074",
 		"android": "2.2074"
 	},
-	"version": "v2.1.3",
+	"version": "v2.2.0",
 	"id": "zilko.xdbot",
 	"name": "xdBot",
 	"developer": "Zilko",
@@ -98,6 +98,12 @@
 		"restore_page": {
 			"name": "Restore Settings Page",
 			"description": "Saves the page you were in when you closed the menu.",
+			"type": "bool",
+			"default": true
+		},
+		"level_settings_button": {
+			"name": "Show Button At Settings",
+			"description": "Shows the xdBot button in the level settings layer.",
 			"type": "bool",
 			"default": false
 		}

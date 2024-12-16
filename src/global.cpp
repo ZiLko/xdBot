@@ -317,6 +317,14 @@ PauseLayer* Global::getPauseLayer() {
 $execute{
     auto & g = Global::get();
 
+  if (!g.mod->setSavedValue("defaults_set8", true)) {
+    g.mod->setSavedValue("render_sfx_volume", 1.f);
+    g.mod->setSavedValue("render_music_volume", 1.f);
+    g.mod->setSavedValue("render_fade_in_video", std::to_string(2));
+    g.mod->setSavedValue("render_fade_out_video", std::to_string(2));
+    g.mod->setSavedValue("respawn_time", 0.5f);
+  }
+
   if (!g.mod->setSavedValue("defaults_set5", true)) {
     g.mod->setSettingValue<std::filesystem::path>("render_folder", g.mod->getSaveDir() / "renders");
     g.mod->setSavedValue("macro_hide_playing_label", true);
@@ -376,6 +384,9 @@ $execute{
   g.seedEnabled = g.mod->getSavedValue<bool>("macro_seed_enabled");
   g.frameLabel = g.mod->getSavedValue<bool>("macro_show_frame_label");
   g.speedhackAudio = g.mod->getSavedValue<bool>("macro_speedhack_audio");
+  g.trajectoryBothSides = g.mod->getSavedValue<bool>("macro_trajectory_both_sides");
+  g.p2mirror = g.mod->getSavedValue<bool>("p2_input_mirror");
+  
   g.frameFixes = g.mod->getSettingValue<bool>("frame_fixes");
 
   g.speedhackEnabled = false;

@@ -1,10 +1,62 @@
 #include "record_layer.hpp"
 #include "macro_editor.hpp"
 #include "game_ui.hpp"
+#include "render_presets_layer.hpp"
+#include "clickbot_layer.hpp"
 #include "noclip_settings_layer.hpp"
+#include "trajectory_settings_layer.hpp"
 
 #include <Geode/modify/CCTextInputNode.hpp>
 #include <Geode/modify/PauseLayer.hpp>
+
+const std::vector<std::vector<RecordSetting>> settings {
+	{
+		{ "Speedhack:", "macro_speedhack_enabled", InputType::Speedhack, 0.4f },
+		{ "Seed:", "macro_seed_enabled", InputType::Seed, 0.4f },
+		{ "Show Trajectory:", "macro_show_trajectory", InputType::Settings, 0.325f, menu_selector(TrajectorySettingsLayer::open)  },
+		{ "Enable Coin Finder:", "macro_coin_finder", InputType::None },
+		{ "Enable Noclip:", "macro_noclip", InputType::Settings, 0.325f, menu_selector(NoclipSettingsLayer::open) },
+		{ "Enable Frame Stepper:", "macro_frame_stepper", InputType::None }
+	},
+	{
+		{ "Enable Auto Saving:", "macro_auto_save", InputType::Autosave },
+		{ "Enable Layout Mode:", "macro_layout_mode", InputType::None },
+		{ "Auto Safe Mode:", "macro_auto_safe_mode", InputType::None },
+		{ "Instant respawn:", "macro_instant_respawn", InputType::None },
+		{ "No death effect:", "macro_no_death_effect", InputType::None },
+		{ "No respawn flash:", "macro_no_respawn_flash", InputType::None }
+	},
+	{
+	#ifdef GEODE_IS_WINDOWS
+		{ "Force cursor on open:", "menu_show_cursor", InputType::None },
+		{ "Button on pause menu:", "menu_show_button", InputType::None },
+		{ "Pause on open:", "menu_pause_on_open", InputType::None },
+	#else
+		{ "Always show buttons:", "macro_always_show_buttons", InputType::None },
+		{ "Hide speedhack button:", "macro_hide_speedhack", InputType::None },
+		{ "Hide Frame Stepper button:", "macro_hide_stepper", InputType::None, 0.3f },
+	#endif
+		{ "Hide labels on render:", "render_hide_labels", InputType::None },
+		{ "Hide playing label:", "macro_hide_playing_label", InputType::None },
+		{ "Hide recording label:", "macro_hide_recording_label", InputType::None }
+	},
+	{
+		{ "Enable Clickbot:", "clickbot_enabled", InputType::Settings, 0.325f, menu_selector(ClickbotLayer::open)},
+		{ "Speedhack Audio:", "macro_speedhack_audio", InputType::None },
+		{ "Always Practice Fixes:", "macro_always_practice_fixes", InputType::None },
+		{ "Show Frame Label:", "macro_show_frame_label", InputType::None },
+		{ "Ignore inputs:", "macro_ignore_inputs", InputType::None },
+		{ "Auto Stop Playing:", "macro_auto_stop_playing", InputType::None }
+	},
+    {
+		{ "Respawn Time:", "respawn_time_enabled", InputType::Respawn },
+		{ "Input Mirror:", "p2_input_mirror", InputType::None },
+		{ "Disable Shaders:", "disable_shaders", InputType::None },
+		{ "Instant Mirror Portal:", "instant_mirror_portal", InputType::None },
+		{ "No Mirror Portal:", "no_mirror_portal", InputType::None },
+		{ "Lock Delta:", "macro_lock_delta", InputType::None }
+    }
+};
 
 class $modify(PauseLayer) {
     void customSetup() {
@@ -68,11 +120,6 @@ $execute{
 };
 
 class $modify(CCTextInputNode) {
-
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("CCTextInputNode::ccTouchBegan", 100))
-            log::warn("CCTextInputNode::ccTouchBegan hook priority fail xD.");
-    }
 
     bool ccTouchBegan(cocos2d::CCTouch * v1, cocos2d::CCEvent * v2) {
         if (this->getID() == "android-disabled") return false;
@@ -302,6 +349,11 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
         mod->setSavedValue("render_fps", std::string(fpsInput->getString()));
     }
 
+    if (respawnInput) {
+        std::string str = respawnInput->getString();
+        mod->setSavedValue("respawn_time", numFromString<double>(str).unwrapOr(0.5));
+    }
+
     if (!speedhackInput) return;
 
     if (std::string_view(speedhackInput->getString()) != "" && node == speedhackInput) {
@@ -320,8 +372,8 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
 void RecordLayer::updatePage(CCObject* obj) {
     auto& g = Global::get();
     g.currentPage += static_cast<CCNode*>(obj)->getID() == "page-left" ? -1 : 1;
-    if (g.currentPage == -1) g.currentPage = 3;
-    else if (g.currentPage == 4) g.currentPage = 0;
+    if (g.currentPage == -1) g.currentPage = settings.size() - 1;
+    else if (g.currentPage == settings.size()) g.currentPage = 0;
 
     goToSettingsPage(g.currentPage);
 }
@@ -343,6 +395,8 @@ void RecordLayer::toggleSetting(CCObject* obj) {
     if (id == "macro_show_trajectory") g.showTrajectory = value;
     if (id == "macro_coin_finder") g.coinFinder = value;
     if (id == "clickbot_enabled") g.clickbotEnabled = value;
+    if (id == "p2_input_mirror") g.p2mirror = value;
+    if (id == "macro_lock_delta") g.lockDelta = value;
 
     if (id == "macro_show_frame_label") {
         g.frameLabel = value;
@@ -395,32 +449,33 @@ void RecordLayer::toggleSetting(CCObject* obj) {
 }
 
 void RecordLayer::openKeybinds(CCObject*) {
-// #ifdef GEODE_IS_WINDOWS
+#ifdef GEODE_IS_WINDOWS
 
-//     MoreOptionsLayer::create()->onKeybindings(nullptr);
-//     if (!mod->setSavedValue("opened_keybinds", true))
-//         FLAlertLayer::create(
-//             "Warning",
-//             "Scroll down to find xdBot's keybinds",
-//             "Ok"
-//         )->show();
+    MoreOptionsLayer::create()->onKeybindings(nullptr);
+    if (!mod->setSavedValue("opened_keybinds", true))
+        FLAlertLayer::create(
+            "Warning",
+            "Scroll down to find xdBot's keybinds",
+            "Ok"
+        )->show();
 
-// #else
+#else
 
     Interface::openButtonEditor();
 
-// #endif
+#endif
 }
 
 void RecordLayer::openRendersFolder(CCObject*) {
-    std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
+    // std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
 
-    if (std::filesystem::exists(path))
-        file::openFolder(path);
-    else if (std::filesystem::create_directory(path))
-        file::openFolder(path);
-    else
-        FLAlertLayer::create("Error", "There was an error getting the folder. ID: 4", "Ok")->show();
+    // if (std::filesystem::exists(path))
+    //     file::openFolder(path);
+    // else if (std::filesystem::create_directory(path))
+    //     file::openFolder(path);
+    // else
+    //     FLAlertLayer::create("Error", "There was an error getting the folder. ID: 4", "Ok")->show();
+    RenderPresetsLayer::create()->show();
 }
 
 void RecordLayer::onAutosaves(CCObject*) {
@@ -470,7 +525,7 @@ bool RecordLayer::setup() {
     menu = CCMenu::create();
     m_mainLayer->addChild(menu);
 
-    for (int i = 0; i < 4; i++) {
+    for (int i = 0; i < settings.size(); i++) {
         CCSprite* dot = CCSprite::create("smallDot.png");
         menu->addChild(dot);
         dots.push_back(dot);
@@ -712,9 +767,6 @@ bool RecordLayer::setup() {
     widthInput->setID("render-input");
     menu->addChild(widthInput);
 
-    if (mod->getSavedValue<bool>("render_fix_shaders"))
-        widthInput->m_placeholderLabel->setOpacity(120);
-
     heightInput = CCTextInputNode::create(150, 30, "Height", "chatFont.fnt");
     heightInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
     heightInput->ignoreAnchorPointForPosition(true);
@@ -730,9 +782,6 @@ bool RecordLayer::setup() {
     heightInput->setDelegate(this);
     heightInput->setID("render-input");
     menu->addChild(heightInput);
-
-    if (mod->getSavedValue<bool>("render_fix_shaders"))
-        heightInput->m_placeholderLabel->setOpacity(120);
 
     bitrateInput = CCTextInputNode::create(150, 30, "br", "chatFont.fnt");
     bitrateInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
@@ -835,9 +884,6 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-    if (mod->getSavedValue<bool>("render_fix_shaders"))
-        bg->setOpacity(27);
-
 #ifdef GEODE_IS_ANDROID
     bg->setOpacity(27);
 #endif
@@ -851,9 +897,6 @@ bool RecordLayer::setup() {
     bg->setContentSize({ 162, 55 });
     bg->setZOrder(29);
     menu->addChild(bg);
-
-    if (mod->getSavedValue<bool>("render_fix_shaders"))
-        bg->setOpacity(27);
 
 #ifdef GEODE_IS_ANDROID
     bg->setOpacity(27);
@@ -1039,15 +1082,10 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
         spr->setScale(0.419f);
 
-        auto callback = sett.id == "clickbot_enabled" ? menu_selector(ClickbotLayer::open) : nullptr;
-
-        if (sett.id == "macro_noclip")
-            callback = menu_selector(NoclipSettingsLayer::open);
-
         CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
             spr,
             this,
-            callback
+            sett.callback
         );
         btn->setPosition(ccp(138, yPos));
 
@@ -1137,7 +1175,38 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
 
         nodes.push_back(static_cast<CCNode*>(seedInput));
         menu->addChild(seedInput);
+    }
 
+    if (sett.input == InputType::Respawn) {
+        CCScale9Sprite* bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
+        bg->setPosition(ccp(110, yPos + 10));
+        bg->setScale(0.355f);
+        bg->setColor({ 0,0,0 });
+        bg->setOpacity(75);
+        bg->setAnchorPoint({ 0, 1 });
+        bg->setContentSize({ 100, 55 });
+        bg->setZOrder(29);
+        nodes.push_back(static_cast<CCNode*>(bg));
+        menu->addChild(bg);
+
+        respawnInput = CCTextInputNode::create(150, 30, "sec", "chatFont.fnt");
+        respawnInput->setPosition(ccp(127.5, yPos));
+        respawnInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
+        respawnInput->ignoreAnchorPointForPosition(true);
+        respawnInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
+        respawnInput->m_placeholderLabel->setScale(0.6);
+        respawnInput->setMaxLabelScale(0.7f);
+        respawnInput->setMouseEnabled(true);
+        respawnInput->setTouchEnabled(true);
+        respawnInput->setContentSize({ 32.f, 20.f });
+        respawnInput->setAllowedChars("0123456789.");
+        respawnInput->setString(fmt::format("{:.2}", mod->getSavedValue<double>("respawn_time")).c_str());
+        respawnInput->setMaxLabelWidth(30.f);
+        respawnInput->setDelegate(this);
+        respawnInput->setMaxLabelLength(4);
+
+        nodes.push_back(static_cast<CCNode*>(respawnInput));
+        menu->addChild(respawnInput);
     }
 }
 
@@ -1154,6 +1223,7 @@ void RecordLayer::goToSettingsPage(int page) {
     trajectoryToggle = nullptr;
     noclipToggle = nullptr;
     speedhackInput = nullptr;
+    respawnInput = nullptr;
     seedInput = nullptr;
 
     for (size_t i = 0; i < 6; i++)

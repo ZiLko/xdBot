@@ -1,3 +1,25 @@
+# v2.2.0
+
+* Changed the default of restore page setting.
+* Fixed play button sound appearing in renders.
+* Fixed keybinds button opening mobile keybinds in pc.
+* Fixed render width and height inputs being on low opacity for some people.
+* Fixed follow trigger bug, this might break some macros in timewarp.
+* Added render fade in and fade out.
+* Added render volume settings.
+* Added render hide endscreen setting.
+* Added render hide level complete setting.
+* Added render presets.
+* Added trajectory on both sides setting.
+* Added input mirror.
+* Added disable shaders.
+* Added instant mirror portal.
+* Added no mirror portal.
+* Added custom respawn time.
+* Added lock delta (filler lmao).
+* Added optional button at level settings.
+* Added my ko-fi.
+
 # v2.1.3
 
 * Fixed GUI being shy and running a way.

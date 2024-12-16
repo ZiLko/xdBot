@@ -15,11 +15,15 @@ void RenderSettingsLayer::textChanged(CCTextInputNode* node) {
     std::string args = argsInput->getString();
     std::string audioArgs = audioArgsInput->getString();
     std::string videoArgs = videoArgsInput->getString();
+    std::string fadeIn = fadeInInput->getString();
+    std::string fadeOut = fadeOutInput->getString();
 
     mod->setSavedValue("render_seconds_after", secondsAfter);
     mod->setSavedValue("render_args", args);
     mod->setSavedValue("render_audio_args", audioArgs);
     mod->setSavedValue("render_video_args", videoArgs);
+    mod->setSavedValue("render_fade_in_time", fadeIn);
+    mod->setSavedValue("render_fade_out_time", fadeOut);
 }
 
 void RenderSettingsLayer::onDefaults(CCObject*) {
@@ -73,8 +77,10 @@ bool RenderSettingsLayer::setup() {
     cocos2d::CCSize center = cocos2d::CCDirector::sharedDirector()->getWinSize() / 2;
     CCSprite* spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
     CCSprite* spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
+
     CCMenu* menu = CCMenu::create();
     m_mainLayer->addChild(menu);
+    menu->setPositionX(menu->getPositionX() - 67);
 
     CCScale9Sprite* bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.355f);
@@ -238,17 +244,124 @@ bool RenderSettingsLayer::setup() {
     recordAudioToggle->setID("render_record_audio");
     menu->addChild(recordAudioToggle);
 
+    lbl = CCLabelBMFont::create("Fade In:", "bigFont.fnt");
+    lbl->setPosition(ccp(25, -32));
+    lbl->setAnchorPoint({ 0, 0.5 });
+    lbl->setOpacity(200);
+    lbl->setScale(0.325);
+    menu->addChild(lbl);
+
+    fadeInInput = TextInput::create(50.f, "s", "bigFont.fnt");
+    fadeInInput->setScale(0.5f);
+    fadeInInput->setPosition(ccp(100, -32));
+    fadeInInput->setString(Mod::get()->getSavedValue<std::string>("render_fade_in_time").c_str());
+    fadeInInput->getInputNode()->setDelegate(this);
+    menu->addChild(fadeInInput);
+
+    CCMenuItemToggler* toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    toggle->setPosition(ccp(130, -32));
+    toggle->setScale(0.555);
+    toggle->toggle(mod->getSavedValue<bool>("render_fade_in"));
+    toggle->setID("render_fade_in");
+    menu->addChild(toggle);
+
+    lbl = CCLabelBMFont::create("Fade Out:", "bigFont.fnt");
+    lbl->setPosition(ccp(25, -58));
+    lbl->setAnchorPoint({ 0, 0.5 });
+    lbl->setOpacity(200);
+    lbl->setScale(0.325);
+    menu->addChild(lbl);
+
+    fadeOutInput = TextInput::create(50.f, "s", "bigFont.fnt");
+    fadeOutInput->setScale(0.5f);
+    fadeOutInput->setPosition(ccp(100, -58));
+    fadeOutInput->setString(Mod::get()->getSavedValue<std::string>("render_fade_out_time").c_str());
+    fadeOutInput->getInputNode()->setDelegate(this);
+    menu->addChild(fadeOutInput);
+
+    toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    toggle->setPosition(ccp(130, -58));
+    toggle->setScale(0.555);
+    toggle->toggle(mod->getSavedValue<bool>("render_fade_out"));
+    toggle->setID("render_fade_out");
+    menu->addChild(toggle);
+
+    lbl = CCLabelBMFont::create("Hide Endscreen:", "bigFont.fnt");
+    lbl->setPosition(ccp(-105, -83));
+    lbl->setAnchorPoint({ 0, 0.5 });
+    lbl->setOpacity(200);
+    lbl->setScale(0.325);
+    menu->addChild(lbl);
+
+    toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    toggle->setPosition(ccp(0, -83));
+    toggle->setScale(0.555);
+    toggle->toggle(mod->getSavedValue<bool>("render_hide_endscreen"));
+    toggle->setID("render_hide_endscreen");
+    menu->addChild(toggle);
+
+    lbl = CCLabelBMFont::create("Hide Level Complete:", "bigFont.fnt");
+    lbl->setPosition(ccp(-105, -108));
+    lbl->setAnchorPoint({ 0, 0.5 });
+    lbl->setOpacity(200);
+    lbl->setScale(0.25);
+    menu->addChild(lbl);
+
+    toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    toggle->setPosition(ccp(0, -108));
+    toggle->setScale(0.555);
+    toggle->toggle(mod->getSavedValue<bool>("render_hide_levelcomplete"));
+    toggle->setID("render_hide_levelcomplete");
+    menu->addChild(toggle);
+
+    lbl = CCLabelBMFont::create("SFX Volume", "goldFont.fnt");
+    lbl->setScale(0.475f);
+    lbl->setPosition({188, 87});
+    menu->addChild(lbl);
+
+    sfxSlider = Slider::create(
+		this,
+		menu_selector(RenderSettingsLayer::onSlider),
+		1.f
+	);
+	sfxSlider->setPosition({188, 69});
+	sfxSlider->setAnchorPoint({ 0.f, 0.f });
+	sfxSlider->setScale(0.545f);
+	sfxSlider->setValue(Mod::get()->getSavedValue<double>("render_sfx_volume"));
+	menu->addChild(sfxSlider);
+
+    lbl = CCLabelBMFont::create("Music Volume", "goldFont.fnt");
+    lbl->setScale(0.475f);
+    lbl->setPosition({188, 42});
+    menu->addChild(lbl);
+
+    musicSlider = Slider::create(
+		this,
+		menu_selector(RenderSettingsLayer::onSlider),
+		1.f
+	);
+	musicSlider->setPosition({188, 24});
+	musicSlider->setAnchorPoint({ 0.f, 0.f });
+	musicSlider->setScale(0.545f);
+	musicSlider->setValue(Mod::get()->getSavedValue<double>("render_music_volume"));
+	menu->addChild(musicSlider);
+
     ButtonSprite* spr = ButtonSprite::create("Ok");
     spr->setScale(0.875);
     CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(RenderSettingsLayer::close));
-    btn->setPosition(ccp(0, -100));
+    btn->setPosition(ccp(67, -100));
     menu->addChild(btn);
 
     spr = ButtonSprite::create("Restore Defaults");
     spr->setScale(0.375f);
     btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(RenderSettingsLayer::onDefaults));
-    btn->setPosition({80, -123});
+    btn->setPosition({200, -123});
     menu->addChild(btn);
 
     return true;
+}
+
+void RenderSettingsLayer::onSlider(CCObject*) {
+    Mod::get()->setSavedValue("render_sfx_volume", sfxSlider->getValue());
+    Mod::get()->setSavedValue("render_music_volume", musicSlider->getValue());
 }

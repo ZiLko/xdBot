@@ -6,30 +6,13 @@
 
 class $modify(GJBaseGameLayer) {
 
-  static void onModify(auto& self) {
-    if (!self.setHookPriority("GJBaseGameLayer::checkpointActivated", -1))
-      log::warn("GJBaseGameLayer::checkpointActivated hook priority fail xD.");
-
-    if (!self.setHookPriority("GJBaseGameLayer::processMoveActions", -1))
-      log::warn("GJBaseGameLayer::processMoveActions hook priority fail xD.");
-
-    if (!self.setHookPriority("GJBaseGameLayer::processMoveActionsStep", -1))
-      log::warn("GJBaseGameLayer::processMoveActionsStep hook priority fail xD.");
-
-    if (!self.setHookPriority("GJBaseGameLayer::processAreaMoveGroupAction", -1))
-      log::warn("GJBaseGameLayer::processAreaMoveGroupAction hook priority fail xD.");
-  }
-
   void toggleFlipped(bool p0, bool p1) {
+    if (Mod::get()->getSavedValue<bool>("no_mirror_portal"))
+      p0 = false;
+    if (Global::get().state == state::recording || Mod::get()->getSavedValue<bool>("instant_mirror_portal"))
+      p1 = true;
 
-  // This is just instant mirror portal
-  // Didnt make it a setting cus its needed to fix a position bug when respawning on a checkpoint
-
-    if (Global::get().state == state::recording)
-      return GJBaseGameLayer::toggleFlipped(p0, true);
-
-    return GJBaseGameLayer::toggleFlipped(p0, p1);
-
+    GJBaseGameLayer::toggleFlipped(p0, p1);
   }
 
   void checkpointActivated(CheckpointGameObject * cp) {
@@ -93,11 +76,6 @@ class $modify(CheckpointObject) {
 };
 
 class $modify(PlayLayer) {
-
-  static void onModify(auto& self) {
-    if (!self.setHookPriority("PlayLayer::storeCheckpoint", -1))
-      log::warn("PlayLayer::storeCheckpoint hook priority fail xD.");
-  }
 
   void storeCheckpoint(CheckpointObject * cp) {
     if (!cp) return PlayLayer::storeCheckpoint(cp);

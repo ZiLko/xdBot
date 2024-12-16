@@ -2,7 +2,9 @@
 #include "../ui/game_ui.hpp"
 #include "../utils/subprocess.hpp"
 
+#include <Geode/modify/FMODAudioEngine.hpp>
 #include <Geode/modify/GJBaseGameLayer.hpp>
+#include <Geode/modify/EndLevelLayer.hpp>
 #include <Geode/modify/PlayLayer.hpp>
 #include <Geode/modify/CCScheduler.hpp>
 #include <Geode/utils/web.hpp>
@@ -12,6 +14,43 @@
 #include <fstream>
 
 #ifdef GEODE_IS_WINDOWS
+
+class $modify(PlayLayer) {
+    void showCompleteText() {
+        PlayLayer::showCompleteText();
+        if (Global::get().renderer.recording && m_levelEndAnimationStarted && Mod::get()->getSavedValue<bool>("render_hide_levelcomplete")) {
+            for (CCNode* node : CCArrayExt<CCNode*>(getChildren())) {
+                CCSprite* spr = typeinfo_cast<CCSprite*>(node);
+                if (!spr) continue;
+                if (!isSpriteFrameName(spr, "GJ_levelComplete_001.png")) continue;
+                spr->setVisible(false);
+            }
+        }
+    }
+};
+
+class $modify(EndLevelLayer) {
+    
+    void customSetup() {
+        EndLevelLayer::customSetup();
+
+        if (!PlayLayer::get()) return;
+        if (Global::get().renderer.recording && PlayLayer::get()->m_levelEndAnimationStarted && Mod::get()->getSavedValue<bool>("render_hide_endscreen")) {
+            Loader::get()->queueInMainThread([this] {
+                setVisible(false);
+            });
+        }
+    }
+};
+
+class $modify(FMODAudioEngine) {
+
+    void playEffect(gd::string path, float speed, float p2, float volume) {
+        if (path != "playSound_01.ogg" || !Global::get().renderer.recordingAudio)
+            FMODAudioEngine::playEffect(path, speed, p2, volume);
+    }
+
+};
 
 class $modify(GJBaseGameLayer) {
     void update(float dt) {
@@ -41,9 +80,7 @@ class $modify(CCScheduler) {
 
     void update(float dt) {
         Renderer& r = Global::get().renderer;
-        if (!r.recording) return CCScheduler::update(dt);
-
-        // CCScheduler::update(1.f / 240.f);
+        if (!r.recording) return CCScheduler::update(Global::get().lockDelta ? 1.f / 240.f : dt);
 
         r.changeRes(false);
 
@@ -138,8 +175,11 @@ void Renderer::start() {
     extraArgs = mod->getSavedValue<std::string>("render_args");
     videoArgs = mod->getSavedValue<std::string>("render_video_args");
     extraAudioArgs = mod->getSavedValue<std::string>("render_audio_args");
-    stopAfter = std::stof(mod->getSavedValue<std::string>("render_seconds_after"));
+    SFXVolume = mod->getSavedValue<double>("render_sfx_volume");
+    musicVolume = mod->getSavedValue<double>("render_music_volume");
+    stopAfter = geode::utils::numFromString<float>(mod->getSavedValue<std::string>("render_seconds_after")).unwrapOr(0.f);
     audioMode = AudioMode::Off;
+
     if (mod->getSavedValue<bool>("render_only_song")) audioMode = AudioMode::Song;
     if (mod->getSavedValue<bool>("render_record_audio")) audioMode = AudioMode::Record;
 
@@ -199,8 +239,17 @@ void Renderer::start() {
         if (extraArgs.empty()) extraArgs = "-pix_fmt yuv420p";
         if (videoArgs.empty()) videoArgs = "colorspace=all=bt709:iall=bt470bg:fast=1";
 
-        std::string command = std::format(
-            "\"{}\" -y -f rawvideo -pix_fmt rgb24 -s {}x{} -r {} -i - {}{}{} -vf \"vflip,{}\" -an \"{}\" ",
+        std::string fadeInTime = Mod::get()->getSavedValue<std::string>("render_fade_in_time");
+        bool fadeInVideo = Mod::get()->getSavedValue<bool>("render_fade_in");
+        std::string fadeOutTime = Mod::get()->getSavedValue<std::string>("render_fade_out_time");
+        bool fadeOutVideo = Mod::get()->getSavedValue<bool>("render_fade_out");
+
+        std::string fadeArgs;
+        if (fadeInVideo)
+            fadeArgs = fmt::format(",fade=t=in:st=0:d={}", fadeInTime);
+
+        std::string command = fmt::format(
+            "\"{}\" -y -f rawvideo -pix_fmt rgb24 -s {}x{} -r {} -i - {}{}{} -vf \"vflip,{}{}\" -an \"{}\" ",
             ffmpegPath,
             std::to_string(width),
             std::to_string(height),
@@ -209,6 +258,7 @@ void Renderer::start() {
             bitrate,
             extraArgs,
             videoArgs,
+            fadeArgs,
             path
         );
 
@@ -239,7 +289,21 @@ void Renderer::start() {
 
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
-        if (audioMode == AudioMode::Off || (audioMode == AudioMode::Song && !std::filesystem::exists(songFile)) || (audioMode == AudioMode::Record && !std::filesystem::exists("fmodoutput.wav"))) {
+        double totalTime = lastFrame_t;
+        float fadeOutStart = totalTime + (levelFinished ? stopAfter : 0.f) - geode::utils::numFromString<float>(fadeOutTime).unwrapOr(2.f);
+        if (fadeOutVideo) {
+            command = fmt::format("\"{}\" -i \"{}\" -vf \"fade=t=out:st={}:d={}\" -c:a copy \"{}\"", ffmpegPath, path, fadeOutStart, fadeOutTime, path + "_temp.mp4");
+
+
+            log::info("Executing (Fade Out): {}", command);
+            process = subprocess::Popen(command);
+            if (!process.close()) {
+                std::filesystem::remove(path);
+                std::filesystem::rename(path + "_temp.mp4", path);
+            } else log::debug("Fade Out Error xD");
+        }
+
+        if ((SFXVolume == 0.f && musicVolume == 0.f) || audioMode == AudioMode::Off || (audioMode == AudioMode::Song && !std::filesystem::exists(songFile)) || (audioMode == AudioMode::Record && !std::filesystem::exists("fmodoutput.wav"))) {
             if (audioMode != AudioMode::Off) {
                 Loader::get()->queueInMainThread([] {
                     FLAlertLayer::create("Error", "Song File not found.", "Ok")->show();
@@ -250,6 +314,10 @@ void Renderer::start() {
 
             Loader::get()->queueInMainThread([] {
                 Notification::create("Render Saved Without Audio", NotificationIcon::Success)->show();
+                if (!Mod::get()->getSavedValue<bool>("render_hide_endscreen")) return;
+                if (PlayLayer* pl = PlayLayer::get())
+                    if (EndLevelLayer* layer = pl->getChildByType<EndLevelLayer>(0))
+                        layer->setVisible(true);
             });
 
             return;
@@ -265,14 +333,13 @@ void Renderer::start() {
 
         std::string tempPath = Utils::narrow(buffer) + "." + std::filesystem::path(path).filename().string();
         std::filesystem::rename(buffer, tempPath);
-        double totalTime = lastFrame_t;
 
         std::string tempPathAudio = (Mod::get()->getSaveDir() / "temp_audio_file.wav").string();
 
         // std::string tempPathAudio = tempPath;
 
         if (audioMode == AudioMode::Record) {
-            command = std::format("\"{}\" -i \"{}\" -acodec pcm_s16le -ar 44100 -ac 2 \"{}\"",
+            command = fmt::format("\"{}\" -i \"{}\" -acodec pcm_s16le -ar 44100 -ac 2 \"{}\"",
                 ffmpegPath,
                 "fmodoutput.wav",
                 tempPathAudio
@@ -288,14 +355,25 @@ void Renderer::start() {
         }
 
         {
-            std::string fadeInString = (fadeIn && audioMode == AudioMode::Song) ? ", afade=t=in:d=2" : "";
-            std::string fadeOutString = (fadeOut && audioMode == AudioMode::Song) ? fmt::format(", afade=t=out:d=2:st={}", totalTime - stopAfter - 3.5f) : "";
+
+            std::string fadeInString;
+            if ((fadeIn && audioMode == AudioMode::Song) || fadeInVideo) 
+                fadeInString = fmt::format(", afade=t=in:d={}", fadeInVideo ? fadeInTime : "2");
+
+            std::string fadeOutString;
+            if ((fadeOut && audioMode == AudioMode::Song) || fadeOutVideo) 
+                fadeOutString = fmt::format(
+                    ", afade=t=out:d={}:st={}", 
+                    fadeOutVideo ? fadeOutTime : "2",
+                    fadeOutVideo ? fadeOutStart : totalTime - stopAfter - 3.5f
+                );
+
             std::string file = audioMode == AudioMode::Song ? songFile : tempPathAudio;
             float offset = audioMode == AudioMode::Song ? songOffset : (isPlatformer ? 0.28f : 0.f);
 
             if (!extraAudioArgs.empty()) extraAudioArgs += " ";
 
-            command = std::format(
+            command = fmt::format(
                 "\"{}\" -y -ss {} -i \"{}\" -i \"{}\" -t {} -c:v copy {} -filter:a \"[1:a]adelay=0|0{}{}\" \"{}\"",
                 ffmpegPath,
                 offset,
@@ -317,6 +395,7 @@ void Renderer::start() {
                 });
                 return;
             }
+
         }
 
         std::filesystem::remove(Utils::widen(path));
@@ -342,7 +421,7 @@ void Renderer::stop(int frame) {
     finishFrame = frame;
 
     if (PlayLayer* pl = PlayLayer::get()) {
-        if (pl->m_hasCompletedLevel)
+        if (pl->m_levelEndAnimationStarted)
             finishFrame = 0;
 
         if (pl->m_isPaused && audioMode == AudioMode::Record) {
@@ -488,10 +567,10 @@ void Renderer::handleRecording(PlayLayer* pl, int frame) {
 }
 
 void Renderer::startAudio(PlayLayer* pl) {
-    bool endLevelLayer = pl->getChildByType<EndLevelLayer>(0) != nullptr;
+    EndLevelLayer* endLevelLayer = pl->getChildByType<EndLevelLayer>(0);
     if (dontRecordAudio) return;
 
-    if (pl->m_levelEndAnimationStarted && endLevelLayer) {
+    if (pl->m_levelEndAnimationStarted && endLevelLayer != nullptr) {
         CCKeyboardDispatcher::get()->dispatchKeyboardMSG(enumKeyCodes::KEY_Space, true, false);
         CCKeyboardDispatcher::get()->dispatchKeyboardMSG(enumKeyCodes::KEY_Space, false, false);
     }
@@ -508,6 +587,10 @@ void Renderer::startAudio(PlayLayer* pl) {
         if (PauseLayer* layer = Global::getPauseLayer())
             layer->onResume(nullptr);
 
+        auto fmod = FMODAudioEngine::sharedEngine();
+        fmod->m_globalChannel->getVolume(&ogSFXVol);
+        fmod->m_backgroundMusicChannel->getVolume(&ogMusicVol);
+
         FMODAudioEngine::sharedEngine()->m_system->setOutput(FMOD_OUTPUTTYPE_WAVWRITER);
         startedAudio = true;
         if (CCNode* lbl = pl->getChildByID("recording-audio-label"_spr))
@@ -517,6 +600,10 @@ void Renderer::startAudio(PlayLayer* pl) {
 
 void Renderer::stopAudio() {
     FMODAudioEngine::sharedEngine()->m_system->setOutput(FMOD_OUTPUTTYPE_AUTODETECT);
+    auto fmod = FMODAudioEngine::sharedEngine();
+	fmod->m_globalChannel->setVolume(ogSFXVol);
+	fmod->m_backgroundMusicChannel->setVolume(ogMusicVol);
+
     recordingAudio = false;
     if (!PlayLayer::get()) return;
     if (CCNode* lbl = PlayLayer::get()->getChildByID("recording-audio-label"_spr))
@@ -526,6 +613,9 @@ void Renderer::stopAudio() {
 void Renderer::handleAudioRecording(PlayLayer* pl, int frame) {
 #ifdef GEODE_IS_WINDOWS
     auto& g = Global::get();
+    
+	fmod->m_globalChannel->setVolume(SFXVolume);
+	fmod->m_backgroundMusicChannel->setVolume(musicVolume);
 
     if (!pl) {
         g.renderer.stopAudio();

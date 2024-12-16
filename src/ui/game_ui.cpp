@@ -9,11 +9,6 @@ class $modify(PlayLayer) {
         CCLabelBMFont* frameLabel = nullptr;
     };
 
-    static void onModify(auto & self) {
-        if (!self.setHookPriority("PlayLayer::init", -1))
-            log::warn("PlayLayer::init hook priority fail xD.");
-    }
-
     void postUpdate(float dt) {
         PlayLayer::postUpdate(dt);
         auto& g = Global::get();

@@ -26,6 +26,10 @@ public:
     bool recording = false;
     bool pause = false;
     int audioMode = 0;
+    float ogMusicVol;
+    float ogSFXVol;
+    float SFXVolume = 1.f;
+    float musicVolume = 1.f;
 
     bool dontRender = false;
     bool dontRecordAudio = false;

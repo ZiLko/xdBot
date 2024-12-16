@@ -31,7 +31,7 @@ public:
 
     static CCDrawNode* createNode();
 
-    static void createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, PlayerObject* realPlayer, bool hold);
+    static void createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, PlayerObject* realPlayer, bool hold, bool inverted = false);
 
     static void drawPlayerHitbox(PlayerObject* player, CCDrawNode* drawNode);
 

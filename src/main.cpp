@@ -194,11 +194,6 @@ class $modify(BGLHook, GJBaseGameLayer) {
     bool macroInput = false;
   };
 
-  static void onModify(auto & self) {
-    if (!self.setHookPriority("GJBaseGameLayer::processCommands", -1))
-      log::warn("GJBaseGameLayer::processCommands hook priority fail xD.");
-  }
-
   void processCommands(float dt) {
     auto& g = Global::get();
 
@@ -229,8 +224,8 @@ class $modify(BGLHook, GJBaseGameLayer) {
           return PlayLayer::get()->resetLevel();
       }
 
-      if (g.previousFrame == frame && frame != 0)
-        return;
+      // if (g.previousFrame == frame && frame != 0)
+        // return;
 
     }
 
@@ -389,6 +384,9 @@ class $modify(BGLHook, GJBaseGameLayer) {
   void handleButton(bool hold, int button, bool player2) {
     auto& g = Global::get();
 
+    if (g.p2mirror && m_gameState.m_isDualMode)
+      GJBaseGameLayer::handleButton(hold, button, !player2);
+
     if (g.state == state::none)
       return GJBaseGameLayer::handleButton(hold, button, player2);
 
@@ -423,8 +421,11 @@ class $modify(BGLHook, GJBaseGameLayer) {
     if (!this->m_levelSettings->m_twoPlayerMode)
       player2 = false;
 
-    if (!g.ignoreRecordAction && !g.creatingTrajectory && !m_player1->m_isDead)
+    if (!g.ignoreRecordAction && !g.creatingTrajectory && !m_player1->m_isDead) {
       g.macro.recordAction(frame, button, player2, hold);
+      if (g.p2mirror && m_gameState.m_isDualMode)
+        g.macro.recordAction(frame, button, !player2, hold);
+    }
 
   }
 };
