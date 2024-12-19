@@ -233,7 +233,6 @@ void Renderer::start() {
 
     renderer.begin();
 
-
     std::thread([&, path, songFile, songOffset, fadeIn, fadeOut, extension]() {
 
         if (!codec.empty()) codec = "-c:v " + codec + " ";
@@ -295,7 +294,7 @@ void Renderer::start() {
         float fadeOutStart = totalTime - fadeOutTime;
 
         if (fadeOutVideo) {
-            command = fmt::format("\"{}\" -i \"{}\" -vf \"fade=t=out:st={}:d={}\" {}-c:a copy \"{}\"", ffmpegPath, path, fadeOutStart, std::to_string(fadeOutTime), codec, path + "_temp" + extension);
+            command = fmt::format("\"{}\" -i \"{}\" -vf \"fade=t=out:st={}:d={}\" {}{}-c:a copy \"{}\"", ffmpegPath, path, fadeOutStart, std::to_string(fadeOutTime), codec, bitrate, path + "_temp" + extension);
 
 
             log::info("Executing (Fade Out): {}", command);
@@ -556,7 +555,7 @@ void Renderer::handleRecording(PlayLayer* pl, int frame) {
             lastFrame_t = pl->m_gameState.m_levelTime;
 
             int correctMusicTime = static_cast<int>((frame / 240.f + pl->m_levelSettings->m_songOffset) * 1000);
-            correctMusicTime += fmod->m_musicOffset; // Global music offset
+            correctMusicTime += fmod->m_musicOffset;
 
             if (fmod->getMusicTimeMS(0) - correctMusicTime >= 110)
                 fmod->setMusicTimeMS(correctMusicTime, true, 0);
