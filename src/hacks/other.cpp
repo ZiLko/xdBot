@@ -152,7 +152,7 @@ class $modify(EndLevelLayer) {
         if (g.mod->getSettingValue<bool>("endscreen_button")) {
 			cocos2d::CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
-			CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playbtn_001.png");
+			CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
 			sprite->setScale(0.350f);
             
         	CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
@@ -238,7 +238,7 @@ class $modify(GameLevelOptionsLayer) {
 
         if (!Mod::get()->getSettingValue<bool>("level_settings_button")) return ret;
 
-        CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playbtn_001.png");
+        CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
 		sprite->setScale(0.350f);
             
         CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
