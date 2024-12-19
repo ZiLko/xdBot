@@ -10,6 +10,7 @@ public:
 	Slider* musicSlider = nullptr;
 	TextInput* fadeInInput = nullptr;
 	TextInput* fadeOutInput = nullptr;
+	TextInput* extensionInput = nullptr;
 
 	CCTextInputNode* argsInput = nullptr;
 	CCTextInputNode* audioArgsInput = nullptr;
@@ -42,4 +43,6 @@ public:
 	void onSlider(CCObject*);
 
 	void onDefaults(CCObject*);
+
+	void showInfoPopup(CCObject*);
 };

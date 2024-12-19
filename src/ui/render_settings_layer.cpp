@@ -17,6 +17,7 @@ void RenderSettingsLayer::textChanged(CCTextInputNode* node) {
     std::string videoArgs = videoArgsInput->getString();
     std::string fadeIn = fadeInInput->getString();
     std::string fadeOut = fadeOutInput->getString();
+    std::string extension = extensionInput->getString();
 
     mod->setSavedValue("render_seconds_after", secondsAfter);
     mod->setSavedValue("render_args", args);
@@ -24,6 +25,7 @@ void RenderSettingsLayer::textChanged(CCTextInputNode* node) {
     mod->setSavedValue("render_video_args", videoArgs);
     mod->setSavedValue("render_fade_in_time", fadeIn);
     mod->setSavedValue("render_fade_out_time", fadeOut);
+    mod->setSavedValue("render_file_extension", extension);
 }
 
 void RenderSettingsLayer::onDefaults(CCObject*) {
@@ -39,6 +41,15 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
             g.mod->setSavedValue("render_video_args", std::string("colorspace=all=bt709:iall=bt470bg:fast=1"));
             g.mod->setSavedValue("render_record_audio", true);
             g.mod->setSavedValue("render_only_song", false);
+            g.mod->setSavedValue("render_music_volume", 1.0);
+            g.mod->setSavedValue("render_sfx_volume", 1.0);
+            g.mod->setSavedValue("render_file_extension", std::string(".mp4"));
+            g.mod->setSavedValue("render_fade_in", false);
+            g.mod->setSavedValue("render_fade_out", false);
+            g.mod->setSavedValue("render_fade_in_time", std::to_string(2));
+            g.mod->setSavedValue("render_fade_out_time", std::to_string(2));
+            g.mod->setSavedValue("render_hide_endscreen", false);
+            g.mod->setSavedValue("render_hide_levelcomplete", false);
 
 	        CCArray* children = CCDirector::sharedDirector()->getRunningScene()->getChildren();
             CCObject* child;
@@ -111,7 +122,7 @@ bool RenderSettingsLayer::setup() {
     argsInput->setScale(0.75);
     argsInput->setString(mod->getSavedValue<std::string>("render_args").c_str());
     argsInput->setDelegate(this);
-    argsInput->setAllowedChars(" 0123456789abcdefghijklmnopqrstuvwxyz-_.\"\\/");
+    argsInput->setAllowedChars(" 0123456789abcdefghijklmnopqrstuvwxyz-_:;.\"\\/[](){}+=<>|!*&'%@");
     menu->addChild(argsInput);
 
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
@@ -143,7 +154,7 @@ bool RenderSettingsLayer::setup() {
     audioArgsInput->setScale(0.75);
     audioArgsInput->setString(mod->getSavedValue<std::string>("render_audio_args").c_str());
     audioArgsInput->setDelegate(this);
-    audioArgsInput->setAllowedChars(" 0123456789abcdefghijklmnopqrstuvwxyz-_.\"\\/");
+    audioArgsInput->setAllowedChars(" 0123456789abcdefghijklmnopqrstuvwxyz-_:;.\"\\/[](){}+=<>|!*&'%@");
     menu->addChild(audioArgsInput);
 
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
@@ -176,6 +187,7 @@ bool RenderSettingsLayer::setup() {
     videoArgsInput->setMaxLabelWidth(165.f);
     videoArgsInput->setScale(0.75);
     videoArgsInput->setString(mod->getSavedValue<std::string>("render_video_args").c_str());
+    videoArgsInput->setAllowedChars(" 0123456789abcdefghijklmnopqrstuvwxyz-_:;.\"\\/[](){}+=<>|!*&'%@");
     videoArgsInput->setDelegate(this);
     menu->addChild(videoArgsInput);
 
@@ -216,7 +228,7 @@ bool RenderSettingsLayer::setup() {
     lbl->setScale(0.825);
     menu->addChild(lbl);
 
-    lbl = CCLabelBMFont::create("Only Add Song:", "bigFont.fnt");
+    lbl = CCLabelBMFont::create("Legacy Audio:", "bigFont.fnt");
     lbl->setPosition(ccp(-105, -32));
     lbl->setAnchorPoint({ 0, 0.5 });
     lbl->setOpacity(200);
@@ -272,6 +284,21 @@ bool RenderSettingsLayer::setup() {
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
+
+    lbl = CCLabelBMFont::create("File Extension:", "bigFont.fnt");
+    lbl->setPosition(ccp(110, -5));
+    lbl->setAnchorPoint({ 0, 0.5 });
+    lbl->setOpacity(200);
+    lbl->setScale(0.3f);
+    menu->addChild(lbl);
+
+    extensionInput = TextInput::create(46.f, "", "chatFont.fnt");
+    extensionInput->setScale(0.8f);
+    extensionInput->setPosition(ccp(209, -5));
+    extensionInput->setString(Mod::get()->getSavedValue<std::string>("render_file_extension").c_str());
+    extensionInput->getInputNode()->setDelegate(this);
+    extensionInput->getInputNode()->setAllowedChars("abcdefghijklmnñopqrstuvwxyz0123456789.");
+    menu->addChild(extensionInput);
 
     fadeOutInput = TextInput::create(50.f, "s", "bigFont.fnt");
     fadeOutInput->setScale(0.5f);
@@ -360,6 +387,20 @@ bool RenderSettingsLayer::setup() {
     btn->setPosition({200, -123});
     menu->addChild(btn);
 
+    CCSprite* spr2 = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
+    spr2->setScale(0.33f);
+    btn = CCMenuItemSpriteExtra::create(spr2, this, menu_selector(RenderSettingsLayer::showInfoPopup));
+    btn->setPosition({13, -22});
+    btn->setTag(1);
+    menu->addChild(btn);
+
+    spr2 = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
+    spr2->setScale(0.33f);
+    btn = CCMenuItemSpriteExtra::create(spr2, this, menu_selector(RenderSettingsLayer::showInfoPopup));
+    btn->setPosition({13, -48});
+    btn->setTag(0);
+    menu->addChild(btn);
+
     return true;
 }
 
@@ -367,3 +408,14 @@ void RenderSettingsLayer::onSlider(CCObject*) {
     Mod::get()->setSavedValue("render_sfx_volume", sfxSlider->getValue());
     Mod::get()->setSavedValue("render_music_volume", musicSlider->getValue());
 }
+
+void RenderSettingsLayer::showInfoPopup(CCObject* obj) {
+    int tag = static_cast<CCNode*>(obj)->getTag();
+    std::string title = tag ? "Legacy Audio" : "Record Audio";
+    std::string msg = tag ? "Adds only the original level song to the video, ignoring all song and SFX triggers." : "Records the game's audio in another attempt and adds it to the video. This ensures all song and SFX triggers are captured.";
+    FLAlertLayer::create(
+        title.c_str(),
+        msg.c_str(),
+        "Ok"
+    )->show();
+};

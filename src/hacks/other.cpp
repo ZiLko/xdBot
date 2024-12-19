@@ -150,9 +150,9 @@ class $modify(EndLevelLayer) {
         auto& g = Global::get();
 
         if (g.mod->getSettingValue<bool>("endscreen_button")) {
-			auto winSize = CCDirector::sharedDirector()->getWinSize();
+			cocos2d::CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
-			CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+			CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playbtn_001.png");
 			sprite->setScale(0.350f);
             
         	CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
@@ -177,6 +177,16 @@ class $modify(EndLevelLayer) {
         }
 
         if (!g.safeMode) return;
+
+        if (CCMenu* menu = m_mainLayer->getChildByType<CCMenu>(0)) {
+            if (CCMenuItemSpriteExtra* btn = menu->getChildByType<CCMenuItemSpriteExtra>(0))
+                btn->setPositionX(btn->getPositionX() - 2);
+            if (CCMenuItemSpriteExtra* btn = menu->getChildByType<CCMenuItemSpriteExtra>(1))
+                btn->setPositionX(btn->getPositionX() + 2);
+            if (CCMenuItemSpriteExtra* btn = menu->getChildByType<CCMenuItemSpriteExtra>(2))
+                btn->setPositionX(btn->getPositionX() - 2);
+        }
+
         if (!g.mod->getSavedValue<bool>("macro_auto_safe_mode")) return;
 
         CCLabelBMFont* lbl = CCLabelBMFont::create("Auto-safe-mode", "goldFont.fnt");
@@ -228,7 +238,7 @@ class $modify(GameLevelOptionsLayer) {
 
         if (!Mod::get()->getSettingValue<bool>("level_settings_button")) return ret;
 
-        CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playBtn2_001.png");
+        CCSprite* sprite = CCSprite::createWithSpriteFrameName("GJ_playbtn_001.png");
 		sprite->setScale(0.350f);
             
         CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(

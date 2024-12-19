@@ -179,13 +179,14 @@ void Renderer::start() {
     musicVolume = mod->getSavedValue<double>("render_music_volume");
     stopAfter = geode::utils::numFromString<float>(mod->getSavedValue<std::string>("render_seconds_after")).unwrapOr(0.f);
     audioMode = AudioMode::Off;
+    std::string extension = mod->getSavedValue<std::string>("render_file_extension");
 
     if (mod->getSavedValue<bool>("render_only_song")) audioMode = AudioMode::Song;
     if (mod->getSavedValue<bool>("render_record_audio")) audioMode = AudioMode::Record;
 
     auto now = std::chrono::system_clock::now();
     auto timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
-    std::string filename = fmt::format("render_{}_{}.mp4", std::string_view(pl->m_level->m_levelName), std::to_string(timestamp));
+    std::string filename = fmt::format("render_{}_{}{}", std::string_view(pl->m_level->m_levelName), std::to_string(timestamp), extension);
     std::string path = (Mod::get()->getSettingValue<std::filesystem::path>("render_folder") / filename).string();
 
     width = std::stoi(mod->getSavedValue<std::string>("render_width2"));
@@ -233,7 +234,7 @@ void Renderer::start() {
     renderer.begin();
 
 
-    std::thread([&, path, songFile, songOffset, fadeIn, fadeOut]() {
+    std::thread([&, path, songFile, songOffset, fadeIn, fadeOut, extension]() {
 
         if (!codec.empty()) codec = "-c:v " + codec + " ";
         if (!bitrate.empty()) bitrate = "-b:v " + bitrate + " ";
@@ -294,14 +295,14 @@ void Renderer::start() {
         float fadeOutStart = totalTime - fadeOutTime;
 
         if (fadeOutVideo) {
-            command = fmt::format("\"{}\" -i \"{}\" -vf \"fade=t=out:st={}:d={}\" -c:a copy \"{}\"", ffmpegPath, path, fadeOutStart, std::to_string(fadeOutTime), path + "_temp.mp4");
+            command = fmt::format("\"{}\" -i \"{}\" -vf \"fade=t=out:st={}:d={}\" {}-c:a copy \"{}\"", ffmpegPath, path, fadeOutStart, std::to_string(fadeOutTime), codec, path + "_temp" + extension);
 
 
             log::info("Executing (Fade Out): {}", command);
             process = subprocess::Popen(command);
             if (!process.close()) {
                 std::filesystem::remove(path);
-                std::filesystem::rename(path + "_temp.mp4", path);
+                std::filesystem::rename(path + "_temp" + extension, path);
             } else log::debug("Fade Out Error xD");
         }
 

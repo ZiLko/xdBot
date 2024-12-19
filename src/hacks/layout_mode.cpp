@@ -1,4 +1,12 @@
 #include "layout_mode.hpp"
+#include <Geode/modify/LevelTools.hpp>
+
+class $modify(LevelTools) {
+    static bool verifyLevelIntegrity(gd::string v1, int v2) {
+        if (Global::get().layoutMode) return true;
+        return LevelTools::verifyLevelIntegrity(v1, v2);
+    }
+};
 
 class $modify(PlayLayer) {
 
@@ -107,10 +115,10 @@ std::string LayoutMode::getModifiedString(std::string levelString) {
 
         if (!props.contains(1)) continue;
 
-        if (!importantTriggerIDs.contains(std::stoi(props[1]))) continue;
+        if (!importantTriggerIDs.contains(std::stoi(props.at(1)))) continue;
 
-        for (int i = 0; i < importantTriggerIDs.at(std::stoi(props[1])).size(); i++) {
-            int propID = importantTriggerIDs.at(std::stoi(props[1]))[i];
+        for (int i = 0; i < importantTriggerIDs.at(std::stoi(props.at(1))).size(); i++) {
+            int propID = importantTriggerIDs.at(std::stoi(props.at(1)))[i];
             if (!props.contains(propID)) continue;
 
             if (std::stoi(props[propID]) != 0)
@@ -120,7 +128,7 @@ std::string LayoutMode::getModifiedString(std::string levelString) {
     }
 
     std::string newString = "";
-    
+
     for (LevelObject obj : objects) {
 
         std::vector<std::string> vec = obj.vecString;
@@ -129,10 +137,9 @@ std::string LayoutMode::getModifiedString(std::string levelString) {
 
         if (!props.contains(1)) continue;
 
-        if (decoObjectIDs.contains(std::stoi(props[1])) || props.contains(121)) {
-            if (props.contains(57)) continue;
-
-            for (const auto& el : Utils::splitByChar(props[57], '.')) {
+        if (decoObjectIDs.contains(std::stoi(props.at(1))) || props.contains(121)) {
+            if (!props.contains(57)) continue;
+            for (const auto& el : Utils::splitByChar(props.at(57), '.')) {
                 if (el.empty()) continue;
                 if (!importantGroups.contains(std::stoi(el))) continue;
 
@@ -147,8 +154,8 @@ std::string LayoutMode::getModifiedString(std::string levelString) {
 
             continue;
         }
-        
-        if (!solidObjectIDs.contains(std::stoi(props[1]))) {
+
+        if (!solidObjectIDs.contains(std::stoi(props.at(1)))) {
             newString += ";" + obj.ogString;
             continue;
         }

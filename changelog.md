@@ -1,3 +1,14 @@
+# v2.2.2
+
+* Fixed layout mode returning "Load Failed!" on robtop levels.
+* Fixed crazy layout mode bug idk how it didnt get reported before.
+* Fixed render args not allowing some characters.
+* Fixed fade out not re-encoding with the selected codec.
+* Fixed render restore defaults button not restoring defaults.
+* Added render file extension setting.
+* Added render info popups for the audio settings.
+* Renamed render "Only Add Song" to "Legacy Audio".
+
 # v2.2.1
 
 * Added renders folder button back but inside the render presets menu.

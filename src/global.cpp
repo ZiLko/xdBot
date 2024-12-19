@@ -317,6 +317,10 @@ PauseLayer* Global::getPauseLayer() {
 $execute{
     auto & g = Global::get();
 
+  if (!g.mod->setSavedValue("defaults_set9", true))
+    g.mod->setSavedValue("render_file_extension", std::string(".mp4"));
+
+
   if (!g.mod->setSavedValue("defaults_set8", true)) {
     g.mod->setSavedValue("render_sfx_volume", 1.f);
     g.mod->setSavedValue("render_music_volume", 1.f);
