@@ -1033,7 +1033,7 @@ bool RecordLayer::setup() {
     CCSprite* dickordSpr = CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png");
     dickordSpr->setScale(0.9f);
     CCMenuItemSpriteExtra* dickordBtn = CCMenuItemSpriteExtra::create(dickordSpr, this, menu_selector(RecordLayer::onDiscord));
-    dickordBtn->setPosition({42, 42});
+    dickordBtn->setPosition((CCDirector::sharedDirector()->getWinSize() / 2 - m_size / 2 + ccp(-16, 16)));
     m_buttonMenu->addChild(dickordBtn);
 
     if (!Mod::get()->setSavedValue<bool>("dickord", true))
