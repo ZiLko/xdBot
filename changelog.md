@@ -1,3 +1,7 @@
+# v2.2.5
+
+* Discord.
+
 # v2.2.4
 
 * Fixed render fade out not re encoding with the original bitrate.

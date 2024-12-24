@@ -132,4 +132,6 @@ public:
 
 	void toggleFPS(bool on);
 
+	void onDiscord(CCObject*);
+
 };

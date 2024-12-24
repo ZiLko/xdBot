@@ -8,6 +8,7 @@
 
 #include <Geode/modify/CCTextInputNode.hpp>
 #include <Geode/modify/PauseLayer.hpp>
+#include <Geode/utils/web.hpp>
 
 const std::vector<std::vector<RecordSetting>> settings {
 	{
@@ -1029,6 +1030,15 @@ bool RecordLayer::setup() {
 
 #endif
 
+    CCSprite* dickordSpr = CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png");
+    dickordSpr->setScale(0.9f);
+    CCMenuItemSpriteExtra* dickordBtn = CCMenuItemSpriteExtra::create(dickordSpr, this, menu_selector(RecordLayer::onDiscord));
+    dickordBtn->setPosition({42, 42});
+    m_buttonMenu->addChild(dickordBtn);
+
+    if (!Mod::get()->setSavedValue<bool>("dickord", true))
+        dickordSpr->runAction(CCSequence::create(CCScaleTo::create(0.25f, 1.5f), CCRotateTo::create(0.25f, 90), CCRotateTo::create(0.25f, 180), CCRotateTo::create(0.25f, 270), CCRotateTo::create(0.25f, 0), CCScaleTo::create(0.25f, 0.9f), nullptr));
+
     return true;
 }
 
@@ -1222,4 +1232,16 @@ void RecordLayer::goToSettingsPage(int page) {
         loadSetting(settings[page][i], ySettingPositions[i]);
 
     updateDots();
+}
+
+void RecordLayer::onDiscord(CCObject*) {
+    geode::createQuickPopup(
+        "Discord",
+        "Join the <cb>Discord</c> server?\n(<cl>discord.gg/rWdZbw7aKm</c>).\n<cr>If you are in an unofficial server, you should leave NOW.</c>",
+        "No", "Yes",
+        [](auto, bool btn2) {
+        	if (btn2)
+				geode::utils::web::openLinkInBrowser("https://discord.gg/rWdZbw7aKm");
+        }
+    );
 }
