@@ -1,3 +1,7 @@
+# v2.2.6
+
+* Fixed discord link.
+
 # v2.2.5
 
 * Discord.

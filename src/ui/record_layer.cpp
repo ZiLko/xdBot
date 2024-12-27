@@ -1237,11 +1237,11 @@ void RecordLayer::goToSettingsPage(int page) {
 void RecordLayer::onDiscord(CCObject*) {
     geode::createQuickPopup(
         "Discord",
-        "Join the <cb>Discord</c> server?\n(<cl>discord.gg/rWdZbw7aKm</c>).\n<cr>If you are in an unofficial server, you should leave NOW.</c>",
+        "Join the <cb>Discord</c> server?\n(<cl>discord.gg/w6yvdzVzBd</c>).\n<cr>If you are in an unofficial server, you should leave NOW.</c>",
         "No", "Yes",
         [](auto, bool btn2) {
         	if (btn2)
-				geode::utils::web::openLinkInBrowser("https://discord.gg/rWdZbw7aKm");
+				geode::utils::web::openLinkInBrowser("https://discord.gg/w6yvdzVzBd");
         }
     );
 }
