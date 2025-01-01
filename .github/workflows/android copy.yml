@@ -1,4 +1,4 @@
-name: Build Android 2
+name: Build Geode Mod
 
 on:
   workflow_dispatch:
@@ -12,10 +12,17 @@ jobs:
       fail-fast: false
       matrix:
         config:
+        - name: Windows
+          os: windows-latest
+          build-type: RelWithDebInfo
 
         - name: Android32
           os: ubuntu-latest
           target: Android32
+
+        - name: Android64
+          os: ubuntu-latest
+          target: Android64
 
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
@@ -27,8 +34,10 @@ jobs:
         uses: geode-sdk/build-geode-mod@main
         with:
           bindings: geode-sdk/bindings
+          build-config: ${{ matrix.config.build-type || 'Release' }}
+          export-pdb: true
           bindings-ref: main
-          combine: false
+          combine: true
           target: ${{ matrix.config.target }}
 
   package:
