@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - "d"
+      - "main"
 
 jobs:
   build:
@@ -16,10 +16,6 @@ jobs:
         - name: Android32
           os: ubuntu-latest
           target: Android32
-
-          - name: Android64
-          os: ubuntu-latest
-          target: Android64
 
     name: ${{ matrix.config.name }}
     runs-on: ${{ matrix.config.os }}
