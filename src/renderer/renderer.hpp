@@ -1,4 +1,6 @@
 #include "../includes.hpp"
+// #include "events.hpp"
+#include <eclipse.ffmpeg-api/include/recorder.hpp>
 
 enum AudioMode {
     Off = 0,
@@ -47,6 +49,7 @@ public:
     int pauseAttempts = 0;
 
     MyRenderTexture renderer;
+    ffmpeg::Recorder ffmpeg;
     std::vector<uint8_t> currentFrame;
     std::mutex lock;
     std::string codec = "", bitrate = "12M", extraArgs = "", videoArgs = "", extraAudioArgs = "", path = "";

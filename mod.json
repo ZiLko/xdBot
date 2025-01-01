@@ -15,7 +15,12 @@
 			"version": ">=v1.10.0",
 			"importance": "required",
 			"platforms": ["win"]
-		}
+		},
+		{
+            "id": "eclipse.ffmpeg-api",
+            "version": ">=1.1.2",
+            "importance": "required"
+        }
 	],
 	"settings": {
 		"frame_fixes": {

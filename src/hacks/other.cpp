@@ -180,11 +180,18 @@ class $modify(EndLevelLayer) {
 
         if (CCMenu* menu = m_mainLayer->getChildByType<CCMenu>(0)) {
             if (CCMenuItemSpriteExtra* btn = menu->getChildByType<CCMenuItemSpriteExtra>(0))
-                btn->setPositionX(btn->getPositionX() - 2);
+                btn->setPositionX(btn->getPositionX() - 1);
             if (CCMenuItemSpriteExtra* btn = menu->getChildByType<CCMenuItemSpriteExtra>(1))
-                btn->setPositionX(btn->getPositionX() + 2);
+                btn->setPositionX(btn->getPositionX() + 1);
             if (CCMenuItemSpriteExtra* btn = menu->getChildByType<CCMenuItemSpriteExtra>(2))
-                btn->setPositionX(btn->getPositionX() - 2);
+                btn->setPositionX(btn->getPositionX() - 1);
+        }
+
+        if (CCMenu* menu = m_mainLayer->getChildByType<CCMenu>(1)) {
+            if (CCMenuItemSpriteExtra* btn = menu->getChildByType<CCMenuItemSpriteExtra>(0))
+                btn->setPositionX(btn->getPositionX() - 1);
+            if (CCMenuItemSpriteExtra* btn = menu->getChildByType<CCMenuItemSpriteExtra>(1))
+                btn->setPositionX(btn->getPositionX() + 1);
         }
 
         if (!g.mod->getSavedValue<bool>("macro_auto_safe_mode")) return;

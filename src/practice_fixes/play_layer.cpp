@@ -23,20 +23,6 @@ class $modify(GJBaseGameLayer) {
       Global::get().cancelCheckpoint = true;
   }
 
-  void processMoveActions() {
-    if (!m_player1->m_isDead || Global::get().state == state::none)
-      GJBaseGameLayer::processMoveActions();
-  }
-	void processMoveActionsStep(float v1, bool v2) {
-    if (!m_player1->m_isDead || Global::get().state == state::none)
-      GJBaseGameLayer::processMoveActionsStep(v1, v2);
-  }
-
-  void processAreaMoveGroupAction(cocos2d::CCArray* v1, EnterEffectInstance* v2, cocos2d::CCPoint v3, int v4, int v5, int v6, int v7, int v8, bool v9, bool v10) {
-    if (!m_player1->m_isDead || Global::get().state == state::none)
-      GJBaseGameLayer::processAreaMoveGroupAction(v1, v2, v3, v4, v5, v6, v7, v8, v9, v10);
-  }
-
 };
 
 class $modify(CheckpointObject) {
