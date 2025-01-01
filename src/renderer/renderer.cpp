@@ -116,7 +116,7 @@ bool Renderer::toggle() {
     if (g.renderer.recording || g.renderer.recordingAudio) {
         g.renderer.recordingAudio ? g.renderer.stopAudio() : g.renderer.stop(Global::getCurrentFrame());
     }
-    else if (std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe") {
+    // else if (std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe") {
         if (!PlayLayer::get()) {
             FLAlertLayer::create("Warning", "<cl>Open a level</c> to start rendering it.", "Ok")->show();
             return false;
@@ -136,21 +136,21 @@ bool Renderer::toggle() {
             }
         }
 
-    }
-    else {
-        geode::createQuickPopup(
-            "Error",
-            "<cl>ffmpeg.exe</c> not found, set the path to it in mod settings.\nOpen download link?",
-            "Cancel", "Yes",
-            [](auto, bool btn2) {
-                if (btn2) {
-                    FLAlertLayer::create("Info", "Unzip the downloaded file and look for <cl>ffmpeg.exe</c> in the 'bin' folder.", "Ok")->show();
-				    utils::web::openLinkInBrowser("https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z");
-                }
-            }
-        );
-        return false;
-    }
+    // }
+    // else {
+    //     geode::createQuickPopup(
+    //         "Error",
+    //         "<cl>ffmpeg.exe</c> not found, set the path to it in mod settings.\nOpen download link?",
+    //         "Cancel", "Yes",
+    //         [](auto, bool btn2) {
+    //             if (btn2) {
+    //                 FLAlertLayer::create("Info", "Unzip the downloaded file and look for <cl>ffmpeg.exe</c> in the 'bin' folder.", "Ok")->show();
+	// 			    utils::web::openLinkInBrowser("https://www.gyan.dev/ffmpeg/builds/ffmpeg-git-essentials.7z");
+    //             }
+    //         }
+    //     );
+    //     return false;
+    // }
 
     Interface::updateLabels();
 
