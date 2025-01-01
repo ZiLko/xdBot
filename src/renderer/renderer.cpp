@@ -111,7 +111,7 @@ bool Renderer::toggle() {
         return false;
     }
 
-    std::filesystem::path ffmpegPath = g.mod->getSettingValue<std::filesystem::path>("ffmpeg_path");
+    // std::filesystem::path ffmpegPath = g.mod->getSettingValue<std::filesystem::path>("ffmpeg_path");
 
     if (g.renderer.recording || g.renderer.recordingAudio) {
         g.renderer.recordingAudio ? g.renderer.stopAudio() : g.renderer.stop(Global::getCurrentFrame());
@@ -122,7 +122,7 @@ bool Renderer::toggle() {
             return false;
         }
 
-        g.renderer.ffmpegPath = ffmpegPath.string();
+        // g.renderer.ffmpegPath = ffmpegPath.string();
         std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("render_folder");
 
         if (std::filesystem::exists(path))

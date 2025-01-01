@@ -53,8 +53,7 @@
 		"render_folder": {
 			"name": "Render Save Location",
 			"type": "folder",
-			"default": "{gd_dir}/renders",
-			"platforms": ["win"]
+			"default": "{gd_dir}/renders"
 		},
 		"background_color": {
             "name": "Menu background color",
