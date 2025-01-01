@@ -191,51 +191,51 @@ void Renderer::start() {
     if (height % 2 != 0)
         height++;
 
-    renderer.width = width;
-    renderer.height = height;
-    ogRes = cocos2d::CCEGLView::get()->getDesignResolutionSize();
-    ogScaleX = cocos2d::CCEGLView::get()->m_fScaleX;
-    ogScaleY = cocos2d::CCEGLView::get()->m_fScaleY;
-    changeRes(false);
+    // renderer.width = width;
+    // renderer.height = height;
+    // ogRes = cocos2d::CCEGLView::get()->getDesignResolutionSize();
+    // ogScaleX = cocos2d::CCEGLView::get()->m_fScaleX;
+    // ogScaleY = cocos2d::CCEGLView::get()->m_fScaleY;
+    // changeRes(false);
 
-    dontRender = true;
-    recording = true;
-    frameHasData = false;
-    levelFinished = false;
-    startedAudio = false;
-    timeAfter = 0.f;
-    finishFrame = 0;
-    pauseAttempts = 0;
-    lastFrame_t = extra_t = 0;
+    // dontRender = true;
+    // recording = true;
+    // frameHasData = false;
+    // levelFinished = false;
+    // startedAudio = false;
+    // timeAfter = 0.f;
+    // finishFrame = 0;
+    // pauseAttempts = 0;
+    // lastFrame_t = extra_t = 0;
 
-    if (!pl->m_levelEndAnimationStarted && pl->m_isPaused)
-        Global::get().restart = true;
+    // if (!pl->m_levelEndAnimationStarted && pl->m_isPaused)
+    //     Global::get().restart = true;
 
-    if (Global::get().state != state::playing)
-        Macro::togglePlaying();
+    // if (Global::get().state != state::playing)
+    //     Macro::togglePlaying();
 
-    auto songFile = pl->m_level->getAudioFileName();
-    if (pl->m_level->m_songID == 0)
-        songFile = cocos2d::CCFileUtils::sharedFileUtils()->fullPathForFilename(songFile.c_str(), false);
+    // auto songFile = pl->m_level->getAudioFileName();
+    // if (pl->m_level->m_songID == 0)
+    //     songFile = cocos2d::CCFileUtils::sharedFileUtils()->fullPathForFilename(songFile.c_str(), false);
 
-    float songOffset = pl->m_levelSettings->m_songOffset + (fmod->m_musicOffset / 1000.f) + (levelStartFrame / 240.f);
-    bool fadeIn = pl->m_levelSettings->m_fadeIn;
-    bool fadeOut = pl->m_levelSettings->m_fadeOut;
+    // float songOffset = pl->m_levelSettings->m_songOffset + (fmod->m_musicOffset / 1000.f) + (levelStartFrame / 240.f);
+    // bool fadeIn = pl->m_levelSettings->m_fadeIn;
+    // bool fadeOut = pl->m_levelSettings->m_fadeOut;
 
-    currentFrame.resize(width * height * 3, 0);
-    renderedFrames.clear();
-    renderer.begin();
+    // currentFrame.resize(width * height * 3, 0);
+    // renderedFrames.clear();
+    // renderer.begin();
 
-    ffmpeg::RenderSettings settings;
-    settings.m_pixelFormat = ffmpeg::PixelFormat::RGB24;
-    settings.m_codec = codec;
-    settings.m_bitrate = geode::utils::numFromString<int64_t>(mod->getSavedValue<std::string>("render_bitrate")).unwrapOr(30) * 1000000;
-    settings.m_width = width;
-    settings.m_height = height;
-    settings.m_fps = fps;
-    settings.m_outputFile = path;
+    // ffmpeg::RenderSettings settings;
+    // settings.m_pixelFormat = ffmpeg::PixelFormat::RGB24;
+    // settings.m_codec = codec;
+    // settings.m_bitrate = geode::utils::numFromString<int64_t>(mod->getSavedValue<std::string>("render_bitrate")).unwrapOr(30) * 1000000;
+    // settings.m_width = width;
+    // settings.m_height = height;
+    // settings.m_fps = fps;
+    // settings.m_outputFile = path;
 
-    std::thread([&, path, songFile, songOffset, fadeIn, fadeOut, extension, settings]() {
+    // std::thread([&, path, songFile, songOffset, fadeIn, fadeOut, extension, settings]() {
         // if (!codec.empty()) codec = "-c:v " + codec + " ";
         // if (!bitrate.empty()) bitrate = "-b:v " + bitrate + " ";
         // if (extraArgs.empty()) extraArgs = "-pix_fmt yuv420p";
@@ -414,7 +414,7 @@ void Renderer::start() {
         //     Notification::create("Render Saved With Audio", NotificationIcon::Success)->show();
         // });
         
-        }).detach();
+        // }).detach();
 }
 
 void Renderer::stop(int frame) {
