@@ -236,54 +236,53 @@ void Renderer::start() {
     settings.m_outputFile = path;
 
     std::thread([&, path, songFile, songOffset, fadeIn, fadeOut, extension, settings]() {
+        // if (!codec.empty()) codec = "-c:v " + codec + " ";
+        // if (!bitrate.empty()) bitrate = "-b:v " + bitrate + " ";
+        // if (extraArgs.empty()) extraArgs = "-pix_fmt yuv420p";
+        // if (videoArgs.empty()) videoArgs = "colorspace=all=bt709:iall=bt470bg:fast=1";
 
-        if (!codec.empty()) codec = "-c:v " + codec + " ";
-        if (!bitrate.empty()) bitrate = "-b:v " + bitrate + " ";
-        if (extraArgs.empty()) extraArgs = "-pix_fmt yuv420p";
-        if (videoArgs.empty()) videoArgs = "colorspace=all=bt709:iall=bt470bg:fast=1";
+        // float fadeInTime = geode::utils::numFromString<float>(Mod::get()->getSavedValue<std::string>("render_fade_in_time")).unwrapOr(0.f);
+        // bool fadeInVideo = Mod::get()->getSavedValue<bool>("render_fade_in") && fadeInTime != 0.f;
+        // float fadeOutTime = geode::utils::numFromString<float>(Mod::get()->getSavedValue<std::string>("render_fade_out_time")).unwrapOr(0.f);
+        // bool fadeOutVideo = Mod::get()->getSavedValue<bool>("render_fade_out") && fadeOutTime != 0.f;
 
-        float fadeInTime = geode::utils::numFromString<float>(Mod::get()->getSavedValue<std::string>("render_fade_in_time")).unwrapOr(0.f);
-        bool fadeInVideo = Mod::get()->getSavedValue<bool>("render_fade_in") && fadeInTime != 0.f;
-        float fadeOutTime = geode::utils::numFromString<float>(Mod::get()->getSavedValue<std::string>("render_fade_out_time")).unwrapOr(0.f);
-        bool fadeOutVideo = Mod::get()->getSavedValue<bool>("render_fade_out") && fadeOutTime != 0.f;
+        // std::string fadeArgs;
+        // if (fadeInVideo)
+        //     fadeArgs = fmt::format(",fade=t=in:st=0:d={}", fadeInTime);
 
-        std::string fadeArgs;
-        if (fadeInVideo)
-            fadeArgs = fmt::format(",fade=t=in:st=0:d={}", fadeInTime);
+        // // std::string command = fmt::format(
+        // //     "\"{}\" -y -f rawvideo -pix_fmt rgb24 -s {}x{} -r {} -i - {}{}{} -vf \"vflip,{}{}\" -an \"{}\" ",
+        // //     ffmpegPath,
+        // //     std::to_string(width),
+        // //     std::to_string(height),
+        // //     std::to_string(fps),
+        // //     codec,
+        // //     bitrate,
+        // //     extraArgs,
+        // //     videoArgs,
+        // //     fadeArgs,
+        // //     path
+        // // );
 
-        // std::string command = fmt::format(
-        //     "\"{}\" -y -f rawvideo -pix_fmt rgb24 -s {}x{} -r {} -i - {}{}{} -vf \"vflip,{}{}\" -an \"{}\" ",
-        //     ffmpegPath,
-        //     std::to_string(width),
-        //     std::to_string(height),
-        //     std::to_string(fps),
-        //     codec,
-        //     bitrate,
-        //     extraArgs,
-        //     videoArgs,
-        //     fadeArgs,
-        //     path
-        // );
+        // // log::info("Executing: {}", command);
 
-        // log::info("Executing: {}", command);
+        // // auto process = subprocess::Popen(command);
 
-        // auto process = subprocess::Popen(command);
+        // bool xd = ffmpeg.init(settings);
 
-        bool xd = ffmpeg.init(settings);
+        // while (recording || pause || recordingAudio || frameHasData) {
+        //     lock.lock();
+        //     if (frameHasData) {
+        //         const std::vector<uint8_t> frame = currentFrame;
+        //         frameHasData = false;
+        //         lock.unlock();
+        //         // process.m_stdin.write(frame.data(), frame.size());
+        //         auto xd2 = ffmpeg.writeFrame(frame);
+        //     }
+        //     else lock.unlock();
+        // }
 
-        while (recording || pause || recordingAudio || frameHasData) {
-            lock.lock();
-            if (frameHasData) {
-                const std::vector<uint8_t> frame = currentFrame;
-                frameHasData = false;
-                lock.unlock();
-                // process.m_stdin.write(frame.data(), frame.size());
-                auto xd2 = ffmpeg.writeFrame(frame);
-            }
-            else lock.unlock();
-        }
-
-        ffmpeg.stop();
+        // ffmpeg.stop();
 
         // if (process.close()) {
         //     Loader::get()->queueInMainThread([] {
