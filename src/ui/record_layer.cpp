@@ -629,9 +629,7 @@ bool RecordLayer::setup() {
     lbl->setPosition(ccp(-116.5, -9));
     menu->addChild(lbl);
 
-#ifdef GEODE_IS_ANDROID
-    lbl->setOpacity(90);
-#endif
+
 
     lbl = CCLabelBMFont::create("Settings", "goldFont.fnt");
     lbl->setPosition(ccp(103, 111));
@@ -648,42 +646,28 @@ bool RecordLayer::setup() {
     lbl->setScale(0.325f);
     menu->addChild(lbl);
 
-    #ifdef GEODE_IS_ANDROID
     
-    lbl = CCLabelBMFont::create("Not Available For Android.", "bigFont.fnt");
-    lbl->setPosition(ccp(-116, -52));
-    lbl->setOpacity(120);
-    lbl->setScale(0.325f);
-    menu->addChild(lbl);
-
-    #endif
 
     lbl = CCLabelBMFont::create("X", "chatFont.fnt");
     lbl->setPosition(ccp(-114.5, -31));
     lbl->setScale(0.7f);
     menu->addChild(lbl);
 
-#ifdef GEODE_IS_ANDROID
-    lbl->setOpacity(90);
-#endif
+
 
     lbl = CCLabelBMFont::create("M", "chatFont.fnt");
     lbl->setPosition(ccp(-164, -59));
     lbl->setScale(0.7f);
     menu->addChild(lbl);
 
-#ifdef GEODE_IS_ANDROID
-    lbl->setOpacity(90);
-#endif
+
 
     lbl = CCLabelBMFont::create("FPS", "chatFont.fnt");
     lbl->setPosition(ccp(-108.5, -59));
     lbl->setScale(0.49f);
     menu->addChild(lbl);
 
-#ifdef GEODE_IS_ANDROID
-    lbl->setOpacity(90);
-#endif
+
 
     ButtonSprite* btnSprite = ButtonSprite::create("Save");
     btnSprite->setScale(0.54f);
@@ -720,9 +704,7 @@ bool RecordLayer::setup() {
     btn->setPosition(ccp(148, -100));
     menu->addChild(btn);
 
-#ifdef GEODE_IS_ANDROID
-    btn->setPositionX(142);
-#endif
+
 
     btnSprite = ButtonSprite::create("Load");
     btnSprite->setScale(0.54f);
@@ -793,18 +775,12 @@ bool RecordLayer::setup() {
 
     CCSprite* emptyBtn = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
     emptyBtn->setScale(0.67f);
-#ifdef GEODE_IS_ANDROID
-    emptyBtn->setScale(-0.67f);
-    emptyBtn->setOpacity(90);
-#endif
+
 
     CCSprite* folderIcon = CCSprite::createWithSpriteFrameName("folderIcon_001.png");
     folderIcon->setPosition(emptyBtn->getContentSize() / 2);
     folderIcon->setScale(0.7f);
-#ifdef GEODE_IS_ANDROID
-    // folderIcon->setScale(-0.7f);
-    folderIcon->setOpacity(90);
-#endif
+
 
     emptyBtn->addChild(folderIcon);
     btn = CCMenuItemSpriteExtra::create(
@@ -813,17 +789,12 @@ bool RecordLayer::setup() {
         menu_selector(RecordLayer::openPresets)
     );
     btn->setPosition(ccp(-177.5, -97));
-#ifdef GEODE_IS_ANDROID
-    btn->setScale(-1);
-#endif
+
     menu->addChild(btn);
 
     CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
     spr->setScale(0.65f);
-#ifdef GEODE_IS_ANDROID
-    spr->setScale(-0.65f);
-    spr->setOpacity(90);
-#endif
+
 
     btn = CCMenuItemSpriteExtra::create(
         spr,
@@ -832,9 +803,7 @@ bool RecordLayer::setup() {
     );
     btn->setPosition(ccp(-129.5, -97));
     menu->addChild(btn);
-#ifdef GEODE_IS_ANDROID
-    btn->setScale(-1);
-#endif
+
 
     codecInput = CCTextInputNode::create(150, 30, "Codec", "chatFont.fnt");
     codecInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
@@ -877,9 +846,7 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-#ifdef GEODE_IS_ANDROID
-    bg->setOpacity(27);
-#endif
+
 
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.375f);
@@ -891,9 +858,7 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-#ifdef GEODE_IS_ANDROID
-    bg->setOpacity(27);
-#endif
+
 
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.375f);
@@ -905,9 +870,7 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-#ifdef GEODE_IS_ANDROID
-    bg->setOpacity(27);
-#endif
+
 
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.375f);
@@ -919,9 +882,7 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-#ifdef GEODE_IS_ANDROID
-    bg->setOpacity(27);
-#endif
+
 
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.375f);
@@ -933,18 +894,14 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-#ifdef GEODE_IS_ANDROID
-    bg->setOpacity(27);
-#endif
+
 
     ButtonSprite* spriteOn2 = ButtonSprite::create("Stop");
     spriteOn2->setScale(0.74f);
     ButtonSprite* spriteOff2 = ButtonSprite::create("Start");
     spriteOff2->setScale(0.74f);
 
-#ifdef GEODE_IS_ANDROID
-    spriteOff2->setScale(-0.74f);
-#endif
+
 
     renderToggle = CCMenuItemToggler::create(spriteOff2, spriteOn2, this, menu_selector(RecordLayer::toggleRender));
     renderToggle->toggle(g.renderer.recording || g.renderer.recordingAudio);
@@ -952,17 +909,7 @@ bool RecordLayer::setup() {
     renderToggle->setPosition(ccp(-65.5, -100));
     menu->addChild(renderToggle);
 
-#ifdef GEODE_IS_ANDROID
-    renderToggle->setScale(-1);
-    CCNode* sprite = static_cast<CCNode*>(renderToggle->m_offButton->getChildren()->objectAtIndex(0));
 
-    if (CCLabelBMFont* lbl = typeinfo_cast<CCLabelBMFont*>(sprite->getChildren()->objectAtIndex(0)))
-        lbl->setOpacity(90);
-
-    if (CCScale9Sprite* spr = typeinfo_cast<CCScale9Sprite*>(sprite->getChildren()->objectAtIndex(1)))
-        spr->setOpacity(90);
-
-#endif
 
     spr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
     spr->setScale(0.65f);
@@ -1011,24 +958,7 @@ bool RecordLayer::setup() {
 
     goToSettingsPage(g.currentPage);
 
-#ifdef GEODE_IS_ANDROID
 
-    widthInput->setID("android-disabled");
-    widthInput->m_placeholderLabel->setOpacity(120);
-
-    heightInput->setID("android-disabled");
-    heightInput->m_placeholderLabel->setOpacity(120);
-
-    fpsInput->setID("android-disabled");
-    fpsInput->m_placeholderLabel->setOpacity(120);
-
-    bitrateInput->setID("android-disabled");
-    bitrateInput->m_placeholderLabel->setOpacity(120);
-
-    codecInput->setID("android-disabled");
-    codecInput->m_placeholderLabel->setOpacity(120);
-
-#endif
 
     CCSprite* dickordSpr = CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png");
     dickordSpr->setScale(0.9f);
