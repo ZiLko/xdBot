@@ -338,6 +338,11 @@ PauseLayer* Global::getPauseLayer() {
 $execute{
   auto & g = Global::get();
 
+  if (!g.mod->setSavedValue("defaults_set_12", true)) {
+    g.mod->setSettingValue<std::filesystem::path>("macros_folder", g.mod->getSaveDir() / "macros");
+    g.mod->setSettingValue<std::filesystem::path>("autosaves_folder", g.mod->getSaveDir() / "autosaves");
+  }
+
   #ifdef GEODE_IS_ANDROID
   if (!g.mod->setSavedValue("defaults_set_11", true))
     g.mod->setSavedValue("render_codec", std::string("libx264"));
@@ -369,8 +374,6 @@ $execute{
     g.mod->setSavedValue("trajectory_color2", ccc3(130, 8, 8));
     g.mod->setSavedValue("trajectory_length", std::to_string(240));
 
-    g.mod->setSettingValue<std::filesystem::path>("macros_folder", g.mod->getSaveDir() / "macros");
-    g.mod->setSettingValue<std::filesystem::path>("autosaves_folder", g.mod->getSaveDir() / "autosaves");
   }
 
   if (!g.mod->setSavedValue("defaults_set3", true)) {
