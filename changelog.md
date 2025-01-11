@@ -1,3 +1,7 @@
+# v2.3.4
+
+* Fixed render green video?.
+
 # v2.3.3
 
 * Fixed android render inputs length being limited to 3 or 2 idk.

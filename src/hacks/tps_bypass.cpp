@@ -45,7 +45,7 @@ class $modify(GJBaseGameLayer) {
         
         if (0 < m_resumeTimer) {
             // cocos2d::CCDirector::sharedDirector();
-            m_resumeTimer = m_resumeTimer + -1;
+            m_resumeTimer--;
             dt = 0.0;
         }
 

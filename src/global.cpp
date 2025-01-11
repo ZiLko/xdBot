@@ -216,7 +216,7 @@ void Global::updateSeed(bool isRestart) {
     else {
       std::random_device rd;
       std::mt19937 generator(rd());
-      std::uniform_int_distribution<int> distribution(1000, 9999);
+      std::uniform_int_distribution<int> distribution(1000, 999999999);
       finalSeed = distribution(generator);
     }
 

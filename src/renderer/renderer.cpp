@@ -325,7 +325,7 @@ void Renderer::start() {
         } else {
             #ifdef GEODE_IS_WINDOWS
             command = fmt::format(
-                "\"{}\" -y -f rawvideo -pix_fmt yuv420p -s {}x{} -r {} -i - {}{}{} -vf \"vflip,{}{}\" -an \"{}\" ",
+                "\"{}\" -y -f rawvideo -pix_fmt rgb24 -s {}x{} -r {} -i - {}{}{} -vf \"vflip,{}{}\" -an \"{}\" ",
                 ffmpegPath,
                 std::to_string(width),
                 std::to_string(height),
