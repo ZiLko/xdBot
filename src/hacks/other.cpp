@@ -170,7 +170,7 @@ class $modify(EndLevelLayer) {
         EndLevelLayer::customSetup();
         auto& g = Global::get();
 
-        if (g.mod->getSavedValue<bool>("autosave_levelend_enabled"))
+        if (g.state == state::recording && g.autosaveEnabled && g.mod->getSavedValue<bool>("autosave_levelend_enabled"))
             Macro::autoSave(nullptr, g.currentSession);
 
         if (g.mod->getSettingValue<bool>("endscreen_button")) {
@@ -182,8 +182,8 @@ class $modify(EndLevelLayer) {
         	CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
                 sprite,
 			    this,
-			    menu_selector(RecordLayer::openMenu2
-            ));
+			    menu_selector(RecordLayer::openMenu2)
+            );
 			btn->setPosition({160, -99});
 
 			CCLayer* layer = this->getChildByType<CCLayer>(0);

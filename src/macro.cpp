@@ -46,14 +46,16 @@ bool Macro::flipControls() {
 }
 
 void Macro::autoSave(GJGameLevel* level, int number) {
-    if (!level) level = PlayLayer::get() ? PlayLayer::get()->m_level : nullptr;
+    if (!level) level = PlayLayer::get() != nullptr ? PlayLayer::get()->m_level : nullptr;
     if (!level) return;
 
     std::string levelname = level->m_levelName;
     std::filesystem::path autoSavesPath = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
     std::filesystem::path path = autoSavesPath / fmt::format("autosave_{}_{}", levelname, number);
 
-    std::string username = GJAccountManager::sharedState()->m_username;
+    if (!std::filesystem::exists(autoSavesPath)) return;
+
+    std::string username = GJAccountManager::sharedState() != nullptr ? GJAccountManager::sharedState()->m_username : "";
     int result = Macro::save(username, fmt::format("AutoSave {} in level {}", number, levelname), path.string());
 
     if (result != 0)

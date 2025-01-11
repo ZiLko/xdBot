@@ -381,6 +381,8 @@ void Renderer::start() {
 
         #ifdef GEODE_IS_ANDROID
         audioMode = AudioMode::Off;
+        #else
+        if (usingApi) audioMode = AudioMode::Off;
         #endif
 
         if ((SFXVolume == 0.f && musicVolume == 0.f) || audioMode == AudioMode::Off || (audioMode == AudioMode::Song && !std::filesystem::exists(songFile)) || (audioMode == AudioMode::Record && !std::filesystem::exists("fmodoutput.wav"))) {

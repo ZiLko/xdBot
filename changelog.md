@@ -1,3 +1,8 @@
+# v2.3.3
+
+* Fixed android render inputs length being limited to 3 or 2 idk.
+* Fixed macro autosaving on level end even if autosave was not enabled.
+
 # v2.3.2
 
 * Fixed android default render codec.

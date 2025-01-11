@@ -794,7 +794,6 @@ bool RecordLayer::setup() {
     heightInput->setMouseEnabled(true);
     heightInput->setContentSize({ 60, 20 });
     heightInput->setTouchEnabled(true);
-    heightInput->setMaxLabelLength(4);
     heightInput->setAllowedChars("0123456789");
     heightInput->setString(mod->getSavedValue<std::string>("render_height").c_str());
     heightInput->setDelegate(this);
@@ -811,7 +810,6 @@ bool RecordLayer::setup() {
     bitrateInput->setContentSize({ 32, 20 });
     bitrateInput->setTouchEnabled(true);
     bitrateInput->setAllowedChars("0123456789");
-    bitrateInput->setMaxLabelLength(3);
     bitrateInput->setString(mod->getSavedValue<std::string>("render_bitrate").c_str());
     bitrateInput->setDelegate(this);
     menu->addChild(bitrateInput);
@@ -870,7 +868,6 @@ bool RecordLayer::setup() {
     fpsInput->setMouseEnabled(true);
     fpsInput->setTouchEnabled(true);
     fpsInput->setContentSize({ 32, 20 });
-    fpsInput->setMaxLabelLength(3);
     fpsInput->setAllowedChars("0123456789");
     fpsInput->setString(mod->getSavedValue<std::string>("render_fps").c_str());
     fpsInput->setDelegate(this);
