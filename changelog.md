@@ -1,3 +1,7 @@
+# v2.3.1
+
+* Fixed renders folder not creating automatically if not found.
+
 # v2.3.0
 
 * Added TPS Bypass.

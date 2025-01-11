@@ -197,12 +197,12 @@ bool Renderer::toggle() {
         if (std::filesystem::exists(path))
             g.renderer.start();
         else {
-            // if (std::filesystem::create_directory(path))
-            //     g.renderer.start();
-            // else {
+            if (std::filesystem::create_directory(path))
+                g.renderer.start();
+            else {
                 FLAlertLayer::create("Error", "There was an error getting the renders folder. ID: 11", "Ok")->show();
                 return false;
-            // }
+            }
         }
     }
 
