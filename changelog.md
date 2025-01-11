@@ -1,3 +1,9 @@
+# v2.3.2
+
+* Fixed android default render codec.
+* Fixed android width input length being limited to 3.
+* Fixed macros folder not creating automatically if not found.
+
 # v2.3.1
 
 * Fixed renders folder not creating automatically if not found.

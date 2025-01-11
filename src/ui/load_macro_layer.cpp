@@ -29,13 +29,15 @@ void LoadMacroLayer::open(geode::Popup<>* layer, geode::Popup<>* layer2, bool au
 	std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder");
 
 	if (!std::filesystem::exists(path)) {
-		return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 6", "Ok")->show();
+		if (!std::filesystem::create_directory(path))
+			return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 6", "Ok")->show();
 	}
 
 	path = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
 
 	if (!std::filesystem::exists(path)) {
-		return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 61", "Ok")->show();
+		if (!std::filesystem::create_directory(path))
+			return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 61", "Ok")->show();
 	}
 
 	LoadMacroLayer* layerReal = create(layer, layer2, autosaves);

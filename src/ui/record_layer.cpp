@@ -779,7 +779,6 @@ bool RecordLayer::setup() {
     widthInput->setMouseEnabled(true);
     widthInput->setContentSize({ 60, 20 });
     widthInput->setTouchEnabled(true);
-    widthInput->setMaxLabelLength(4);
     widthInput->setAllowedChars("0123456789");
     widthInput->setString(mod->getSavedValue<std::string>("render_width2").c_str());
     widthInput->setDelegate(this);

@@ -338,6 +338,11 @@ PauseLayer* Global::getPauseLayer() {
 $execute{
   auto & g = Global::get();
 
+  #ifdef GEODE_IS_ANDROID
+  if (!g.mod->setSavedValue("defaults_set_11", true))
+    g.mod->setSavedValue("render_codec", std::string("libx264"));
+  #endif
+
   if (!g.mod->setSavedValue("defaults_set_10", true)) {
     g.mod->setSettingValue("restore_page", true);
 
