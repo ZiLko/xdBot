@@ -17,7 +17,7 @@ const std::vector<float> safeValues = {
     1.0f / 5, 1.0f / 4, 1.0f / 3, 1.0f / 2
 };
 
-const std::string xdBotVersion = "v2.2.6";
+const std::string xdBotVersion = "v2.3.0";
 
 enum state {
     none,
@@ -50,11 +50,17 @@ public:
 
     static void recordAction(int frame, int button, bool player2, bool hold);
 
+    static void recordFrameFix(int frame, PlayerObject* p1, PlayerObject* p2);
+
     static int save(std::string author, std::string desc, std::string path, bool json = false);
+
+    static void autoSave(GJGameLevel* level, int number);
 
     static void tryAutosave(GJGameLevel* level, CheckpointObject* cp);
 
     static void updateInfo(PlayLayer* pl);
+
+    static void updateTPS();
 
     static bool loadXDFile(std::filesystem::path path);
 
@@ -69,6 +75,8 @@ public:
     static void toggleRecording();
 
     static bool shouldStep();
+
+    static bool flipControls();
 
 };
 

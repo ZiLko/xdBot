@@ -345,7 +345,7 @@ bool RenderSettingsLayer::setup() {
 
     lbl = CCLabelBMFont::create("SFX Volume", "goldFont.fnt");
     lbl->setScale(0.475f);
-    lbl->setPosition({188, 87});
+    lbl->setPosition({188, 42});
     menu->addChild(lbl);
 
     sfxSlider = Slider::create(
@@ -353,7 +353,7 @@ bool RenderSettingsLayer::setup() {
 		menu_selector(RenderSettingsLayer::onSlider),
 		1.f
 	);
-	sfxSlider->setPosition({188, 69});
+	sfxSlider->setPosition({188, 24});
 	sfxSlider->setAnchorPoint({ 0.f, 0.f });
 	sfxSlider->setScale(0.545f);
 	sfxSlider->setValue(Mod::get()->getSavedValue<double>("render_sfx_volume"));
@@ -361,7 +361,7 @@ bool RenderSettingsLayer::setup() {
 
     lbl = CCLabelBMFont::create("Music Volume", "goldFont.fnt");
     lbl->setScale(0.475f);
-    lbl->setPosition({188, 42});
+    lbl->setPosition({188, 87});
     menu->addChild(lbl);
 
     musicSlider = Slider::create(
@@ -369,7 +369,7 @@ bool RenderSettingsLayer::setup() {
 		menu_selector(RenderSettingsLayer::onSlider),
 		1.f
 	);
-	musicSlider->setPosition({188, 24});
+	musicSlider->setPosition({188, 69});
 	musicSlider->setAnchorPoint({ 0.f, 0.f });
 	musicSlider->setScale(0.545f);
 	musicSlider->setValue(Mod::get()->getSavedValue<double>("render_music_volume"));

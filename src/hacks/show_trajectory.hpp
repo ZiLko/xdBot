@@ -1,3 +1,5 @@
+#pragma once
+
 #include "../includes.hpp"
 #include "../practice_fixes/practice_fixes.hpp"
 #include "layout_mode.hpp"
@@ -25,6 +27,20 @@ class ShowTrajectory {
 
 public:
 
+    static auto& get() {
+        static ShowTrajectory instance;
+        return instance;
+    }
+
+
+    void updateMergedColor();
+
+    void setColor1(cocos2d::ccColor3B color);
+
+    void setColor2(cocos2d::ccColor3B color);
+
+    static void trajectoryOff();
+
     static cocos2d::CCDrawNode* trajectoryNode();
 
     static void updateTrajectory(PlayLayer* pl);
@@ -37,9 +53,11 @@ public:
 
     static std::vector<cocos2d::CCPoint> getVertices(PlayerObject* player, cocos2d::CCRect rect, float rotation);
 
-    static cocos2d::ccColor4F getMergedColor(cocos2d::ccColor4F color1, cocos2d::ccColor4F color2);
-
     static void handlePortal(PlayerObject* player, int id);
+
+    static cocos2d::ccColor3B ccc3BFromccc4F(cocos2d::ccColor4F color) {
+        return ccc3((int)(color.r * 255), (int)(color.g * 255), (int)(color.b * 255));
+    }
 
     PlayerObject* fakePlayer1 = nullptr;
     PlayerObject* fakePlayer2 = nullptr;

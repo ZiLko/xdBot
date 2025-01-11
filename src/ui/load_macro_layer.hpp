@@ -73,7 +73,7 @@ public:
 	static void open(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves = false);
 
 	void openFolder(CCObject*) {
-		file::openFolder(Mod::get()->getSaveDir() / (isAutosaves ? "autosaves" : "macros"));
+		file::openFolder(Mod::get()->getSettingValue<std::filesystem::path>(isAutosaves ? "autosaves_folder" : "macros_folder"));
 	}
 
 	void textChanged(CCTextInputNode* p) override;
@@ -91,6 +91,4 @@ public:
 	void onImportMacro(CCObject*);
 
 	void updateSort(CCObject*);
-
-	void onMergeToggle(CCObject* obj);
 };

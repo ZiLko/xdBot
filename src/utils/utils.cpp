@@ -168,6 +168,20 @@ std::string Utils::getTexture() {
     return texture;
 }
 
+std::string Utils::getSimplifiedString(std::string str) {
+    if (str.find(".") == std::string::npos) return str;
+
+    while(str.back() == '0') {
+        str.pop_back();
+        if (str.empty()) break;
+    }
+
+    if (!str.empty())
+        if (str.back() == '.') str.pop_back();
+
+    return str;
+}
+
 void Utils::setBackgroundColor(cocos2d::extension::CCScale9Sprite* bg) {
     cocos2d::ccColor3B color = Mod::get()->getSettingValue<cocos2d::ccColor3B>("background_color");
 

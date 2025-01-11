@@ -267,6 +267,19 @@ bool ClickbotLayer::setup() {
 	lbl->setScale(0.3f);
 	menu->addChild(lbl);
 
+	toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+	toggle->setScale(0.55f);
+	toggle->setPosition(ccp(73, -70));
+	toggle->toggle(Mod::get()->getSavedValue<bool>("clickbot_holding_only"));
+	toggle->setID("clickbot_holding_only");
+	menu->addChild(toggle);
+
+	lbl = CCLabelBMFont::create("Hold Only", "bigFont.fnt");
+	lbl->setPosition(ccp(88, -70));
+	lbl->setAnchorPoint({ 0, 0.5 });
+	lbl->setScale(0.3f);
+	menu->addChild(lbl);
+
 	updateLabels();
 
 	return true;
@@ -385,7 +398,7 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 
 	file::pick(file::PickMode::OpenFile, { Mod::get()->getResourcesDir(), { textFilter } }).listen([this](Result<std::filesystem::path>* res) {
 		if (res->isOk()) {
-			std::filesystem::path path = res->unwrap();
+			std::filesystem::path path = res->unwrapOrDefault();
 
 			this->filenameLabel->setString(path.filename().string().c_str());
 

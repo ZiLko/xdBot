@@ -53,17 +53,17 @@ private:
         btn->setPositionY(-56);
         menu->addChild(btn);
 
-        // CCSprite* spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-        // CCSprite* spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
-        // jsonToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
-        // jsonToggle->setPosition({ -124, -78 });
-        // jsonToggle->setScale(0.575);
-        // menu->addChild(jsonToggle);
+        CCSprite* spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
+        CCSprite* spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
+        jsonToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
+        jsonToggle->setPosition({ -124, -78 });
+        jsonToggle->setScale(0.575);
+        menu->addChild(jsonToggle);
 
-        // lbl = CCLabelBMFont::create("JSON", "bigFont.fnt");
-        // lbl->setPosition({ -97, -77.5 });
-        // lbl->setScale(0.375);
-        // menu->addChild(lbl);
+        lbl = CCLabelBMFont::create("JSON", "bigFont.fnt");
+        lbl->setPosition({ -97, -77.5 });
+        lbl->setScale(0.375);
+        menu->addChild(lbl);
 
         return true;
     }
@@ -76,11 +76,10 @@ public:
         if (Global::get().macro.inputs.empty())
             return FLAlertLayer::create("Save Macro", "You can't save an <cl>empty</c> macro.", "Ok")->show();
 
-        std::filesystem::path path = Mod::get()->getSaveDir() / "macros";
+        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder");
 
         if (!std::filesystem::exists(path)) {
-            if (!std::filesystem::create_directory(path))
-                return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 10", "Ok")->show();
+            return FLAlertLayer::create("Error", ("There was an error getting the folder \"" + path.string() + "\". ID: 10").c_str(), "Ok")->show();
         }
 
         SaveMacroLayer* layerReal = create();
@@ -93,11 +92,11 @@ public:
         if (macroName == "")
             return FLAlertLayer::create("Save Macro", "Give a <cl>name</c> to the macro.", "Ok")->show();
 
-        std::filesystem::path path = Mod::get()->getSaveDir() / "macros" / macroName;
+        std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder") / macroName;
         std::string author = authorInput->getString();
         std::string desc = descInput->getString();
 
-        int result = Macro::save(author, desc, path.string(), true); // Previously jsonToggle->isToggled()
+        int result = Macro::save(author, desc, path.string(), jsonToggle->isToggled());
 
         if (result != 0)
             return FLAlertLayer::create("Error", "There was an error saving the macro. ID: " + std::to_string(result), "Ok")->show();

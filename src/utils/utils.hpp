@@ -13,12 +13,14 @@ public:
 
     static std::string getTexture();
 
+    static std::string getSimplifiedString(std::string str);
+
     static void setBackgroundColor(cocos2d::extension::CCScale9Sprite* bg);
 
     static std::vector<std::string> splitByChar(std::string str, char splitChar);
 
     static int copyFile(const std::string& sourcePath, const std::string& destinationPath);
-
+    
     static std::string narrow(const wchar_t* str);
     static inline auto narrow(const std::wstring& str) {
         return narrow(str.c_str());

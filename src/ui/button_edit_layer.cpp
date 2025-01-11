@@ -224,6 +224,19 @@ bool ButtonEditLayer::setup() {
     btn->setPosition({ -40, 30 });
     menu->addChild(btn);
 
+    spr = ButtonSprite::create("Restore");
+    spr->setScale(0.55f);
+
+    btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(ButtonEditLayer::onRestore));
+    btn->setPosition({ 242, -144 });
+    menu->addChild(btn);
+
+    ButtonSprite* spr1 = btn->getChildByType<ButtonSprite>(0);
+    CCScale9Sprite* spr2 = spr1->getChildByType<CCScale9Sprite>(0);
+    CCLabelBMFont* lbl = spr1->getChildByType<CCLabelBMFont>(0);
+    spr2->setOpacity(130);
+    lbl->setOpacity(130);
+
     addSprites();
 
     for (size_t i = 0; i < spriteButtons.size(); i++) {
@@ -240,7 +253,6 @@ bool ButtonEditLayer::setup() {
     }
 
     addSliders();
-    updateScale(nullptr);
     updateScale(nullptr);
     updateSelected("button_advance_frame");
 
@@ -317,4 +329,42 @@ void ButtonEditLayer::addSprites() {
 
     m_mainLayer->addChild(spr);
     spriteButtons.push_back(spr);
+}
+
+void ButtonEditLayer::onRestore(CCObject*) {
+    for (int i = 0; i < spriteButtons.size(); i++) {
+        spriteButtons[i]->removeFromParentAndCleanup(true);
+    }
+
+    spriteButtons.clear();
+
+    cocos2d::CCSize winSize = CCDirector::sharedDirector()->getWinSize();
+    auto& g = Global::get();
+
+    g.mod->setSavedValue("button_off_pos_x", 62.f);
+    g.mod->setSavedValue("button_off_pos_y", winSize.height - 35.f);
+    g.mod->setSavedValue("button_off_scale", 1.f);
+    g.mod->setSavedValue("button_off_opacity", 1.f);
+
+    g.mod->setSavedValue("button_advance_frame_pos_x", 100.f);
+    g.mod->setSavedValue("button_advance_frame_pos_y", winSize.height - 50.f);
+    g.mod->setSavedValue("button_advance_frame_scale", 0.9f);
+    g.mod->setSavedValue("button_advance_frame_opacity", 1.f);
+
+    g.mod->setSavedValue("button_speedhack_pos_x", winSize.width - 62.f);
+    g.mod->setSavedValue("button_speedhack_pos_y", winSize.height - 38.f);
+    g.mod->setSavedValue("button_speedhack_scale", 1.f);
+    g.mod->setSavedValue("button_speedhack_opacity", 1.f);
+
+    addSprites();
+
+    if (scaleSlider)
+        scaleSlider->setValue(0.9f);
+    if (opacitySlider)
+        opacitySlider->setValue(1.f);
+    
+    updateScale(nullptr);
+    updateOpacity(nullptr);
+
+    updateSelected("button_advance_frame");
 }

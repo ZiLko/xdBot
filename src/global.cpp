@@ -1,15 +1,22 @@
 #include "ui/record_layer.hpp"
 #include "ui/game_ui.hpp"
 
-#include "ui/button_setting.hpp"
-
-// #include <Geode/loader/SettingNode.hpp>
+#include <Geode/modify/CCTextInputNode.hpp>
 
 #ifdef GEODE_IS_WINDOWS
-
 #include <geode.custom-keybinds/include/Keybinds.hpp>
-
 #endif
+
+#include <random>
+
+class $modify(CCTextInputNode) {
+
+    bool ccTouchBegan(cocos2d::CCTouch * v1, cocos2d::CCEvent * v2) {
+        if (this->getID() == "disabled-input"_spr) return false;
+
+        return CCTextInputNode::ccTouchBegan(v1, v2);
+    }
+};
 
 struct IncompatibleSetting {
   std::string ID;
@@ -39,9 +46,9 @@ bool Global::hasIncompatibleMods() {
     auto json = mod->getSavedValue<matjson::Value>("values");
     for (const auto& obj : json.asArray().unwrap()) {
 
-      if (obj["name"].asString().unwrap() != "TPS Bypass") continue;
+      if (obj["name"].asString().unwrapOrDefault() != "TPS Bypass") continue;
 
-      if (obj["value"].asInt().unwrap() != 240)
+      if (obj["value"].asInt().unwrapOrDefault() != 240)
         settingsToDisable.push_back("<cr>TPS Bypass (Prism Menu)</c>");
 
       break;
@@ -145,16 +152,25 @@ bool Global::hasIncompatibleMods() {
   return ret;
 }
 
-int Global::getCurrentFrame() {
-  PlayLayer* pl = PlayLayer::get();
-  if (!pl) return 0;
-
+int Global::getTPS() {
   auto& g = Global::get();
+  return g.tpsEnabled ? g.tps : 240;
+}
 
-  int frame = static_cast<int>(pl->m_gameState.m_levelTime * 240.0);
+int Global::getCurrentFrame(bool editor) {
+  double levelTime;
+  PlayLayer* pl = PlayLayer::get();
 
-  frame -= g.frameOffset;
+  if (!pl) {
+    if (!editor) return 0;
 
+    levelTime = GJBaseGameLayer::get()->m_gameState.m_levelTime;
+  }
+
+  levelTime = pl->m_gameState.m_levelTime;
+  int frame = static_cast<int>(levelTime * getTPS());
+
+  frame -= Global::get().frameOffset;
   if (frame < 0) return 0;
 
   return frame;
@@ -185,13 +201,29 @@ void Global::updateSeed(bool isRestart) {
   auto& g = Global::get();
 
   if (g.seedEnabled) {
+    PlayLayer* pl = PlayLayer::get();
+    if (!pl) return;
+
     unsigned long long ull = std::stoull(g.mod->getSavedValue<std::string>("macro_seed"), nullptr, 0);
     uintptr_t seed = static_cast<uintptr_t>(ull);
+    int finalSeed;
+
+    if (!pl->m_player1->m_isDead) {
+      std::mt19937 generator(seed + pl->m_gameState.m_currentProgress);
+      std::uniform_int_distribution<int> distribution(100000, 999999999);
+      int randomSeed = distribution(generator);
+    }
+    else {
+      std::random_device rd;
+      std::mt19937 generator(rd());
+      std::uniform_int_distribution<int> distribution(1000, 9999);
+      finalSeed = distribution(generator);
+    }
 
 #ifdef GEODE_IS_WINDOWS
-    *(uintptr_t*)((char*)geode::base::get() + seedAddr) = seed;
+    *(uintptr_t*)((char*)geode::base::get() + seedAddr) = finalSeed;
 #else
-    GameToolbox::fast_srand(seed);
+    GameToolbox::fast_srand(finalSeed);
 #endif
 
     g.safeMode = true;
@@ -303,59 +335,59 @@ PauseLayer* Global::getPauseLayer() {
   return nullptr;
 }
 
-// SettingNode* ButtonSettingValue::createNode(float width) {
-//   return ButtonSettingNode::create(this, width);
-// }
-
-// $on_mod(Loaded) {
-//   auto& g = Global::get();
-//   g.mod = Mod::get();
-
-//   g.mod->addCustomSetting<ButtonSettingValue>("button", "none");
-// }
-
 $execute{
-    auto & g = Global::get();
+  auto & g = Global::get();
 
-  if (!g.mod->setSavedValue("defaults_set9", true))
-    g.mod->setSavedValue("render_file_extension", std::string(".mp4"));
+  if (!g.mod->setSavedValue("defaults_set_10", true)) {
+    g.mod->setSettingValue("restore_page", true);
 
-
-  if (!g.mod->setSavedValue("defaults_set8", true)) {
-    g.mod->setSavedValue("render_sfx_volume", 1.f);
-    g.mod->setSavedValue("render_music_volume", 1.f);
+    g.mod->setSavedValue("autosave_interval_enabled", false);
+    g.mod->setSavedValue("autosave_interval", std::to_string(10));
+    g.mod->setSavedValue("autosave_checkpoint_enabled", true);
+    g.mod->setSavedValue("autosave_levelend_enabled", true);
+    
     g.mod->setSavedValue("render_fade_in_video", std::to_string(2));
     g.mod->setSavedValue("render_fade_out_video", std::to_string(2));
-    g.mod->setSavedValue("respawn_time", 0.5f);
-  }
 
-  if (!g.mod->setSavedValue("defaults_set5", true)) {
-    g.mod->setSettingValue<std::filesystem::path>("render_folder", g.mod->getSaveDir() / "renders");
-    g.mod->setSavedValue("macro_hide_playing_label", true);
-  }
+    g.mod->setSavedValue("macro_auto_stop_playing", false);
+    g.mod->setSavedValue("macro_tps", 240.f);
+    g.mod->setSavedValue("macro_tps_enabled", false);
 
-  if (!g.mod->setSavedValue("defaults_set4", true)) {
-    g.mod->setSavedValue("macro_noclip_p1", true);
-    g.mod->setSavedValue("macro_noclip_p2", true);
-  }
+    g.mod->setSavedValue("autoclicker_hold_for", 5);
+    g.mod->setSavedValue("autoclicker_release_for", 5);
+    g.mod->setSavedValue("autoclicker_hold_for2", 5);
+    g.mod->setSavedValue("autoclicker_release_for2", 5);
+    g.mod->setSavedValue("autoclicker_p1", true);
+    g.mod->setSavedValue("autoclicker_p2", true);
 
-  if (!g.mod->setSavedValue("defaults_set6", true))
-    g.mod->setSavedValue("render_args", std::string("-pix_fmt yuv420p"));
+    g.mod->setSavedValue("trajectory_color1", ccc3(74, 226, 85));
+    g.mod->setSavedValue("trajectory_color2", ccc3(130, 8, 8));
+    g.mod->setSavedValue("trajectory_length", std::to_string(240));
 
-  if (!g.mod->setSavedValue("defaults_set7", true)) {
-    g.mod->setSavedValue("render_seconds_after", std::to_string(2));
-    g.mod->setSavedValue("render_record_audio", true);
+    g.mod->setSettingValue<std::filesystem::path>("macros_folder", g.mod->getSaveDir() / "macros");
+    g.mod->setSettingValue<std::filesystem::path>("autosaves_folder", g.mod->getSaveDir() / "autosaves");
   }
 
   if (!g.mod->setSavedValue("defaults_set3", true)) {
+    g.mod->setSettingValue<std::filesystem::path>("render_folder", g.mod->getSaveDir() / "renders");
+    g.mod->setSavedValue("render_file_extension", std::string(".mp4"));
+    g.mod->setSavedValue("render_sfx_volume", 1.f);
+    g.mod->setSavedValue("render_music_volume", 1.f);
+    g.mod->setSavedValue("respawn_time", 0.5f);
+    g.mod->setSavedValue("render_seconds_after", std::to_string(2));
+    g.mod->setSavedValue("render_record_audio", true);
+    g.mod->setSavedValue("render_args", std::string("-pix_fmt yuv420p"));
+    g.mod->setSavedValue("macro_noclip_p1", true);
+    g.mod->setSavedValue("macro_noclip_p2", true);
+
     g.mod->setSavedValue("render_width2", std::to_string(1920));
     g.mod->setSavedValue("render_height", std::to_string(1080));
     g.mod->setSavedValue("render_bitrate", std::to_string(12));
     g.mod->setSavedValue("render_fps", std::to_string(60));
     g.mod->setSavedValue("render_video_args", std::string("colorspace=all=bt709:iall=bt470bg:fast=1"));
 
+    g.mod->setSavedValue("render_codec", std::string("libx264"));
     #ifdef GEODE_IS_WINDOWS
-    g.mod->setSavedValue("render_codec", std::string("h264"));
     g.mod->setSettingValue("ffmpeg_path", geode::dirs::getGameDir() / "ffmpeg.exe");
     #endif
 
@@ -369,8 +401,8 @@ $execute{
     g.mod->setSavedValue("macro_ignore_inputs", true);
     g.mod->setSavedValue("macro_auto_safe_mode", true);
     g.mod->setSavedValue("macro_speedhack_audio", true);
-    g.mod->setSavedValue("macro_auto_stop_playing", true);
-    g.mod->setSavedValue("macro_show_frame_label", true);
+    g.mod->setSavedValue("macro_show_frame_label", false);
+    g.mod->setSavedValue("macro_hide_playing_label", true);
 
     g.mod->setSavedValue("menu_show_button", true);
     g.mod->setSavedValue("menu_pause_on_open", false);
@@ -390,13 +422,35 @@ $execute{
   g.speedhackAudio = g.mod->getSavedValue<bool>("macro_speedhack_audio");
   g.trajectoryBothSides = g.mod->getSavedValue<bool>("macro_trajectory_both_sides");
   g.p2mirror = g.mod->getSavedValue<bool>("p2_input_mirror");
-  
-  g.frameFixes = g.mod->getSettingValue<bool>("frame_fixes");
+  g.tpsEnabled = g.mod->getSavedValue<bool>("macro_tps_enabled");
+  g.tps = g.mod->getSavedValue<double>("macro_tps");
+  g.autoclicker = g.mod->getSavedValue<bool>("autoclicker_enabled");
+  g.autoclickerP1 = g.mod->getSavedValue<bool>("autoclicker_p1");
+  g.autoclickerP2 = g.mod->getSavedValue<bool>("autoclicker_p2");
+  g.disableShaders = g.mod->getSavedValue<bool>("disableShaders");
+  g.autosaveIntervalEnabled = g.mod->getSavedValue<bool>("autosave_interval_enabled");
+  g.autosaveEnabled = g.mod->getSavedValue<bool>("macro_auto_save");
 
+  g.holdFor = g.mod->getSavedValue<int64_t>("autoclicker_hold_for");
+  g.releaseFor = g.mod->getSavedValue<int64_t>("autoclicker_release_for");
+  g.holdFor2 = g.mod->getSavedValue<int64_t>("autoclicker_hold_for2");
+  g.releaseFor2 = g.mod->getSavedValue<int64_t>("autoclicker_release_for2");
+  g.currentPage = g.mod->getSavedValue<int64_t>("current_page");
+
+  g.autosaveInterval = (geode::utils::numFromString<float>(g.mod->getSavedValue<std::string>("autosave_interval")).unwrapOr(0.f) * 60);
+  
   g.speedhackEnabled = false;
   g.mod->setSavedValue("macro_speedhack_enabled", false);
 
   g.frameOffset = g.mod->getSettingValue<int64_t>("frame_offset");
+  g.frameFixesLimit = g.mod->getSettingValue<int64_t>("frame_fixes_limit");
+  g.lockDelta = g.mod->getSettingValue<bool>("lock_delta");
+  g.stopPlaying = g.mod->getSettingValue<bool>("auto_stop_playing");
+
+  if (g.mod->getSettingValue<std::string>("macro_accuracy") == "Frame Fixes")
+    g.frameFixes = true;
+  else if (g.mod->getSettingValue<std::string>("macro_accuracy") == "Input Fixes")
+    g.inputFixes = true;
 
   g.macro.author = "N/A";
   g.macro.description = "N/A";

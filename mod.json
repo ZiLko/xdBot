@@ -1,10 +1,10 @@
 {
-	"geode": "4.1.1",
+	"geode": "4.0.1",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074"
 	},
-	"version": "v2.2.6",
+	"version": "2.3.0",
 	"id": "zilko.xdbot",
 	"name": "xdBot",
 	"developer": "Zilko",
@@ -23,11 +23,15 @@
         }
 	],
 	"settings": {
-		"frame_fixes": {
-			"name": "Frame Fixes",
-			"description": "Records the players position every frame",
-			"type": "bool",
-			"default": true
+		"button-setting": {
+			"type": "custom:button",
+			"name": "Open Menu"
+		},
+		"macro_accuracy": {
+			"type": "string",
+			"name": "Accuracy",
+			"default": "Frame Fixes",
+			"one-of": ["Vanilla", "Input Fixes", "Frame Fixes"]
 		},
 		"frame_offset": {
 			"name": "Frame Offset",
@@ -50,6 +54,16 @@
 			"default": "",
 			"platforms": ["win"]
 		},
+		"macros_folder": {
+			"name": "Macro Save Location",
+			"type": "folder",
+			"default": "{gd_dir}/macros"
+		},
+		"autosaves_folder": {
+			"name": "Auto Saves Location",
+			"type": "folder",
+			"default": "{gd_dir}/autosaves"
+		},
 		"render_folder": {
 			"name": "Render Save Location",
 			"type": "folder",
@@ -59,24 +73,6 @@
             "name": "Menu background color",
             "type": "color",
             "default": "#334499"
-        },
-		"show_trajectory_color1": {
-            "name": "Trajectory Primary Color",
-            "type": "color",
-            "default": "#820808"
-        },
-		"show_trajectory_color2": {
-            "name": "Trajectory Secondary Color",
-            "type": "color",
-            "default": "#4ae255"
-        },
-		"show_trajectory_length": {
-            "name": "Trajectory Length",
-			"description": "How long will the Show Trajectory be.",
-            "type": "int",
-            "default": 240,
-			"min": 60,
-			"max": 480
         },
 		"editor_keybinds": {
 			"name": "Keybinds on editor",
@@ -99,15 +95,40 @@
 			"default": false,
 			"platforms": ["win"]
 		},
+		"level_settings_button": {
+			"name": "Show Button At Settings",
+			"description": "Shows the xdBot button in the level settings layer.",
+			"type": "bool",
+			"default": false
+		},
 		"restore_page": {
 			"name": "Restore Settings Page",
 			"description": "Saves the page you were in when you closed the menu.",
 			"type": "bool",
 			"default": true
 		},
-		"level_settings_button": {
-			"name": "Show Button At Settings",
-			"description": "Shows the xdBot button in the level settings layer.",
+		"disable_speedhack": {
+			"name": "Auto Disable Speedhack",
+			"description": "Disables Speedhack when exiting a level.",
+			"type": "bool",
+			"default": true
+		},
+		"frame_fixes_limit": {
+			"name": "Frame Fixes Limit in FPS",
+			"description": "Limits how many frame fixes per second there will be.",
+			"type": "int",
+			"default": 240,
+			"min": 1
+		},
+		"auto_stop_playing": {
+			"name": "Auto Stop Playing",
+			"description": "Stops playing the macro when it ends.",
+			"type": "bool",
+			"default": true
+		},
+		"lock_delta": {
+			"name": "Lock Delta",
+			"description": "Locks the delta.",
 			"type": "bool",
 			"default": false
 		}

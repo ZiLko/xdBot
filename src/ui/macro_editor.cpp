@@ -522,7 +522,7 @@ void MacroEditLayer::loadPage(int page) {
 InputText MacroEditLayer::getInputText(input input) {
     InputText ret = {
         std::to_string(input.frame),
-        btnNames.at(input.button),
+        btnNames.contains(input.button) ? btnNames.at(input.button) : std::to_string(input.button),
         input.player2 ? "Two" : "One",
         input.down ? "Hold" : "Release"
     };
@@ -969,66 +969,70 @@ void MacroEditLayer::onMerge(CCObject*) {
     LoadMacroLayer::open(layer, this, false);
 }
 
-void MacroEditLayer::mergeMacro(std::vector<input> mergeInputs, const bool players[2], bool overwrite) {
+void MacroEditLayer::mergeMacro(std::vector<input> mergeInputs, bool players[2], bool overwrite) {
     if (mergeInputs.empty()) return;
-    
+
+    std::vector<input> actualInputs;
+    int endFrame[2] = {0, 0};
+
+    for (input inp : mergeInputs) {
+        if (players[static_cast<int>(inp.player2)])
+            actualInputs.push_back(inp);
+    }
+
     for (int i = 0; i < 2; i++) {
-        int startFrame = 0;
-        int endFrame = 0;
-        bool player2 = players[1] && i == 1;
-
-        std::vector<input> actualInputs;
-        for (input inp : mergeInputs) {
-            if (inp.player2 == player2)
-                actualInputs.push_back(inp);
-        }
-
-        for (input inp : mergeInputs) {
-            if (inp.player2 != player2) continue;
-            startFrame = inp.frame;
-            break;
-        }
-
         for (int j = mergeInputs.size() - 1; j >= 0; j--) {
+            if (!players[i]) break;
             input inp = mergeInputs[j];
-            if (inp.player2 != player2) continue;
-            endFrame = inp.frame;
+            if (static_cast<int>(inp.player2) != i) continue;
+            endFrame[i] = inp.frame;
             break;
         }
+    }
 
-        if (overwrite) {
-            auto condition = [startFrame, endFrame, player2](const input& element) {
-                return element.frame >= startFrame && element.frame <= endFrame && element.player2 == player2;
-            };
-    
-            auto newEnd = std::remove_if(inputs.begin(), inputs.end(), condition);
-    
-            inputs.erase(newEnd, inputs.end());
+    if (overwrite) {
+        int startFrame[2] = {0, 0};
+
+        for (int i = 0; i < 2; i++) {
+            for (input inp : mergeInputs) {
+                if (!players[i]) break;
+                if (static_cast<int>(inp.player2) != i) continue;
+                startFrame[i] = inp.frame;
+                break;
+            }
         }
 
-        std::vector<input> mergedVector;
-        mergedVector.resize(inputs.size() + actualInputs.size());
-        std::merge(actualInputs.begin(), actualInputs.end(), inputs.begin(), inputs.end(), mergedVector.begin());
+        auto condition = [startFrame, endFrame, players](const input& element) {
+            int p = static_cast<int>(element.player2);
+            return element.frame >= startFrame[p] && element.frame <= endFrame[p] && players[p];
+        };
+    
+        auto newEnd = std::remove_if(inputs.begin(), inputs.end(), condition);
+    
+        inputs.erase(newEnd, inputs.end());
+    }
 
-        inputs = mergedVector;
+    std::vector<input> mergedVector;
+    mergedVector.resize(inputs.size() + actualInputs.size());
+    std::merge(actualInputs.begin(), actualInputs.end(), inputs.begin(), inputs.end(), mergedVector.begin());
 
-        for (int j = inputs.size() - 1; j >= 0; j--) {
-            if (inputs[j].frame >= endFrame) continue;
+    inputs = mergedVector;
 
-            int co = j / 6;
-            int newPage = co + 1;
-            int newSelected = j - co * 6;
+    for (int j = inputs.size() - 1; j >= 0; j--) {
+        if (inputs[j].frame >= endFrame[0]) continue;
 
-            loadPage(newPage);
+        int co = j / 6;
+        int newPage = co + 1;
+        int newSelected = j - co * 6;
 
-            selectedInput = -1;
-            hoveredInput = -2;
-            selectInput(newSelected + (newSelected < 5 ? 1 : 0));
+        loadPage(newPage);
 
-            break;
-        }
+        selectedInput = -1;
+        hoveredInput = -2;
+        selectInput(newSelected + (newSelected < 5 ? 1 : 0));
+
+        break;
+    }
         
-        updateSaved();
-    }    
-
+    updateSaved();
 }

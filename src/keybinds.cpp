@@ -6,6 +6,7 @@
 #include "ui/macro_editor.hpp"
 #include "ui/render_settings_layer.hpp"
 #include "hacks/layout_mode.hpp"
+#include "hacks/show_trajectory.hpp"
 
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
 #include <Geode/modify/CCTouchDispatcher.hpp>
@@ -36,10 +37,10 @@ class $modify(CCKeyboardDispatcher) {
       }
     }
 
-    if (key == enumKeyCodes::KEY_F && !isKeyRepeat && isKeyDown && PlayLayer::get()) {
-      log::debug("POS DEBUG {}", PlayLayer::get()->m_player1->getPosition());
-      log::debug("POS2 DEBUG {}", PlayLayer::get()->m_player2->getPosition());
-    }
+    // if (key == enumKeyCodes::KEY_F && !isKeyRepeat && isKeyDown && PlayLayer::get()) {
+    //   log::debug("POS DEBUG {}", PlayLayer::get()->m_player1->getPosition());
+    //   log::debug("POS2 DEBUG {}", PlayLayer::get()->m_player2->getPosition());
+    // }
 
 
     // if (key == enumKeyCodes::KEY_J && !isKeyRepeat && isKeyDown && PlayLayer::get()) {
@@ -107,6 +108,7 @@ void onKeybind(bool down, ActionID id) {
     }
 
     g.showTrajectory = g.mod->getSavedValue<bool>("macro_show_trajectory");
+    if (!g.showTrajectory) ShowTrajectory::trajectoryOff();
   }
 
   if (id == "toggle_render"_spr && PlayLayer::get()) {

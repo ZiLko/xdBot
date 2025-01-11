@@ -5,45 +5,79 @@
 #include <Geode/modify/PlayLayer.hpp>
 
 void Macro::recordAction(int frame, int button, bool player2, bool hold) {
+    PlayLayer* pl = PlayLayer::get();
+    if (!pl) return;
+
     auto& g = Global::get();
 
     if (g.macro.inputs.empty())
-        Macro::updateInfo(PlayLayer::get());
+        Macro::updateInfo(pl);
+
+    if (g.tpsEnabled) g.macro.framerate = g.tps;
+
+    if (Macro::flipControls())
+      player2 = !player2;
 
     g.macro.inputs.push_back(input(frame, button, player2, hold));
+}
+
+void Macro::recordFrameFix(int frame, PlayerObject* p1, PlayerObject* p2) {
+    float p1Rotation = p1->getRotation();
+    float p2Rotation = p2->getRotation();
+
+    while (p1Rotation < 0 || p1Rotation > 360)
+      p1Rotation += p1Rotation < 0 ? 360.f : -360.f;
+    
+    while (p2Rotation < 0 || p2Rotation > 360)
+      p2Rotation += p2Rotation < 0 ? 360.f : -360.f;
+
+    Global::get().macro.frameFixes.push_back({
+      frame,
+      { p1->getPosition(), p1Rotation },
+      { p2->getPosition(), p2Rotation }
+    });
+}
+
+bool Macro::flipControls() {
+    PlayLayer* pl = PlayLayer::get();
+    if (!pl) return GameManager::get()->getGameVariable("0010");
+
+    return pl->m_levelSettings->m_platformerMode ? false : GameManager::get()->getGameVariable("0010");
+}
+
+void Macro::autoSave(GJGameLevel* level, int number) {
+    if (!level) level = PlayLayer::get() ? PlayLayer::get()->m_level : nullptr;
+    if (!level) return;
+
+    std::string levelname = level->m_levelName;
+    std::filesystem::path autoSavesPath = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
+    std::filesystem::path path = autoSavesPath / fmt::format("autosave_{}_{}", levelname, number);
+
+    std::string username = GJAccountManager::sharedState()->m_username;
+    int result = Macro::save(username, fmt::format("AutoSave {} in level {}", number, levelname), path.string());
+
+    if (result != 0)
+        log::debug("Failed to autosave macro. ID: {}. Path: {}", result, path);
 }
 
 void Macro::tryAutosave(GJGameLevel* level, CheckpointObject* cp) {
     auto& g = Global::get();
 
     if (g.state != state::recording) return;
-    if (!Mod::get()->getSavedValue<bool>("macro_auto_save")) return;
+    if (!g.autosaveEnabled) return;
     if (!g.checkpoints.contains(cp)) return;
-    if (g.checkpoints[cp].frame < g.lastAutoSave) return;
+    if (g.checkpoints[cp].frame < g.lastAutoSaveFrame) return;
 
-    std::filesystem::path autoSavesPath = g.mod->getSaveDir() / "autosaves";
+    std::filesystem::path autoSavesPath = g.mod->getSettingValue<std::filesystem::path>("autosaves_folder");
 
-    if (!std::filesystem::exists(autoSavesPath)) {
-
-        if (!std::filesystem::create_directory(autoSavesPath))
-            return log::debug("Failed to create auto saves path.");
-
-    }
+    if (!std::filesystem::exists(autoSavesPath))
+        return log::debug("Failed to access auto saves path.");
 
     std::string levelname = level->m_levelName;
     std::filesystem::path path = autoSavesPath / fmt::format("autosave_{}_{}", levelname, g.currentSession);
     std::filesystem::remove(path.string() + ".gdr"); // Remove previous save
 
-    GJAccountManager* accManager = GJAccountManager::sharedState();
-
-    if (!accManager)
-        return log::debug("Failed to autosave macro. ID: 2");
-
-    std::string username = accManager->m_username;
-    int result = Macro::save(username, "", path.string());
-
-    if (result != 0)
-        log::debug("Failed to autosave macro. ID: {}. Path: {}.gdr", result, path);
+    autoSave(level, g.currentSession);
 
 }
 
@@ -52,13 +86,7 @@ void Macro::updateInfo(PlayLayer* pl) {
 
     auto& g = Global::get();
 
-    if (g.macro.canChangeFPS) {
-        g.macro.canChangeFPS = false;
-        g.macro.framerate = 240.f;
-    }
-
     GJGameLevel* level = pl->m_level;
-
     if (level->m_lowDetailModeToggled != g.macro.ldm)
         g.macro.ldm = level->m_lowDetailModeToggled;
 
@@ -81,10 +109,40 @@ void Macro::updateInfo(PlayLayer* pl) {
     g.macro.botInfo.version = xdBotVersion;
 }
 
+void Macro::updateTPS() {
+    auto& g = Global::get();
+
+    if (g.state != state::none && !g.macro.inputs.empty()) {
+        g.previousTpsEnabled = g.tpsEnabled;
+
+        g.mod->setSavedValue("macro_tps", g.macro.framerate);
+        g.mod->setSavedValue("macro_tps_enabled", true);
+
+        if (g.macro.framerate != 240.f) {
+            g.tps = g.macro.framerate;
+            g.tpsEnabled = true;
+            g.previousTps = g.tps;
+        } else
+            g.tpsEnabled = false;
+
+        // g.tpsEnabled = g.tps != 240.f;
+        // if (g.tpsEnabled) g.tps = g.macro.framerate;
+    }
+    else if (g.previousTps != 0.f) {
+        g.tpsEnabled = g.previousTpsEnabled;
+        g.tps = g.previousTps;
+        g.previousTps = 0.f;
+        g.mod->setSavedValue("macro_tps", g.tps);
+        g.mod->setSavedValue("macro_tps_enabled", g.tpsEnabled);
+    }
+
+    if (g.layer) static_cast<RecordLayer*>(g.layer)->updateTPS();
+}
+
 int Macro::save(std::string author, std::string desc, std::string path, bool json) {
     auto& g = Global::get();
 
-    if (g.macro.inputs.empty()) return 30;
+    if (g.macro.inputs.empty()) return 31;
 
     std::string extension = json ? ".gdr.json" : ".gdr";
 
@@ -255,12 +313,11 @@ void Macro::togglePlaying() {
     if (g.layer) {
         static_cast<RecordLayer*>(g.layer)->playing->toggle(Global::get().state != state::playing);
         static_cast<RecordLayer*>(g.layer)->togglePlaying(nullptr);
-        return;
+    } else {
+        RecordLayer* layer = RecordLayer::create();
+        layer->togglePlaying(nullptr);
+        layer->onClose(nullptr);
     }
-
-    RecordLayer* layer = RecordLayer::create();
-    layer->togglePlaying(nullptr);
-    layer->onClose(nullptr);
 }
 
 void Macro::toggleRecording() {
@@ -269,14 +326,13 @@ void Macro::toggleRecording() {
     auto& g = Global::get();
     
     if (g.layer) {
-      static_cast<RecordLayer*>(g.layer)->recording->toggle(Global::get().state != state::recording);
-      static_cast<RecordLayer*>(g.layer)->toggleRecording(nullptr);
-      return;
+        static_cast<RecordLayer*>(g.layer)->recording->toggle(Global::get().state != state::recording);
+        static_cast<RecordLayer*>(g.layer)->toggleRecording(nullptr);
+    } else {
+        RecordLayer* layer = RecordLayer::create();
+        layer->toggleRecording(nullptr);
+        layer->onClose(nullptr);
     }
-
-    RecordLayer* layer = RecordLayer::create();
-    layer->toggleRecording(nullptr);
-    layer->onClose(nullptr);
 }
 
 bool Macro::shouldStep() {

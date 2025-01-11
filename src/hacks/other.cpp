@@ -9,6 +9,8 @@
 #include <Geode/modify/EffectGameObject.hpp>
 #include <Geode/modify/GameLevelOptionsLayer.hpp>
 
+const std::unordered_set<int> shaderIDs = {2904,2905,2907,2909,2910,2911,2912,2913,2914,2915,2916,2917,2919,2920,2921,2922,2923,2924};
+
 class $modify(CCScheduler) {
 
     void update(float dt) {
@@ -88,6 +90,25 @@ class $modify(PlayLayer) {
         CCObject* slopeFix = nullptr;
     };
 
+    void postUpdate(float dt) {
+        PlayLayer::postUpdate(dt);
+
+        auto& g = Global::get();
+
+        if (!g.autosaveEnabled) return;
+        if (!g.autosaveIntervalEnabled) return;
+
+        if (g.autosaveCheck < g.autosaveInterval) {
+            g.autosaveCheck += dt;
+            return;
+        }
+        g.autosaveCheck = 0.f;
+        auto now = std::chrono::steady_clock::now();
+        int currentTime = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count();
+
+        Macro::autoSave(m_level, currentTime);
+    }
+
     void destroyPlayer(PlayerObject * p0, GameObject * p1) {
         if (p0 != m_player1 && p0 != m_player2) return PlayLayer::destroyPlayer(p0, p1);
         
@@ -148,6 +169,9 @@ class $modify(EndLevelLayer) {
     void customSetup() {
         EndLevelLayer::customSetup();
         auto& g = Global::get();
+
+        if (g.mod->getSavedValue<bool>("autosave_levelend_enabled"))
+            Macro::autoSave(nullptr, g.currentSession);
 
         if (g.mod->getSettingValue<bool>("endscreen_button")) {
 			cocos2d::CCSize winSize = CCDirector::sharedDirector()->getWinSize();
@@ -226,14 +250,14 @@ class $modify(GJGameLevel) {
 class $modify(EffectGameObject) {
 
     void triggerObject(GJBaseGameLayer* p0, int p1, gd::vector<int> const* p2) {
-        if (!Mod::get()->getSavedValue<bool>("disable_shaders"))
+        if (!Global::get().disableShaders)
             return EffectGameObject::triggerObject(p0, p1, p2);
 
-        int id = m_objectID;
-        if (id == 30 || id == 1006 || id == 105 || id == 915 || id == 29 || id == 58 || id == 56 || id == 1007 || id == 899)
-            return;
-
-        EffectGameObject::triggerObject(p0, p1, p2);
+        if (!shaderIDs.contains(m_objectID) || !PlayLayer::get()) {
+            EffectGameObject::triggerObject(p0, p1, p2);
+        }
+        else
+            Global::get().safeMode = true;
 	}
 
 };

@@ -21,8 +21,6 @@ const int indexButton[6] = { 1, 2, 3, 1, 2, 3 };
 
 const std::map<int, int> buttonIndex[2] = { { {1, 0}, {2, 1}, {3, 2} }, { {1, 3}, {2, 4}, {3, 5} } };
 
-const int FPSValues[4] = { 60, 120, 180, 240 };
-
 const int sidesButtons[4] = { 1, 2, 4, 5 };
 
 const std::string buttonIDs[6] = {
@@ -58,7 +56,9 @@ public:
 
     static bool hasIncompatibleMods();
 
-    static int getCurrentFrame();
+    static int getTPS();
+
+    static int getCurrentFrame(bool editor = false);
 
     static void updateKeybinds();
 
@@ -90,8 +90,9 @@ public:
     std::unordered_set<int> playedFrames;
     std::vector<int> keybinds[6];
 
-    int lastAutoSave = 0;
-    std::string currentSession = "";
+    int lastAutoSaveFrame = 0;
+    std::chrono::time_point<std::chrono::steady_clock> lastAutoSaveMS = std::chrono::steady_clock::now();
+    int currentSession = 0;
 
     bool stepFrame = false;
     bool stepFrameDraw = false;
@@ -105,6 +106,7 @@ public:
     bool creatingTrajectory = false;
     bool firstAttempt = false;
 
+    bool disableShaders = false;
     bool safeMode = false;
     bool layoutMode = false;
     bool showTrajectory = false;
@@ -114,10 +116,28 @@ public:
     bool speedhackAudio = false;
     bool seedEnabled = false;
     bool clickbotEnabled = false;
+    bool clickbotOnlyPlaying = false;
+    bool clickbotOnlyHolding = false;
     bool frameLabel = false;
     bool trajectoryBothSides = false;
     bool p2mirror = false;
     bool lockDelta = false;
+    bool stopPlaying = false;
+    bool tpsEnabled = false;
+    float tps = 240.f;
+    bool previousTpsEnabled = false;
+    float previousTps = 0.f;
+    bool autoclicker = false;
+    bool autoclickerP1 = false;
+    bool autoclickerP2 = false;
+    int holdFor = 0;
+    int releaseFor = 0;
+    int holdFor2 = 0;
+    int releaseFor2 = 0;
+    bool autosaveIntervalEnabled = false;
+    int autosaveInterval = 600000;
+    float autosaveCheck = 2.f;
+    bool autosaveEnabled = false;
 
     bool ignoreStopDashing[2] = { false, false };
     bool addSideHoldingMembers[2] = { false, false };
@@ -135,7 +155,9 @@ public:
 
     size_t currentAction = 0;
     size_t currentFrameFix = 0;
-    bool frameFixes = true;
+    int frameFixesLimit = 240;
+    bool frameFixes = false;
+    bool inputFixes = false;
 
     int currentPage = 0;
     float currentPitch = 1.f;

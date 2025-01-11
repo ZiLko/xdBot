@@ -83,6 +83,7 @@ class $modify(PlayLayer) {
 
     auto& g = Global::get();
 
+  if (g.mod->getSavedValue<bool>("autosave_checkpoint_enabled"))
     Macro::tryAutosave(m_level, cp);
 
     if (g.state == state::playing) {

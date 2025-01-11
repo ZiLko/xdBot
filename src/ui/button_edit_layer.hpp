@@ -50,6 +50,8 @@ public:
     std::map<std::string, float> scales;
     std::map<std::string, float> opacities;
 
+    void onRestore(CCObject*);
+
     void onSave(CCObject*);
 
     void updateScale(CCObject*);

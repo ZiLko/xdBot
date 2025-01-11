@@ -31,7 +31,8 @@ class $modify(CCDirector) {
 
         if (!pl) return CCDirector::drawScene();
 
-        if (pl->m_isPaused || pl->m_player1->m_isDead || Global::getCurrentFrame() < 3) return CCDirector::drawScene();
+        if (pl->m_isPaused || pl->m_player1->m_isDead) return CCDirector::drawScene();
+        if (Global::getCurrentFrame() < 3) return CCDirector::drawScene();
 
         if (g.stepFrameDraw || g.stepFrameDrawMultiple != 0) {
             g.stepFrameDraw = false;
@@ -42,7 +43,7 @@ class $modify(CCDirector) {
             CCDirector::drawScene();
         }
         else
-            this->getScheduler()->update(1.f / 240.f);
+            this->getScheduler()->update(1.f / Global::getTPS());
 
     }
 };
@@ -63,7 +64,6 @@ class $modify(PlayLayer) {
 class $modify(GJBaseGameLayer) {
 
     void update(float dt) {
-
         if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
 
         if (this->m_player1->m_isDead) {
@@ -80,9 +80,7 @@ class $modify(GJBaseGameLayer) {
             if (Macro::shouldStep()) {
                 g.stepFrame = false;
 
-                GJBaseGameLayer::update(1.f / 240.f);
-
-                g.frameStepperMusicTime = FMODAudioEngine::sharedEngine()->getMusicTimeMS(0);
+                GJBaseGameLayer::update(1.f / Global::getTPS());
 
                 return;
             }
@@ -102,8 +100,6 @@ class $modify(CCParticleSystem) {
     virtual void update(float dt) {
         auto& g = Global::get();
         if (!PlayLayer::get()) return CCParticleSystem::update(dt);
-
-        int frame = Global::getCurrentFrame();
 
         if (!g.renderer.recording && g.frameStepper) {
             if (g.stepFrameParticle != 0) {

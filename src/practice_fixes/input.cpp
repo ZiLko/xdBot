@@ -15,8 +15,9 @@ void InputPracticeFixes::applyFixes(PlayLayer* pl, PlayerData p1Data, PlayerData
 		if ((g.heldButtons[it] && twoPlayers) || ((g.heldButtons[it] || g.heldButtons[it + (it >= 3 ? -3 : 3)]) && !twoPlayers)) {
 			if (it == 0 || it == 3)
 				g.delayedFrameInput[static_cast<int>(it == 3 && twoPlayers)] = frame + 2;
-			else
+			else {
 				g.macro.inputs.push_back(input(frame, indexButton[it], !(it > 2), true));
+			}
 
 		}
 	}
@@ -72,8 +73,9 @@ std::vector<int> InputPracticeFixes::fixInputs(std::vector<button> foundButtons,
 		notFoundButtons = { 0, 1, 2 };
 
 	for (auto& it : foundButtons) {
-		int btnIndex = twoPlayers ? (it.button - 1 + (3 * static_cast<int>(!it.player2))) : (it.button - 1);
-		bool player2 = twoPlayers ? !it.player2 : false;
+		bool player2 = twoPlayers ? (Macro::flipControls() ? it.player2 : !it.player2) : false;
+
+		int btnIndex = twoPlayers ? (it.button - 1 + (3 * static_cast<int>(player2))) : (it.button - 1);
 		bool jumpBtn = btnIndex == 0 || btnIndex == 3;
 
 		if (it.down && jumpBtn && (p1Data.m_isRobot || p2Data.m_isRobot)) {
@@ -113,21 +115,21 @@ std::vector<int> InputPracticeFixes::fixInputs(std::vector<button> foundButtons,
 		
 		if (!it.down && holdingButton) {
 			if (btnIndex != 0 && btnIndex != 3) {
-				g.macro.inputs.push_back(input(frame, it.button, !player2, true));
+				g.macro.inputs.push_back(input(frame, it.button, player2, true));
 			}
 			else
-				g.delayedFrameInput[static_cast<int>(btnIndex == 3)] = frame + 2;
+				g.delayedFrameInput[static_cast<int>(player2)] = frame + 2;
 		}
 		else if (it.down && holdingButton && (btnIndex == 0 || btnIndex == 3))
-			g.delayedFrameInput[static_cast<int>(btnIndex == 3)] = frame + 2;
+				g.delayedFrameInput[static_cast<int>(player2)] = frame + 2;
 
 		if (it.down && !holdingButton) {
 			if (btnIndex == 0 || btnIndex == 3)
-				g.delayedFrameReleaseMain[player2] = frame + 2;
+				g.delayedFrameReleaseMain[static_cast<int>(player2)] = frame + 2;
 			else {
 				bool rightKey = static_cast<bool>(btnIndex > 3 ? btnIndex - 4 : btnIndex - 1);
 				if (g.heldButtons[btnIndex + (rightKey ? -1 : 1)]) {
-					g.macro.inputs.push_back(input(frame, it.button, !player2, false));
+					g.macro.inputs.push_back(input(frame, it.button, player2, false));
 				}
 				else {
 					g.delayedFrameRelease[static_cast<int>(player2)][static_cast<int>(rightKey)] = frame + 2;

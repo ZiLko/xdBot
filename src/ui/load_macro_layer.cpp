@@ -1,5 +1,7 @@
 #include "load_macro_layer.hpp"
+#include "autosave_settings_layer.hpp"
 #include "macro_editor.hpp"
+
 #include <Geode/modify/CCMenu.hpp>
 
 class $modify(CCMenu) {
@@ -24,18 +26,16 @@ class $modify(CCMenu) {
 };
 
 void LoadMacroLayer::open(geode::Popup<>* layer, geode::Popup<>* layer2, bool autosaves) {
-	std::filesystem::path path = Mod::get()->getSaveDir() / "macros";
+	std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder");
 
 	if (!std::filesystem::exists(path)) {
-		if (!std::filesystem::create_directory(path))
-			return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 6", "Ok")->show();
+		return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 6", "Ok")->show();
 	}
 
-	path = Mod::get()->getSaveDir() / "autosaves";
+	path = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
 
 	if (!std::filesystem::exists(path)) {
-		if (!std::filesystem::create_directory(path))
-			return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 61", "Ok")->show();
+		return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 61", "Ok")->show();
 	}
 
 	LoadMacroLayer* layerReal = create(layer, layer2, autosaves);
@@ -144,7 +144,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 
 	file::pick(file::PickMode::OpenFile, { dirs::getGameDir(), { textFilter } }).listen([this](Result<std::filesystem::path>* res) {
 		if (res->isOk()) {
-			std::filesystem::path path = res->unwrap();
+			std::filesystem::path path = res->unwrapOrDefault();
 
 			auto& g = Global::get();
 			Macro tempMacro;
@@ -179,7 +179,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 
 			std::string name = path.filename().string().substr(0, path.filename().string().find_last_of('.'));
 
-			std::filesystem::path newPath = Mod::get()->getSaveDir() / "macros" / name;
+			std::filesystem::path newPath = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder") / name;
 
 			std::string pathString = newPath.string();
 
@@ -241,50 +241,62 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
     m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
     m_title->setPosition(m_title->getPosition() + offset);
 
-	CCSprite* icon = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
-	icon->setScale(0.585f);
-	CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
-		icon,
-		this,
-		menu_selector(LoadMacroLayer::onImportMacro)
-	);
-	btn->setPosition(ccp(165, -121));
+	if (!isMerge) {
+		CCSprite* icon = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
+		icon->setScale(0.585f);
+		CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
+			icon,
+			this,
+			menu_selector(LoadMacroLayer::onImportMacro)
+		);
+		btn->setPosition(ccp(165, -121));
 
-	if (!isMerge)
 		menu->addChild(btn);
 
-	searchInput = TextInput::create(235, "Search Macro", "bigFont.fnt");
-	searchInput->setPositionY(100);
-	searchInput->setDelegate(this);
-	menu->addChild(searchInput);
+		searchInput = TextInput::create(235, "Search Macro", "bigFont.fnt");
+		searchInput->setPositionY(100);
+		searchInput->setDelegate(this);
+		menu->addChild(searchInput);
 
-	CCSprite* emptyBtn = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
-	emptyBtn->setScale(0.585f);
-	CCSprite* folderIcon = CCSprite::createWithSpriteFrameName("folderIcon_001.png");
-	folderIcon->setPosition(emptyBtn->getContentSize() / 2);
-	folderIcon->setScale(0.7f);
-	emptyBtn->addChild(folderIcon);
-	btn = CCMenuItemSpriteExtra::create(
-		emptyBtn,
-		this,
-		menu_selector(LoadMacroLayer::openFolder)
-	);
-	btn->setPosition(ccp(115, -121));
+		CCSprite* emptyBtn = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
+		emptyBtn->setScale(0.585f);
+		CCSprite* folderIcon = CCSprite::createWithSpriteFrameName("folderIcon_001.png");
+		folderIcon->setPosition(emptyBtn->getContentSize() / 2);
+		folderIcon->setScale(0.7f);
+		emptyBtn->addChild(folderIcon);
+		btn = CCMenuItemSpriteExtra::create(
+			emptyBtn,
+			this,
+			menu_selector(LoadMacroLayer::openFolder)
+		);
+		btn->setPosition(ccp(115, -121));
 
-	if (!isMerge)
 		menu->addChild(btn);
 
-	CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
-	spr->setScale(0.585f);
-	btn = CCMenuItemSpriteExtra::create(
-		spr,
-		this,
-		menu_selector(LoadMacroLayer::deleteSelected)
-	);
-	btn->setPosition(ccp(65, -121));
+		CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
+		spr->setScale(0.585f);
+		btn = CCMenuItemSpriteExtra::create(
+			spr,
+			this,
+			menu_selector(LoadMacroLayer::deleteSelected)
+		);
+		btn->setPosition(ccp(65, -121));
 
-	if (!isMerge)
 		menu->addChild(btn);
+
+		if (isAutosaves) {
+			spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
+			spr->setScale(0.55f);
+			btn = CCMenuItemSpriteExtra::create(
+				spr,
+				this,
+				menu_selector(AutoSaveLayer::open)
+			);
+			btn->setPosition(ccp(15, -121));
+
+			menu->addChild(btn);
+		}
+	}
 
 	CCSprite* spr1 = CCSprite::create("GJ_button_01.png");
 	CCSprite* spr2 = CCSprite::createWithSpriteFrameName("GJ_sortIcon_001.png");
@@ -319,7 +331,7 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	if (!isMerge)
 		menu->addChild(lbl);
 
-	spr = CCSprite::createWithSpriteFrameName("gj_findBtnOff_001.png");
+	CCSprite* spr = CCSprite::createWithSpriteFrameName("gj_findBtnOff_001.png");
 	spr->setScale(0.685f);
 	searchOff = CCMenuItemSpriteExtra::create(
 		spr,
@@ -338,13 +350,13 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	menu->addChild(macroCountLbl);
 
 	if (isMerge) {
-		p1Toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(LoadMacroLayer::onMergeToggle));
+		p1Toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
 		p1Toggle->setID("p1-toggle");
 		p1Toggle->setScale(0.675f);
 		p1Toggle->setPosition({ -23, -121 });
 		menu->addChild(p1Toggle);
 
-		p2Toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(LoadMacroLayer::onMergeToggle));
+		p2Toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, nullptr);
 		p2Toggle->setID("p2-toggle");
 		p2Toggle->setScale(0.675f);
 		p2Toggle->setPosition({ 98, -121 });
@@ -378,13 +390,6 @@ bool LoadMacroLayer::setup(geode::Popup<>* layer, geode::Popup<>* layer2, bool a
 	return true;
 }
 
-void LoadMacroLayer::onMergeToggle(CCObject* obj) {
-	std::string id = static_cast<CCNode*>(obj)->getID();
-
-	if (id == "p1-toggle")
-		log::debug("{}", p1Toggle->isToggled());
-}
-
 void LoadMacroLayer::clearSearch(CCObject*) {
 	searchOff->setVisible(false);
 	searchInput->setString("");
@@ -408,8 +413,8 @@ void LoadMacroLayer::updateSort(CCObject*) {
 void LoadMacroLayer::addList(bool refresh, float prevScroll) {
 	cocos2d::CCSize winSize = cocos2d::CCDirector::sharedDirector()->getWinSize();
 
-	std::filesystem::path path = Mod::get()->getSaveDir() / (isAutosaves ? "autosaves" : "macros");
-	std::vector<std::filesystem::path> macros = file::readDirectory(path).unwrap();
+	std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>(isAutosaves ? "autosaves_folder" : "macros_folder");
+	std::vector<std::filesystem::path> macros = file::readDirectory(path).unwrapOrDefault();
 
 	CCArray* cells = CCArray::create();
 
@@ -698,29 +703,29 @@ void MacroCell::handleLoad() {
 	}
 
 	g.macro = newMacro;
-
 	g.currentAction = 0;
 	g.currentFrameFix = 0;
 	g.restart = true;
-
 	g.macro.canChangeFPS = false;
-
-	if (static_cast<int>(g.macro.framerate) > 240)
-		FLAlertLayer::create("Warning", "This macro's <cr>framerate is not supported</c> by xdBot, the macro will most likely break.", "Ok")->show();
 
 	loadLayer->keyBackClicked();
 
+	RecordLayer* newLayer = nullptr;
+
 	if (RecordLayer* layer = typeinfo_cast<RecordLayer*>(menuLayer)) {
 		layer->keyBackClicked();
-		RecordLayer::openMenu(true);
+		newLayer = RecordLayer::openMenu(true);
 	}
+
+	if (!newLayer) newLayer = g.layer != nullptr ? static_cast<RecordLayer*>(g.layer) : nullptr;
+	if (newLayer) newLayer->updateTPS();
 
 	if (!PlayLayer::get() && g.state != state::playing)
 		Macro::togglePlaying();
 	else if (g.state == state::recording) {
-		if (g.layer) {
-			static_cast<RecordLayer*>(g.layer)->recording->toggle(Global::get().state != state::recording);
-			static_cast<RecordLayer*>(g.layer)->toggleRecording(nullptr);
+		if (newLayer) {
+			newLayer->recording->toggle(Global::get().state != state::recording);
+			newLayer->toggleRecording(nullptr);
 		}
 		else {
 			RecordLayer* layer = RecordLayer::create();

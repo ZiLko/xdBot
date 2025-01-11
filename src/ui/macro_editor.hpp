@@ -2,7 +2,7 @@
 
 #include "../includes.hpp"
 
-const std::unordered_map<int, std::string> btnNames = { {1, "Jump"}, {2, "Left"}, {3, "Right"} };
+const std::unordered_map<int, std::string> btnNames = { {1, "Jump"}, {2, "Left"}, {3, "Right"},{4, "Jump"}, {5, "Left"}, {6, "Right"} };
 
 struct InputText {
     std::string frame;
@@ -107,7 +107,7 @@ public:
 
     void onMerge(CCObject*);
 
-    void mergeMacro(std::vector<input> mergeInputs, const bool players[2], bool overwrite);
+    void mergeMacro(std::vector<input> mergeInputs, bool players[2], bool overwrite);
 
     void updateSaved();
 

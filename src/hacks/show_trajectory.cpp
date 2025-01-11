@@ -9,25 +9,23 @@
 #include <Geode/modify/HardStreak.hpp>
 #include <Geode/modify/CCKeyboardDispatcher.hpp>
 
-ShowTrajectory t;
+ShowTrajectory& t = ShowTrajectory::get();
 
-$execute{
+$execute {
 
-    geode::listenForSettingChanges("show_trajectory_color1", +[](cocos2d::ccColor3B value) {
-        t.color1 = ccc4FFromccc3B(value);
-        t.color3 = ShowTrajectory::getMergedColor(t.color1, t.color2);
-    });
-
-    geode::listenForSettingChanges("show_trajectory_color2", +[](cocos2d::ccColor3B value) {
-        t.color2 = ccc4FFromccc3B(value);
-        t.color3 = ShowTrajectory::getMergedColor(t.color1, t.color2);
-    });
-
-    geode::listenForSettingChanges("show_trajectory_length", +[](int64_t value) {
-        t.length = value;
-    });
+    t.color1 = ccc4FFromccc3B(Mod::get()->getSavedValue<cocos2d::ccColor3B>("trajectory_color1"));
+    t.color2 = ccc4FFromccc3B(Mod::get()->getSavedValue<cocos2d::ccColor3B>("trajectory_color2"));
+    t.length = geode::utils::numFromString<int>(Mod::get()->getSavedValue<std::string>("trajectory_length")).unwrapOr(0);
+    t.updateMergedColor();
 
 };
+
+void ShowTrajectory::trajectoryOff() {
+    if (t.trajectoryNode()) {
+        t.trajectoryNode()->clear();
+        t.trajectoryNode()->setVisible(false);
+    }
+}
 
 void ShowTrajectory::updateTrajectory(PlayLayer* pl) {
     if (!t.fakePlayer1 || !t.fakePlayer2) return;
@@ -108,7 +106,7 @@ void ShowTrajectory::createTrajectory(PlayLayer* pl, PlayerObject* fakePlayer, P
         fakePlayer->updateRotation(t.delta);
         fakePlayer->updatePlayerScale();
 
-        cocos2d::ccColor4F color = hold ? t.color2 : t.color1;
+        cocos2d::ccColor4F color = hold ? t.color1 : t.color2;
 
         if (!hold) {
             if ((player2 && t.player2Trajectory[i] == prevPos) || !player2 && t.player1Trajectory[i] == prevPos)
@@ -128,7 +126,7 @@ void ShowTrajectory::drawPlayerHitbox(PlayerObject* player, CCDrawNode* drawNode
     cocos2d::CCRect smallRect = player->GameObject::getObjectRect(0.3, 0.3);
 
     std::vector<cocos2d::CCPoint> vertices = ShowTrajectory::getVertices(player, bigRect, t.deathRotation);
-    drawNode->drawPolygon(&vertices[0], 4, ccc4f(t.color1.r, t.color1.g, t.color1.b, 0.2f), 0.5, t.color1);
+    drawNode->drawPolygon(&vertices[0], 4, ccc4f(t.color2.r, t.color2.g, t.color2.b, 0.2f), 0.5, t.color2);
 
     vertices = ShowTrajectory::getVertices(player, smallRect, t.deathRotation);
     drawNode->drawPolygon(&vertices[0], 4, ccc4f(t.color3.r, t.color3.g, t.color3.b, 0.2f), 0.35, ccc4f(t.color3.r, t.color3.g, t.color3.b, 0.55f));
@@ -185,7 +183,7 @@ std::vector<cocos2d::CCPoint> ShowTrajectory::getVertices(PlayerObject* player, 
     return vertices;
 }
 
-cocos2d::ccColor4F ShowTrajectory::getMergedColor(cocos2d::ccColor4F color1, cocos2d::ccColor4F color2) {
+void ShowTrajectory::updateMergedColor() {
     cocos2d::ccColor4F newColor = { 0.f, 0.f, 0.f, 1.f };
 
     newColor.r = (color1.r + color2.r) / 2;
@@ -196,7 +194,7 @@ cocos2d::ccColor4F ShowTrajectory::getMergedColor(cocos2d::ccColor4F color1, coc
     newColor.g = std::min(1.f, newColor.g + 0.45f);
     newColor.b = std::min(1.f, newColor.b + 0.45f);
 
-    return newColor;
+    color3 = newColor;
 }
 
 void ShowTrajectory::handlePortal(PlayerObject* player, int id) {
@@ -248,16 +246,8 @@ class $modify(PlayLayer) {
 
         if (!t.trajectoryNode() || t.creatingTrajectory) return;
 
-        int frame = Global::getCurrentFrame();
-
-        if (Global::get().showTrajectory && frame > 2) {
-
+        if (Global::get().showTrajectory) {
             ShowTrajectory::updateTrajectory(this);
-
-        }
-        else if (t.trajectoryNode()->isVisible()) {
-            t.trajectoryNode()->clear();
-            t.trajectoryNode()->setVisible(false);
         }
 
     }
@@ -281,16 +271,6 @@ class $modify(PlayLayer) {
         t.fakePlayer2->setPosition({ 0, 105 });
         t.fakePlayer2->setVisible(false);
         m_objectLayer->addChild(t.fakePlayer2);
-
-        t.length = Mod::get()->getSettingValue<int64_t>("show_trajectory_length");
-
-        t.color1 = ccc4FFromccc3B(Mod::get()->getSettingValue<cocos2d::ccColor3B>("show_trajectory_color1"));
-        t.color1.a = 1.f;
-
-        t.color2 = ccc4FFromccc3B(Mod::get()->getSettingValue<cocos2d::ccColor3B>("show_trajectory_color2"));
-        t.color2.a = 1.f;
-
-        t.color3 = ShowTrajectory::getMergedColor(t.color1, t.color2);
 
         m_objectLayer->addChild(t.trajectoryNode(), 500);
     }
@@ -348,7 +328,7 @@ class $modify(GJBaseGameLayer) {
                 if (!obj) continue;
 
                 if ((!objectTypes.contains(static_cast<int>(obj->m_objectType)) && !portalIDs.contains(obj->m_objectID)) || collectibleIDs.contains(obj->m_objectID)) {
-                    if (obj->m_isDisabled || obj->m_isDisabled2) continue;
+                    if (obj->m_isDisabled || obj->m_isDisabled2) continue;  
 
                     disabledObjects.push_back(obj);
                     obj->m_isDisabled = true;

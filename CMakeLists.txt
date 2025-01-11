@@ -16,11 +16,13 @@ add_library(${PROJECT_NAME} SHARED
     src/renderer/renderer.cpp
 
     src/hacks/other.cpp
+    src/hacks/tps_bypass.cpp
     src/hacks/frame_stepper.cpp
     src/hacks/layout_mode.cpp
     src/hacks/show_trajectory.cpp
     src/hacks/coin_finder.cpp
     src/hacks/clickbot.cpp
+    src/hacks/autoclicker.cpp
 
     src/ui/macro_editor.cpp
     src/ui/button_edit_layer.cpp
@@ -29,6 +31,7 @@ add_library(${PROJECT_NAME} SHARED
     src/ui/render_settings_layer.cpp
     src/ui/load_macro_layer.cpp
     src/ui/clickbot_layer.cpp
+    src/ui/button_setting.cpp
 
     src/practice_fixes/input.cpp
     src/practice_fixes/player.cpp

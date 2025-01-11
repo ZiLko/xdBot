@@ -1,5 +1,55 @@
-# v2.2.6
+# v2.3.0
 
+* Added TPS Bypass.
+* Added Android Renderer support with FFmpeg API.
+* Added autoclicker.
+* Added Clickbot "Hold Only" setting.
+* Added auto disable speedhack setting.
+* Added inverted mirror input setting.
+* Added macros save folder setting.
+* Added autosaves folder setting.
+* Added Input Fixes setting.
+* Added Frame Fixes Limit setting.
+* Added restore button in android button edit layer.
+* Added warning when disabling button in pause menu.
+* Added auto save on level end.
+* Added auto save on time interval.
+* Fixed Clickbot ignoring clicks on the same frame.
+* Fixed 2 player macro bugs when "flip 2 player controls" was enabled.
+* Fixed crash when renders folder path was invalid.
+* Fixed BetterInputs incompatibility.
+* Fixed render volume setting not working in legacy audio mode.
+* Fixed Disable Shaders working weird.
+* Fixed input bug when resuming pause with space bar.
+* Fixed macro merge not working properly.
+* Fixed crash with invalid macro files.
+* Fixed layout mode crash in certain levels that use particles.
+* Fixed android crash on edit macro.
+* Fixed android speedhack only allowed 1 decimal digit.
+* Removed some debug logs that i forgot to remove.
+* Removed keybinds button warning.
+* Removed herobrine.
+* Improved seed to be more random xD.
+* Improved Clickbot performance.
+* Improved render hide level complete setting.
+* Changed Clickbot default sounds.
+* Changed render default codec.
+* Changed render codec popup.
+* Swapped positions of sfx and music volume in render settings.
+* Changed discord server popup message.
+* Re-added .gdr save toggle.
+* Re-added xdBot menu button in mod settings.
+* Moved Show Trajectory extra settings to its own UI.
+* Moved Auto Stop Playing setting to more settings.
+* Moved Lock Delta setting to more settings.
+* Possibly optimized a few things i forgot what it was.
+* Made settings page also save after reopening.
+* Made disable shaders trigger auto safe mode.
+* Made auto saved macros have description for no reason xd.
+* Slightly changed extra hack settings button looks.
+
+# v2.2.6
+    
 * Fixed discord link.
 
 # v2.2.5

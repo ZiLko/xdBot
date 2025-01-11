@@ -1,6 +1,7 @@
 #include "../includes.hpp"
 // #include "events.hpp"
 #include <eclipse.ffmpeg-api/include/recorder.hpp>
+#include <eclipse.ffmpeg-api/include/audio_mixer.hpp>
 
 enum AudioMode {
     Off = 0,
@@ -33,6 +34,7 @@ public:
     float SFXVolume = 1.f;
     float musicVolume = 1.f;
 
+    bool usingApi = false;
     bool dontRender = false;
     bool dontRecordAudio = false;
     bool recordingAudio = false;

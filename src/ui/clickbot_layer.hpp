@@ -31,6 +31,8 @@ public:
     void saveSettings() {
         matjson::Value data = matjson::Serialize<ClickSetting>::to_json(settings);
         Mod::get()->setSavedValue(button, data);
+        
+        Clickbot::updateSounds();
     }
 
     void onSelectFile(CCObject*);

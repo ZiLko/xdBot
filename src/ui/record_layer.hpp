@@ -14,7 +14,8 @@ enum InputType {
 	Autosave,
 	Speedhack,
 	Seed,
-	Respawn
+	Respawn,
+	Tps
 };
 
 struct RecordSetting {
@@ -39,12 +40,14 @@ public:
 	CCMenuItemToggler* noclipToggle = nullptr;
 	CCMenuItemToggler* frameStepperToggle = nullptr;
 	CCMenuItemToggler* renderToggle = nullptr;
+	CCMenuItemToggler* tpsToggle = nullptr;
 
 	CCLabelBMFont* actionsLabel = nullptr;
 	CCLabelBMFont* fpsLabel = nullptr;
 	CCLabelBMFont* warningLabel = nullptr;
 
 	CCSprite* warningSprite = nullptr;
+	CCScale9Sprite* tpsBg = nullptr;
 
 	CCMenuItemSpriteExtra* FPSLeft = nullptr;
 	CCMenuItemSpriteExtra* FPSRight = nullptr;
@@ -57,6 +60,7 @@ public:
 	CCTextInputNode* seedInput = nullptr;
 	CCTextInputNode* speedhackInput = nullptr;
 	CCTextInputNode* respawnInput = nullptr;
+	CCTextInputNode* tpsInput = nullptr;
 
 	std::vector<CCNode*> nodes;
 	std::vector<CCSprite*> dots;
@@ -78,6 +82,8 @@ protected:
 
 public:
 
+	static std::string getTPSString();
+	
 	STATIC_CREATE(RecordLayer, 455, 271)
 	
 	virtual void onClose(cocos2d::CCObject*) override;
@@ -133,5 +139,9 @@ public:
 	void toggleFPS(bool on);
 
 	void onDiscord(CCObject*);
+
+	void updateTPS();
+
+	void showKeybindsWarning();
 
 };

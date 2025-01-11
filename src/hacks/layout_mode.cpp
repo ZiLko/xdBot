@@ -1,5 +1,7 @@
 #include "layout_mode.hpp"
+
 #include <Geode/modify/LevelTools.hpp>
+#include <Geode/modify/PlayLayer.hpp>
 
 class $modify(LevelTools) {
     static bool verifyLevelIntegrity(gd::string v1, int v2) {
@@ -13,7 +15,7 @@ class $modify(PlayLayer) {
     void addObject(GameObject * obj) {
         if (!Global::get().layoutMode) return PlayLayer::addObject(obj);
 
-        if (obj->m_objectID == 44 || excludedTriggerIDs.contains(obj->m_objectID)) return;
+        if (excludedTriggerIDs.contains(obj->m_objectID)) return; 
 
         PlayLayer::addObject(obj);
 
@@ -22,9 +24,9 @@ class $modify(PlayLayer) {
         obj->m_detailUsesHSV = false;
         obj->m_baseUsesHSV = false;
         obj->m_hasNoGlow = true;
-        obj->m_isHide = false;
-        obj->setOpacity(255);
-        obj->setVisible(true);
+        obj->m_isHide = obj->m_objectID == 2065;
+        obj->setOpacity(obj->m_objectID == 2065 ? 0 : 255);
+        obj->setVisible(obj->m_objectID != 2065);
     }
 
     bool init(GJGameLevel * level, bool b1, bool b2) {
@@ -139,6 +141,7 @@ std::string LayoutMode::getModifiedString(std::string levelString) {
 
         if (decoObjectIDs.contains(std::stoi(props.at(1))) || props.contains(121)) {
             if (!props.contains(57)) continue;
+
             for (const auto& el : Utils::splitByChar(props.at(57), '.')) {
                 if (el.empty()) continue;
                 if (!importantGroups.contains(std::stoi(el))) continue;

@@ -4,28 +4,31 @@
 #include "render_presets_layer.hpp"
 #include "clickbot_layer.hpp"
 #include "noclip_settings_layer.hpp"
+#include "autoclicker_settings_layer.hpp"
 #include "trajectory_settings_layer.hpp"
+#include "mirror_settings_layer.hpp"
+#include "../hacks/coin_finder.hpp"
+#include "../hacks/show_trajectory.hpp"
 
-#include <Geode/modify/CCTextInputNode.hpp>
 #include <Geode/modify/PauseLayer.hpp>
 #include <Geode/utils/web.hpp>
 
 const std::vector<std::vector<RecordSetting>> settings {
 	{
+		{ "TPS Bypass:", "macro_tps_enabled", InputType::Tps, 0.4f },
 		{ "Speedhack:", "macro_speedhack_enabled", InputType::Speedhack, 0.4f },
 		{ "Seed:", "macro_seed_enabled", InputType::Seed, 0.4f },
-		{ "Show Trajectory:", "macro_show_trajectory", InputType::Settings, 0.325f, menu_selector(TrajectorySettingsLayer::open)  },
-		{ "Enable Coin Finder:", "macro_coin_finder", InputType::None },
 		{ "Enable Noclip:", "macro_noclip", InputType::Settings, 0.325f, menu_selector(NoclipSettingsLayer::open) },
-		{ "Enable Frame Stepper:", "macro_frame_stepper", InputType::None }
+		{ "Show Trajectory:", "macro_show_trajectory", InputType::Settings, 0.325f, menu_selector(TrajectorySettingsLayer::open)  },
+		{ "Enable Frame Stepper:", "macro_frame_stepper", InputType::None },
 	},
 	{
-		{ "Enable Auto Saving:", "macro_auto_save", InputType::Autosave },
-		{ "Enable Layout Mode:", "macro_layout_mode", InputType::None },
-		{ "Auto Safe Mode:", "macro_auto_safe_mode", InputType::None },
 		{ "Instant respawn:", "macro_instant_respawn", InputType::None },
 		{ "No death effect:", "macro_no_death_effect", InputType::None },
-		{ "No respawn flash:", "macro_no_respawn_flash", InputType::None }
+		{ "No respawn flash:", "macro_no_respawn_flash", InputType::None },
+		{ "Enable Coin Finder:", "macro_coin_finder", InputType::None },
+		{ "Enable Layout Mode:", "macro_layout_mode", InputType::None },
+		{ "Auto Safe Mode:", "macro_auto_safe_mode", InputType::None }
 	},
 	{
 	#ifdef GEODE_IS_WINDOWS
@@ -43,19 +46,20 @@ const std::vector<std::vector<RecordSetting>> settings {
 	},
 	{
 		{ "Enable Clickbot:", "clickbot_enabled", InputType::Settings, 0.325f, menu_selector(ClickbotLayer::open)},
-		{ "Speedhack Audio:", "macro_speedhack_audio", InputType::None },
+		{ "Enable Autoclicker:", "autoclicker_enabled", InputType::Settings, 0.3f, menu_selector(AutoclickerLayer::open) },
 		{ "Always Practice Fixes:", "macro_always_practice_fixes", InputType::None },
-		{ "Show Frame Label:", "macro_show_frame_label", InputType::None },
 		{ "Ignore inputs:", "macro_ignore_inputs", InputType::None },
-		{ "Auto Stop Playing:", "macro_auto_stop_playing", InputType::None }
+		{ "Show Frame Label:", "macro_show_frame_label", InputType::None },
+		{ "Speedhack Audio:", "macro_speedhack_audio", InputType::None }
+		// { "Auto Stop Playing:", "macro_auto_stop_playing", InputType::None }
 	},
     {
 		{ "Respawn Time:", "respawn_time_enabled", InputType::Respawn },
-		{ "Input Mirror:", "p2_input_mirror", InputType::None },
+		{ "Input Mirror:", "p2_input_mirror", InputType::Settings, 0.325f, menu_selector(MirrorSettingsLayer::open) },
 		{ "Disable Shaders:", "disable_shaders", InputType::None },
 		{ "Instant Mirror Portal:", "instant_mirror_portal", InputType::None },
 		{ "No Mirror Portal:", "no_mirror_portal", InputType::None },
-		{ "Lock Delta:", "macro_lock_delta", InputType::None }
+		{ "Enable Auto Saving:", "macro_auto_save", InputType::Autosave }
     }
 };
 
@@ -65,7 +69,7 @@ class $modify(PauseLayer) {
 
         #ifdef GEODE_IS_WINDOWS
 
-        if (!Global::get().mod->getSavedValue<bool>("menu_show_button")) return;
+        if (!Mod::get()->getSavedValue<bool>("menu_show_button")) return;
 
         #endif
 
@@ -120,15 +124,6 @@ $execute{
   });
 };
 
-class $modify(CCTextInputNode) {
-
-    bool ccTouchBegan(cocos2d::CCTouch * v1, cocos2d::CCEvent * v2) {
-        if (this->getID() == "android-disabled") return false;
-
-        return CCTextInputNode::ccTouchBegan(v1, v2);
-    }
-};
-
 void RecordLayer::openSaveMacro(CCObject*) {
     SaveMacroLayer::open();
 }
@@ -165,11 +160,6 @@ RecordLayer* RecordLayer::openMenu(bool instant) {
     layer->show();
 
     g.layer = static_cast<geode::Popup<>*>(layer);
-
-        if (Loader::get()->isModLoaded("spaghettdev.betterinputs") && !instant) {
-            if (!g.mod->setSavedValue("betterinputs-warning", true))
-                FLAlertLayer::create("Warning", "<cr>BetterInputs</c> might cause <cr>undefined behavior</c> in xdBot's text inputs.", "Ok")->show();
-        }
 
     return layer;
 }
@@ -230,6 +220,10 @@ void RecordLayer::toggleRecording(CCObject*) {
 
     Interface::updateLabels();
     Interface::updateButtons();
+    Macro::updateTPS();
+    this->updateTPS();
+
+    g.lastAutoSaveMS = std::chrono::steady_clock::now();
 }
 
 void RecordLayer::togglePlaying(CCObject*) {
@@ -259,7 +253,8 @@ void RecordLayer::togglePlaying(CCObject*) {
 
     Interface::updateLabels();
     Interface::updateButtons();
-
+    Macro::updateTPS();
+    this->updateTPS();
 }
 
 void RecordLayer::toggleRender(CCObject* btn) {
@@ -333,15 +328,16 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
 
     }
 
-    mod->setSavedValue("render_codec", std::string(codecInput->getString()));
+    if (node == codecInput)
+        mod->setSavedValue("render_codec", std::string(codecInput->getString()));
 
-    if (std::string_view(widthInput->getString()) != "")
+    if (std::string_view(widthInput->getString()) != "" && node == widthInput)
         mod->setSavedValue("render_width2", std::string(widthInput->getString()));
 
-    if (std::string_view(heightInput->getString()) != "")
+    if (std::string_view(heightInput->getString()) != "" && node == heightInput)
         mod->setSavedValue("render_height", std::string(heightInput->getString()));
 
-    if (std::string_view(bitrateInput->getString()) != "")
+    if (std::string_view(bitrateInput->getString()) != "" && node == bitrateInput)
         mod->setSavedValue("render_bitrate", std::string(bitrateInput->getString()));
 
     if (std::string_view(fpsInput->getString()) != "" && node == fpsInput) {
@@ -350,12 +346,20 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
         mod->setSavedValue("render_fps", std::string(fpsInput->getString()));
     }
 
-    if (respawnInput) {
+    if (respawnInput && node == respawnInput) {
         std::string str = respawnInput->getString();
         mod->setSavedValue("respawn_time", numFromString<double>(str).unwrapOr(0.5));
     }
 
-    if (!speedhackInput) return;
+    if (tpsInput && node == tpsInput) {
+        float value = geode::utils::numFromString<float>(tpsInput->getString()).unwrapOr(0.f);
+        if (std::string_view(tpsInput->getString()) != "" && value < 999999 && value >= 0.f) {
+            mod->setSavedValue("macro_tps", value);
+            Global::get().tps = value;
+        }
+    }
+
+    if (!speedhackInput || node != speedhackInput) return;
 
     if (std::string_view(speedhackInput->getString()) != "" && node == speedhackInput) {
         std::string value = speedhackInput->getString();
@@ -385,7 +389,7 @@ void RecordLayer::toggleSetting(CCObject* obj) {
     auto& g = Global::get();
     mod = g.mod;
 
-    bool value = !toggle->isToggled();
+    bool value = !toggle->isToggled(); 
 
     g.mod->setSavedValue(id, value);
 
@@ -393,11 +397,29 @@ void RecordLayer::toggleSetting(CCObject* obj) {
     if (id == "macro_seed_enabled") g.seedEnabled = value;
     if (id == "macro_speedhack_enabled") g.speedhackEnabled = value;
     if (id == "macro_speedhack_audio") g.speedhackAudio = value;
-    if (id == "macro_show_trajectory") g.showTrajectory = value;
-    if (id == "macro_coin_finder") g.coinFinder = value;
-    if (id == "clickbot_enabled") g.clickbotEnabled = value;
     if (id == "p2_input_mirror") g.p2mirror = value;
-    if (id == "macro_lock_delta") g.lockDelta = value;
+    if (id == "clickbot_enabled") g.clickbotEnabled = value;
+    if (id == "clickbot_playing_only") g.clickbotOnlyPlaying = value;
+    if (id == "clickbot_holding_only") g.clickbotOnlyHolding = value;
+    if (id == "macro_tps_enabled") g.tpsEnabled = value;
+    if (id == "autoclicker_enabled") g.autoclicker = value;
+    if (id == "disable_shaders") g.disableShaders = value;
+    if (id == "macro_auto_save") g.autosaveEnabled = value;
+
+    if (id == "macro_show_trajectory") {
+        g.showTrajectory = value;
+        if (!value) ShowTrajectory::trajectoryOff();
+    }
+
+    if (id == "macro_coin_finder") {
+        g.coinFinder = value;
+        if (!value) CoinFinder::finderOff();
+    }
+
+    if (id == "macro_show_trajectory") {
+        g.showTrajectory = value;
+        if (!value) ShowTrajectory::trajectoryOff();
+    }
 
     if (id == "macro_show_frame_label") {
         g.frameLabel = value;
@@ -408,6 +430,9 @@ void RecordLayer::toggleSetting(CCObject* obj) {
         g.frameStepper = value;
         Interface::updateButtons();
     }
+
+    if (id == "clickbot_enabled" || id == "clickbot_playing_only")
+        Clickbot::updateSounds();
 
     if (id == "macro_hide_recording_label" || id == "macro_hide_playing_label" || id == "render_hide_labels")
         Interface::updateLabels();
@@ -446,19 +471,43 @@ void RecordLayer::toggleSetting(CCObject* obj) {
             this->onClose(nullptr);
             RecordLayer::openMenu(true);
         }
+
+        if (!value)
+            Notification::create("xdBot Button is disabled.", NotificationIcon::Warning)->show();
     }
 }
 
-void RecordLayer::openKeybinds(CCObject*) {
-#ifdef GEODE_IS_WINDOWS
-
-    MoreOptionsLayer::create()->onKeybindings(nullptr);
+void RecordLayer::showKeybindsWarning() {
     if (!mod->setSavedValue("opened_keybinds", true))
         FLAlertLayer::create(
             "Warning",
             "Scroll down to find xdBot's keybinds",
             "Ok"
         )->show();
+}
+
+void RecordLayer::openKeybinds(CCObject*) {
+#ifdef GEODE_IS_WINDOWS
+
+    MoreOptionsLayer::create()->onKeybindings(nullptr);
+    CCScene* scene = CCDirector::get()->getRunningScene();
+
+    FLAlertLayer* layer = typeinfo_cast<FLAlertLayer*>(scene->getChildren()->lastObject());
+    if (!layer) return showKeybindsWarning();
+
+    CCLayer* mainLayer = layer->getChildByType<CCLayer>(0);
+    if (!mainLayer) return showKeybindsWarning();
+
+    CCNode* scrollLayer = mainLayer->getChildByID("ScrollLayer");
+    if (!scrollLayer) return showKeybindsWarning();
+
+    CCNode* contentLayer = scrollLayer->getChildByID("content-layer");
+    if (!contentLayer) return showKeybindsWarning();
+
+    CCNode* xdBot = contentLayer->getChildByID("xdBot");
+    if (!xdBot) return showKeybindsWarning();
+
+    contentLayer->setPositionY(xdBot->getPositionY() - 118);
 
 #else
 
@@ -472,20 +521,17 @@ void RecordLayer::openPresets(CCObject*) {
 }
 
 void RecordLayer::onAutosaves(CCObject*) {
-    std::filesystem::path path = Global::get().mod->getSaveDir() / "autosaves";
+    std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
 
     if (std::filesystem::exists(path))
         LoadMacroLayer::open(static_cast<geode::Popup<>*>(this), nullptr, true);
     else {
-        if (std::filesystem::create_directory(path))
-            LoadMacroLayer::open(static_cast<geode::Popup<>*>(this), nullptr, true);
-        else
-            FLAlertLayer::create("Error", "There was an error getting the folder. ID: 5", "Ok")->show();
+        FLAlertLayer::create("Error", "There was an error getting the folder. ID: 5", "Ok")->show();
     }
 }
 
 void RecordLayer::showCodecPopup(CCObject*) {
-    FLAlertLayer::create("Codec", "<cr>AMD:</c> h264_amf\n<cg>NVIDIA:</c> h264_nvenc\n<cl>INTEL:</c> h264_qsv", "Ok")->show();
+    FLAlertLayer::create("Codec", "<cr>AMD:</c> h264_amf\n<cg>NVIDIA:</c> h264_nvenc\n<cl>INTEL:</c> h264_qsv\nI don't know: libx264", "Ok")->show();
 }
 
 void RecordLayer::updateDots() {
@@ -704,8 +750,6 @@ bool RecordLayer::setup() {
     btn->setPosition(ccp(148, -100));
     menu->addChild(btn);
 
-
-
     btnSprite = ButtonSprite::create("Load");
     btnSprite->setScale(0.54f);
 
@@ -776,11 +820,9 @@ bool RecordLayer::setup() {
     CCSprite* emptyBtn = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
     emptyBtn->setScale(0.67f);
 
-
     CCSprite* folderIcon = CCSprite::createWithSpriteFrameName("folderIcon_001.png");
     folderIcon->setPosition(emptyBtn->getContentSize() / 2);
     folderIcon->setScale(0.7f);
-
 
     emptyBtn->addChild(folderIcon);
     btn = CCMenuItemSpriteExtra::create(
@@ -794,7 +836,6 @@ bool RecordLayer::setup() {
 
     CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
     spr->setScale(0.65f);
-
 
     btn = CCMenuItemSpriteExtra::create(
         spr,
@@ -846,8 +887,6 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-
-
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.375f);
     bg->setColor({ 0,0,0 });
@@ -857,8 +896,6 @@ bool RecordLayer::setup() {
     bg->setContentSize({ 162, 55 });
     bg->setZOrder(29);
     menu->addChild(bg);
-
-
 
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.375f);
@@ -870,8 +907,6 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-
-
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.375f);
     bg->setColor({ 0,0,0 });
@@ -881,8 +916,6 @@ bool RecordLayer::setup() {
     bg->setContentSize({ 82, 55 });
     bg->setZOrder(29);
     menu->addChild(bg);
-
-
 
     bg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
     bg->setScale(0.375f);
@@ -894,22 +927,16 @@ bool RecordLayer::setup() {
     bg->setZOrder(29);
     menu->addChild(bg);
 
-
-
     ButtonSprite* spriteOn2 = ButtonSprite::create("Stop");
     spriteOn2->setScale(0.74f);
     ButtonSprite* spriteOff2 = ButtonSprite::create("Start");
     spriteOff2->setScale(0.74f);
-
-
 
     renderToggle = CCMenuItemToggler::create(spriteOff2, spriteOn2, this, menu_selector(RecordLayer::toggleRender));
     renderToggle->toggle(g.renderer.recording || g.renderer.recordingAudio);
 
     renderToggle->setPosition(ccp(-65.5, -100));
     menu->addChild(renderToggle);
-
-
 
     spr = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
     spr->setScale(0.65f);
@@ -958,8 +985,6 @@ bool RecordLayer::setup() {
 
     goToSettingsPage(g.currentPage);
 
-
-
     CCSprite* dickordSpr = CCSprite::createWithSpriteFrameName("gj_discordIcon_001.png");
     dickordSpr->setScale(0.9f);
     CCMenuItemSpriteExtra* dickordBtn = CCMenuItemSpriteExtra::create(dickordSpr, this, menu_selector(RecordLayer::onDiscord));
@@ -977,6 +1002,7 @@ void RecordLayer::setToggleMember(CCMenuItemToggler* toggle, std::string id) {
     if (id == "macro_show_trajectory") trajectoryToggle = toggle;
     if (id == "macro_noclip") noclipToggle = toggle;
     if (id == "macro_frame_stepper") frameStepperToggle = toggle;
+    if (id == "macro_tps_enabled") tpsToggle = toggle;
 }
 
 void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
@@ -1012,7 +1038,8 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
 
     if (sett.input == InputType::Settings) {
         CCSprite* spr = CCSprite::createWithSpriteFrameName("GJ_optionsBtn_001.png");
-        spr->setScale(0.419f);
+        spr->setScale(0.41f);
+        spr->setOpacity(215);
 
         CCMenuItemSpriteExtra* btn = CCMenuItemSpriteExtra::create(
             spr,
@@ -1071,10 +1098,42 @@ void RecordLayer::loadSetting(RecordSetting sett, float yPos) {
         speedhackInput->setString(mod->getSavedValue<std::string>("macro_speedhack").c_str());
         speedhackInput->setMaxLabelWidth(30.f);
         speedhackInput->setDelegate(this);
-        speedhackInput->setMaxLabelLength(4);
+        speedhackInput->setMaxLabelLength(6);
 
         nodes.push_back(static_cast<CCNode*>(speedhackInput));
         menu->addChild(speedhackInput);
+    }
+
+    if (sett.input == InputType::Tps) {
+        tpsBg = CCScale9Sprite::create("square02b_001.png", { 0, 0, 80, 80 });
+        tpsBg->setPosition(ccp(116, yPos + 10));
+        tpsBg->setScale(0.355f);
+        tpsBg->setColor({ 0,0,0 });
+        tpsBg->setOpacity(75);
+        tpsBg->setAnchorPoint({ 0, 1 });
+        tpsBg->setContentSize({ 100, 55 });
+        tpsBg->setZOrder(29);
+        nodes.push_back(static_cast<CCNode*>(tpsBg));
+        menu->addChild(tpsBg);
+
+        tpsInput = CCTextInputNode::create(150, 30, "tps", "chatFont.fnt");
+        tpsInput->setPosition(ccp(133.5, yPos));
+        tpsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
+        tpsInput->ignoreAnchorPointForPosition(true);
+        tpsInput->m_placeholderLabel->setAnchorPoint({ 0.5f, 0.5f });
+        tpsInput->m_placeholderLabel->setScale(0.6);
+        tpsInput->setMaxLabelScale(0.7f);
+        tpsInput->setMouseEnabled(true);
+        tpsInput->setTouchEnabled(true);
+        tpsInput->setContentSize({ 32, 20 });
+        tpsInput->setAllowedChars("0123456789.");
+        tpsInput->setString(Utils::getSimplifiedString(fmt::format("{:.3f}", Mod::get()->getSavedValue<double>("macro_tps"))).c_str());
+        tpsInput->setMaxLabelWidth(30.f);
+        tpsInput->setDelegate(this);
+        tpsInput->setMaxLabelLength(9);
+
+        nodes.push_back(static_cast<CCNode*>(tpsInput));
+        menu->addChild(tpsInput);
     }
 
     if (sett.input == InputType::Seed) {
@@ -1154,24 +1213,74 @@ void RecordLayer::goToSettingsPage(int page) {
     frameStepperToggle = nullptr;
     trajectoryToggle = nullptr;
     noclipToggle = nullptr;
+    tpsToggle = nullptr;
+
     speedhackInput = nullptr;
     respawnInput = nullptr;
     seedInput = nullptr;
+    tpsInput = nullptr;
+
+    tpsBg = nullptr;
 
     for (size_t i = 0; i < 6; i++)
         loadSetting(settings[page][i], ySettingPositions[i]);
 
     updateDots();
+    updateTPS();
+
+    Mod::get()->setSavedValue("current_page", page);
 }
 
 void RecordLayer::onDiscord(CCObject*) {
     geode::createQuickPopup(
         "Discord",
-        "Join the <cb>Discord</c> server?\n(<cl>discord.gg/w6yvdzVzBd</c>).\n<cr>If you are in an unofficial server, you should leave NOW.</c>",
+        "Join the <cb>Discord</c> server?\n(<cl>discord.gg/w6yvdzVzBd</c>).",
         "No", "Yes",
         [](auto, bool btn2) {
         	if (btn2)
 				geode::utils::web::openLinkInBrowser("https://discord.gg/w6yvdzVzBd");
         }
     );
+}
+
+void RecordLayer::updateTPS() {
+    if (!tpsInput || !tpsToggle || !tpsBg) return;
+    auto& g = Global::get();
+
+    tpsToggle->toggle(g.tpsEnabled);
+    tpsInput->setString(Utils::getSimplifiedString(fmt::format("{:.3f}", Mod::get()->getSavedValue<double>("macro_tps"))).c_str());
+
+    if (g.state == state::none || g.macro.inputs.empty()) {
+        if (CCMenuItemSpriteExtra* btn = tpsToggle->getChildByType<CCMenuItemSpriteExtra>(0))
+            if (CCSprite* spr = btn->getChildByType<CCSprite>(0))
+                spr->setOpacity(255);
+        if (CCMenuItemSpriteExtra* btn = tpsToggle->getChildByType<CCMenuItemSpriteExtra>(1))
+            if (CCSprite* spr = btn->getChildByType<CCSprite>(0))
+                spr->setOpacity(255);
+
+        tpsInput->setID("");
+        tpsBg->setOpacity(75);
+        tpsToggle->setEnabled(true);
+        tpsInput->m_placeholderLabel->setOpacity(255);
+
+        tpsInput->detachWithIME();
+        tpsInput->onClickTrackNode(false);
+        tpsInput->m_cursor->setVisible(false);
+    } else {
+        if (CCMenuItemSpriteExtra* btn = tpsToggle->getChildByType<CCMenuItemSpriteExtra>(0))
+            if (CCSprite* spr = btn->getChildByType<CCSprite>(0))
+                spr->setOpacity(120);
+        if (CCMenuItemSpriteExtra* btn = tpsToggle->getChildByType<CCMenuItemSpriteExtra>(1))
+            if (CCSprite* spr = btn->getChildByType<CCSprite>(0))
+                spr->setOpacity(120);
+
+        tpsInput->setID("disabled-input"_spr);
+        tpsBg->setOpacity(30);
+        tpsToggle->setEnabled(false);
+        tpsInput->m_placeholderLabel->setOpacity(120);
+
+        tpsInput->detachWithIME();
+        tpsInput->onClickTrackNode(false);
+        tpsInput->m_cursor->setVisible(false);
+    }
 }
