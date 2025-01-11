@@ -379,6 +379,10 @@ void Renderer::start() {
         });
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+        #ifdef GEODE_IS_ANDROID
+        audioMode = AudioMode::Off;
+        #endif
+
         if ((SFXVolume == 0.f && musicVolume == 0.f) || audioMode == AudioMode::Off || (audioMode == AudioMode::Song && !std::filesystem::exists(songFile)) || (audioMode == AudioMode::Record && !std::filesystem::exists("fmodoutput.wav"))) {
             if (audioMode != AudioMode::Off) {
                 Loader::get()->queueInMainThread([] {

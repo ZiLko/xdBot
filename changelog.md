@@ -3,6 +3,7 @@
 * Fixed android default render codec.
 * Fixed android width input length being limited to 3.
 * Fixed macros folder not creating automatically if not found.
+* Fixed song file not found on android render (it cant do audio at all).
 
 # v2.3.1
 
