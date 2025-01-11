@@ -191,7 +191,12 @@ class $modify(PlayLayer) {
   void levelComplete() {
     PlayLayer::levelComplete();
 
-    Global::get().firstAttempt = true;
+    auto& g = Global::get();
+
+    g.firstAttempt = true;
+
+    if (g.state == state::recording && g.autosaveEnabled && g.mod->getSavedValue<bool>("autosave_levelend_enabled"))
+      Macro::autoSave(nullptr, g.currentSession);
 
     Macro::resetState(true);
   }

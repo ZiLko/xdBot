@@ -170,9 +170,6 @@ class $modify(EndLevelLayer) {
         EndLevelLayer::customSetup();
         auto& g = Global::get();
 
-        if (g.state == state::recording && g.autosaveEnabled && g.mod->getSavedValue<bool>("autosave_levelend_enabled"))
-            Macro::autoSave(nullptr, g.currentSession);
-
         if (g.mod->getSettingValue<bool>("endscreen_button")) {
 			cocos2d::CCSize winSize = CCDirector::sharedDirector()->getWinSize();
 
