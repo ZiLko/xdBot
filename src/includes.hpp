@@ -103,6 +103,7 @@ public:
     bool cancelCheckpoint = false;
     bool ignoreRecordAction = false;
     bool restart = false;
+    bool restartLater = false;
     bool creatingTrajectory = false;
     bool firstAttempt = false;
 

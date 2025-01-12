@@ -1,6 +1,6 @@
 # v2.3.6
 
-* Improved compatibility with other bots macros.
+* Improved compatibility with other bot's macros (Pathfinder, Eclipse).
 
 # v2.3.5
 

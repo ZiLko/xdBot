@@ -710,6 +710,8 @@ void MacroCell::handleLoad() {
 	g.restart = true;
 	g.macro.canChangeFPS = false;
 
+    g.macro.xdBotMacro = g.macro.botInfo.name == "xdBot";
+
 	loadLayer->keyBackClicked();
 
 	RecordLayer* newLayer = nullptr;

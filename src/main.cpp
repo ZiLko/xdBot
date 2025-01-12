@@ -135,7 +135,7 @@ class $modify(PlayLayer) {
       g.renderer.levelStartFrame = frame;
 
     if (g.restart && m_levelSettings->m_platformerMode && g.state != state::none)
-      m_fields->delayedLevelRestart = frame + 1;
+      m_fields->delayedLevelRestart = frame + 2;
 
     Global::updateSeed(true);
 
@@ -218,19 +218,18 @@ class $modify(BGLHook, GJBaseGameLayer) {
         g.renderer.dontRecordAudio = false;
       }
 
-    int frame = Global::getCurrentFrame();
-
-      if (frame > 2 && g.firstAttempt) {
+      int frame = Global::getCurrentFrame();
+      if (frame > 2 && g.firstAttempt && g.macro.xdBotMacro) {
         g.firstAttempt = false;
 
         if ((m_levelSettings->m_platformerMode || rendering) && !m_levelEndAnimationStarted)
-          return PlayLayer::get()->resetLevelFromStart();
+          return pl->resetLevelFromStart();
         else if (!m_levelEndAnimationStarted)
-          return PlayLayer::get()->resetLevel();
+          return pl->resetLevel();
       }
 
-      if (g.previousFrame == frame && frame != 0)
-        return GJBaseGameLayer::processCommands(dt);
+      // if (g.previousFrame == frame && frame != 0)
+      //   return GJBaseGameLayer::processCommands(dt);
 
     }
 
@@ -253,7 +252,7 @@ class $modify(BGLHook, GJBaseGameLayer) {
       handleRecording(frame);
 
     if (g.state == state::playing)
-      handlePlaying(frame);
+      handlePlaying(Global::getCurrentFrame());
 
   }
 
@@ -446,7 +445,6 @@ class $modify(PauseLayer) {
     g.checkpoints.clear();
 
     if (g.restart) {
-      g.restart = false;
       if (PlayLayer* pl = PlayLayer::get())
         pl->resetLevel();
     }

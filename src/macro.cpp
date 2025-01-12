@@ -109,6 +109,7 @@ void Macro::updateInfo(PlayLayer* pl) {
 
     g.macro.botInfo.name = "xdBot";
     g.macro.botInfo.version = xdBotVersion;
+    g.macro.xdBotMacro = true;
 }
 
 void Macro::updateTPS() {

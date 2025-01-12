@@ -158,22 +158,28 @@ float Global::getTPS() {
 }
 
 int Global::getCurrentFrame(bool editor) {
-  double levelTime;
+  // double levelTime;
   PlayLayer* pl = PlayLayer::get();
 
   if (!pl) {
     if (!editor) return 0;
 
-    levelTime = GJBaseGameLayer::get()->m_gameState.m_levelTime;
+    // levelTime = GJBaseGameLayer::get()->m_gameState.m_levelTime;
   }
 
-  levelTime = pl->m_gameState.m_levelTime;
-  // int frame = pl->m_gameState.m_currentProgress;
-  int frame = static_cast<int>(levelTime * getTPS());
+  auto& g = Global::get();
+  int frame;
+  // levelTime = pl->m_gameState.m_levelTime;
 
-  frame -= Global::get().frameOffset;
-  frame++;
+  if (!g.macro.xdBotMacro && g.state == state::playing) {
+    frame = pl->m_gameState.m_currentProgress;
+  }
+  else {
+    frame = static_cast<int>(pl->m_gameState.m_levelTime * getTPS());
+    frame++;
+  }
 
+  frame -= g.frameOffset;
   if (frame < 0) return 0;
 
   return frame;

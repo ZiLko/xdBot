@@ -240,7 +240,7 @@ void RecordLayer::togglePlaying(CCObject*) {
     if (g.state == state::playing) {
         g.currentAction = 0;
         g.currentFrameFix = 0;
-
+        
         PlayLayer* pl = PlayLayer::get();
 
         if (pl) {

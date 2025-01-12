@@ -43,6 +43,7 @@ public:
 
     bool canChangeFPS = true;
     uintptr_t seed = 0;
+    bool xdBotMacro = true;
 
     static void recordAction(int frame, int button, bool player2, bool hold);
 
