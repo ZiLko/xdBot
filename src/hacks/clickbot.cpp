@@ -104,13 +104,13 @@ void Clickbot::playSound(std::string id) {
 
     if (!sound) return;
 
+    int masterVol = g.mod->getSavedValue<int64_t>("clickbot_volume");
+    if (settings.volume == 0 || masterVol == 0) return;
+
     FMOD_RESULT result;
 
     result = c.system->playSound(sound, nullptr, false, &c.channel);
     if (result != FMOD_OK) return log::debug("Click sound errored. ID: 2");
-
-    int masterVol = g.mod->getSavedValue<int64_t>("clickbot_volume");
-    if (settings.volume == 0 || masterVol == 0) return;
 
     result = c.channel->setVolume((settings.volume / 100.f) * (masterVol / 100.f));
     if (result != FMOD_OK) return log::debug("Click sound errored. ID: 3");

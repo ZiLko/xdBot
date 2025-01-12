@@ -1,3 +1,7 @@
+# v2.3.6
+
+* Improved compatibility with other bots macros.
+
 # v2.3.5
 
 * Added render warning.

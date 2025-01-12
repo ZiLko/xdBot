@@ -4,8 +4,6 @@
 #include "gdr/gdr.hpp"
 #include "utils/utils.hpp"
 
-#include <Geode/Geode.hpp>
-
 using namespace geode::prelude;
 
 #define DIF(a, b) (std::fabs((a) - (b)) > 0.001f)
@@ -16,8 +14,6 @@ const std::vector<float> safeValues = {
     1.0f / 15, 1.0f / 12, 1.0f / 10, 1.0f / 8, 1.0f / 6,
     1.0f / 5, 1.0f / 4, 1.0f / 3, 1.0f / 2
 };
-
-const std::string xdBotVersion = "v2.3.5";
 
 enum state {
     none,

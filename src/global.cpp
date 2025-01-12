@@ -152,9 +152,9 @@ bool Global::hasIncompatibleMods() {
   return ret;
 }
 
-int Global::getTPS() {
+float Global::getTPS() {
   auto& g = Global::get();
-  return g.tpsEnabled ? g.tps : 240;
+  return g.tpsEnabled ? g.tps : 240.f;
 }
 
 int Global::getCurrentFrame(bool editor) {
@@ -168,9 +168,12 @@ int Global::getCurrentFrame(bool editor) {
   }
 
   levelTime = pl->m_gameState.m_levelTime;
+  // int frame = pl->m_gameState.m_currentProgress;
   int frame = static_cast<int>(levelTime * getTPS());
 
   frame -= Global::get().frameOffset;
+  frame++;
+
   if (frame < 0) return 0;
 
   return frame;

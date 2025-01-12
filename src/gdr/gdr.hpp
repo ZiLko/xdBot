@@ -6,7 +6,15 @@
 
 #include "json.hpp"
 
+#include <Geode/utils/VersionInfo.hpp>
+
+geode::prelude::VersionInfo getVersion(std::vector<std::string> nums);
+
 cocos2d::CCPoint dataFromString(std::string dataString);
+
+std::vector<std::string> splitByChar(std::string str, char splitChar);
+
+const std::string xdBotVersion = "v2.3.6";
 
 namespace gdr {
 
@@ -150,12 +158,31 @@ namespace gdr {
 			if (!replayJson["level"]["id"].is_null()) replay.levelInfo.id = replayJson["level"]["id"];
 			if (!replayJson["level"]["name"].is_null()) replay.levelInfo.name = replayJson["level"]["name"];
 
+			std::string ver = replay.botInfo.version;
+			
 			if (replayJson.contains("framerate"))
 				replay.framerate = replayJson["framerate"];
 
-			bool rotation = replay.botInfo.version.find("beta.") == std::string::npos && replay.botInfo.version.find("alpha.") == std::string::npos;
-			bool addOffset = false;
-			if (replay.botInfo.name == "xdBot" && replay.botInfo.version == "v2.0.0") rotation = true;
+			bool rotation = ver.find("beta.") == std::string::npos && ver.find("alpha.") == std::string::npos;
+			if (replay.botInfo.name == "xdBot" && ver == "v2.0.0") rotation = true;
+
+			// bool addOffset = false;
+			bool addOffset = replay.botInfo.name == "xdBot";
+
+			if (addOffset) {
+				if (ver.front() == 'v') ver = ver.substr(1);
+
+				std::vector<std::string> splitVer = splitByChar(ver, '.');
+
+				if (splitVer.size() <= 3) {
+					std::vector<std::string> realVer = {"2", "3", "6"};
+
+					geode::prelude::VersionInfo macroVer = getVersion(splitVer);
+					geode::prelude::VersionInfo checkVer = getVersion(realVer);
+
+					if (macroVer >= checkVer) addOffset = false;
+				}
+			}
 
 			replay.parseExtension(replayJson.get<json::object_t>());
 
@@ -168,7 +195,7 @@ namespace gdr {
 				if (!inputJson.contains("frame")) continue;
 				if (inputJson["frame"].is_null()) continue;
 
-				input.frame = inputJson["frame"].get<int>() - (addOffset ? 1 : 0);
+				input.frame = inputJson["frame"].get<int>() + (addOffset ? 1 : 0);
 				input.button = inputJson["btn"];
 				input.player2 = inputJson["2p"];
 				input.down = inputJson["down"];
@@ -185,7 +212,7 @@ namespace gdr {
 				if (!frameFixJson.contains("frame")) continue;
 				if (frameFixJson["frame"].is_null()) continue;
 
-				frameFix.frame = frameFixJson["frame"].get<int>() - (addOffset ? 1 : 0);
+				frameFix.frame = frameFixJson["frame"].get<int>() + (addOffset ? 1 : 0);
 
 				if (frameFixJson.contains("player1")) {
 
@@ -205,7 +232,6 @@ namespace gdr {
 					frameFix.p2.rotate = false;
 
 				} else if (frameFixJson.contains("p1")) {
-					bool rotation = replay.botInfo.version.find("beta.") == std::string::npos && replay.botInfo.version.find(".alpha") == std::string::npos;
 					if (replay.botInfo.name != "xdBot") rotation = false;
 
 					if (frameFixJson["p1"].contains("x"))

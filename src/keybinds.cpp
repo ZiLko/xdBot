@@ -37,6 +37,9 @@ class $modify(CCKeyboardDispatcher) {
       }
     }
 
+    // if (key == enumKeyCodes::KEY_L && !isKeyRepeat && isKeyDown) {
+    // }
+
     // if (key == enumKeyCodes::KEY_F && !isKeyRepeat && isKeyDown && PlayLayer::get()) {
     //   log::debug("POS DEBUG {}", PlayLayer::get()->m_player1->getPosition());
     //   log::debug("POS2 DEBUG {}", PlayLayer::get()->m_player2->getPosition());

@@ -56,7 +56,7 @@ public:
 
     static bool hasIncompatibleMods();
 
-    static int getTPS();
+    static float getTPS();
 
     static int getCurrentFrame(bool editor = false);
 
