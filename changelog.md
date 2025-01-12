@@ -1,3 +1,10 @@
+# v2.3.5
+
+* Added render warning.
+* Fixed clickbot not working.
+* Fixed render audio recording bugs.
+* Fixed on level end auto save not working.
+
 # v2.3.4
 
 * Fixed render green video?.

@@ -14,6 +14,12 @@ class $modify(CCEGLView) {
 
         if (!editLayer) return;
 
+        CCScene* scene = CCDirector::get()->getRunningScene();
+        if (MacroEditLayer* layer = scene->getChildByType<MacroEditLayer>(0))
+            editLayer = layer;
+        else
+            return;
+
         editLayer->updateHover(getMousePos());
         
     }

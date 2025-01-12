@@ -148,6 +148,11 @@ class $modify(PlayLayer) {
     void levelComplete() {
         auto& g = Global::get();
 
+        g.firstAttempt = true;
+
+        if (g.state == state::recording && g.autosaveEnabled && g.mod->getSavedValue<bool>("autosave_levelend_enabled"))
+            Macro::autoSave(nullptr, g.currentSession);
+
         bool wasTestMode = m_isTestMode;
 
         if (g.safeMode && g.mod->getSavedValue<bool>("macro_auto_safe_mode"))
@@ -157,6 +162,7 @@ class $modify(PlayLayer) {
             g.safeMode = false;
 
         PlayLayer::levelComplete();
+        
         Macro::resetState(true);
 
         m_isTestMode = wasTestMode;

@@ -188,19 +188,6 @@ class $modify(PlayLayer) {
     g.ignoreRecordAction = false;
   }
 
-  void levelComplete() {
-    PlayLayer::levelComplete();
-
-    auto& g = Global::get();
-
-    g.firstAttempt = true;
-
-    if (g.state == state::recording && g.autosaveEnabled && g.mod->getSavedValue<bool>("autosave_levelend_enabled"))
-      Macro::autoSave(nullptr, g.currentSession);
-
-    Macro::resetState(true);
-  }
-
 };
 
 class $modify(BGLHook, GJBaseGameLayer) {
@@ -468,14 +455,26 @@ class $modify(PauseLayer) {
 
   void onQuit(CCObject * sender) {
     PauseLayer::onQuit(sender);
-    auto& g = Global::get();
+
     Macro::resetState();
+
+    Loader::get()->queueInMainThread([] {
+      auto& g = Global::get();
+      if (g.renderer.recording) g.renderer.stop();
+      if (g.renderer.recordingAudio) g.renderer.stopAudio();
+    });
   }
 
   void goEdit() {
     PauseLayer::goEdit();
-    auto& g = Global::get();
+
     Macro::resetState();
+    
+    Loader::get()->queueInMainThread([] {
+      auto& g = Global::get();
+      if (g.renderer.recording) g.renderer.stop();
+      if (g.renderer.recordingAudio) g.renderer.stopAudio();
+    });
   }
 
 };

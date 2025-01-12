@@ -292,6 +292,14 @@ void Renderer::start() {
     settings.m_fps = fps;
     settings.m_outputFile = path;
 
+    if (!Mod::get()->setSavedValue("first_render_", true)) {
+        FLAlertLayer::create(
+            "Warning",
+            "If you have a macro for the level, <cl>let it run</c> to allow the level to render.",
+            "Ok"
+        )->show();
+    }
+
     std::thread([&, path, songFile, songOffset, fadeIn, fadeOut, extension, bitrateApi, settings]() {
         if (!codec.empty()) codec = "-c:v " + codec + " ";
         if (!bitrate.empty()) bitrate = "-b:v " + bitrate + " ";
@@ -508,13 +516,13 @@ void Renderer::start() {
 
 void Renderer::stop(int frame) {
     renderedFrames.clear();
-    finishFrame = frame;
+    finishFrame = Global::getCurrentFrame();
     pause = true;
     recording = false;
     timeAfter = 0.f;
 
     if (PlayLayer* pl = PlayLayer::get()) {
-        if (pl->m_hasCompletedLevel) {
+        if (pl->m_levelEndAnimationStarted) {
             finishFrame = 0;
             levelFinished = true;
         }
@@ -527,7 +535,8 @@ void Renderer::stop(int frame) {
                     xdbot->onClose(nullptr);
             }
         }
-    }
+    } else
+        audioMode = AudioMode::Off;
 
     if (audioMode == AudioMode::Record) {
         recordingAudio = true;
@@ -661,7 +670,7 @@ void Renderer::captureFrame() {
 }
 
 void Renderer::handleRecording(PlayLayer* pl, int frame) {
-    if (!pl) stop();
+    if (!pl) stop(frame);
     isPlatformer = pl->m_levelSettings->m_platformerMode;
     if (dontRender || pl->m_player1->m_isDead) return;
 
