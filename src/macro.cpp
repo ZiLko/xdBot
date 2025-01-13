@@ -117,19 +117,14 @@ void Macro::updateTPS() {
 
     if (g.state != state::none && !g.macro.inputs.empty()) {
         g.previousTpsEnabled = g.tpsEnabled;
+        g.previousTps = g.tps;
 
-        g.mod->setSavedValue("macro_tps", g.macro.framerate);
-        g.mod->setSavedValue("macro_tps_enabled", true);
+        g.tpsEnabled = g.macro.framerate != 240.f;
+        if (g.tpsEnabled) g.tps = g.macro.framerate;
 
-        if (g.macro.framerate != 240.f) {
-            g.tps = g.macro.framerate;
-            g.tpsEnabled = true;
-            g.previousTps = g.tps;
-        } else
-            g.tpsEnabled = false;
-
-        // g.tpsEnabled = g.tps != 240.f;
-        // if (g.tpsEnabled) g.tps = g.macro.framerate;
+        g.mod->setSavedValue("macro_tps", g.tps);
+        g.mod->setSavedValue("macro_tps_enabled", g.tpsEnabled);
+        
     }
     else if (g.previousTps != 0.f) {
         g.tpsEnabled = g.previousTpsEnabled;

@@ -240,6 +240,8 @@ void RecordLayer::togglePlaying(CCObject*) {
     if (g.state == state::playing) {
         g.currentAction = 0;
         g.currentFrameFix = 0;
+
+        g.macro.xdBotMacro = g.macro.botInfo.name == "xdBot";
         
         PlayLayer* pl = PlayLayer::get();
 

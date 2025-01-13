@@ -1,6 +1,15 @@
 #include "render_settings_layer.hpp"
 #include "record_layer.hpp"
 
+#include <Geode/modify/SliderTouchLogic.hpp>
+
+class $modify(SliderTouchLogic) {
+    bool ccTouchBegan(cocos2d::CCTouch* v1, cocos2d::CCEvent* v2) {
+        if (std::string_view(m_slider->getID()) == "disabled-slider"_spr) return false;
+        return SliderTouchLogic::ccTouchBegan(v1, v2);
+    }
+};
+
 void RenderSettingsLayer::textChanged(CCTextInputNode* node) {
 
     if (secondsInput->getString() != "" && node == secondsInput) {
@@ -72,6 +81,8 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
 bool RenderSettingsLayer::setup() {
     setTitle("Render Settings");
 
+    bool usingApi = Renderer::shouldUseAPI();
+
     cocos2d::CCPoint offset = (CCDirector::sharedDirector()->getWinSize() - m_mainLayer->getContentSize()) / 2;
     m_mainLayer->setPosition(m_mainLayer->getPosition() - offset);
     m_closeBtn->setPosition(m_closeBtn->getPosition() + offset);
@@ -86,8 +97,6 @@ bool RenderSettingsLayer::setup() {
         mod->setSavedValue("render_seconds_after", std::to_string(0));
 
     cocos2d::CCSize center = cocos2d::CCDirector::sharedDirector()->getWinSize() / 2;
-    CCSprite* spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
-    CCSprite* spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
 
     CCMenu* menu = CCMenu::create();
     m_mainLayer->addChild(menu);
@@ -102,12 +111,16 @@ bool RenderSettingsLayer::setup() {
     bg->setContentSize({ 392, 55 });
     menu->addChild(bg);
 
+    if (usingApi) bg->setOpacity(40);
+
     CCLabelBMFont* lbl = CCLabelBMFont::create("Extra Args:", "bigFont.fnt");
     lbl->setPosition(ccp(-105, 88));
     lbl->setAnchorPoint({ 0, 0.5 });
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
+
+    if (usingApi) lbl->setOpacity(90);
 
     argsInput = CCTextInputNode::create(150, 30, "args", "chatFont.fnt");
     argsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
@@ -133,6 +146,8 @@ bool RenderSettingsLayer::setup() {
     bg->setAnchorPoint({ 0, 1 });
     bg->setContentSize({ 401, 55 });
     menu->addChild(bg);
+    
+    if (usingApi) bg->setOpacity(40);
 
     lbl = CCLabelBMFont::create("Audio Args:", "bigFont.fnt");
     lbl->setPosition(ccp(-105, 55));
@@ -140,6 +155,8 @@ bool RenderSettingsLayer::setup() {
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
+    
+    if (usingApi) lbl->setOpacity(90);
 
     audioArgsInput = CCTextInputNode::create(150, 30, "audio args", "chatFont.fnt");
     audioArgsInput->m_textField->setAnchorPoint({ 0.5f, 0.5f });
@@ -234,8 +251,13 @@ bool RenderSettingsLayer::setup() {
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
+    
+    if (usingApi) lbl->setOpacity(90);
 
-    onlySongToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    onlySongToggle = CCMenuItemToggler::create(
+        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
+        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
+        this, menu_selector(RecordLayer::toggleSetting));
     onlySongToggle->setPosition(ccp(0, -32));
     onlySongToggle->setScale(0.555);
     onlySongToggle->toggle(mod->getSavedValue<bool>("render_only_song"));
@@ -248,8 +270,13 @@ bool RenderSettingsLayer::setup() {
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
+    
+    if (usingApi) lbl->setOpacity(90);
 
-    recordAudioToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    recordAudioToggle = CCMenuItemToggler::create(
+        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
+        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
+        this, menu_selector(RecordLayer::toggleSetting));
     recordAudioToggle->setPosition(ccp(0, -58));
     recordAudioToggle->setScale(0.555);
     recordAudioToggle->toggle(mod->getSavedValue<bool>("render_record_audio"));
@@ -262,6 +289,8 @@ bool RenderSettingsLayer::setup() {
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
+    
+    if (usingApi) lbl->setOpacity(90);
 
     fadeInInput = TextInput::create(50.f, "s", "bigFont.fnt");
     fadeInInput->setScale(0.5f);
@@ -270,13 +299,22 @@ bool RenderSettingsLayer::setup() {
     fadeInInput->getInputNode()->setDelegate(this);
     fadeInInput->getInputNode()->setAllowedChars("0123456789.");
     menu->addChild(fadeInInput);
-
-    CCMenuItemToggler* toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    
+    CCMenuItemToggler* toggle = CCMenuItemToggler::create(
+        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
+        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
+        this, menu_selector(RecordLayer::toggleSetting));
     toggle->setPosition(ccp(130, -32));
     toggle->setScale(0.555);
     toggle->toggle(mod->getSavedValue<bool>("render_fade_in"));
     toggle->setID("render_fade_in");
     menu->addChild(toggle);
+
+    if (usingApi) {
+        toggle->setCascadeOpacityEnabled(true);
+        toggle->setEnabled(false);
+        toggle->setOpacity(100);
+    }
 
     lbl = CCLabelBMFont::create("Fade Out:", "bigFont.fnt");
     lbl->setPosition(ccp(25, -58));
@@ -284,6 +322,8 @@ bool RenderSettingsLayer::setup() {
     lbl->setOpacity(200);
     lbl->setScale(0.325);
     menu->addChild(lbl);
+    
+    if (usingApi) lbl->setOpacity(90);
 
     lbl = CCLabelBMFont::create("File Extension:", "bigFont.fnt");
     lbl->setPosition(ccp(110, -5));
@@ -291,6 +331,8 @@ bool RenderSettingsLayer::setup() {
     lbl->setOpacity(200);
     lbl->setScale(0.3f);
     menu->addChild(lbl);
+    
+    if (usingApi) lbl->setOpacity(90);
 
     extensionInput = TextInput::create(46.f, "", "chatFont.fnt");
     extensionInput->setScale(0.8f);
@@ -308,12 +350,21 @@ bool RenderSettingsLayer::setup() {
     fadeOutInput->getInputNode()->setAllowedChars("0123456789.");
     menu->addChild(fadeOutInput);
 
-    toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    toggle = CCMenuItemToggler::create(
+        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
+        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
+        this, menu_selector(RecordLayer::toggleSetting));
     toggle->setPosition(ccp(130, -58));
     toggle->setScale(0.555);
     toggle->toggle(mod->getSavedValue<bool>("render_fade_out"));
     toggle->setID("render_fade_out");
     menu->addChild(toggle);
+
+    if (usingApi) {
+        toggle->setCascadeOpacityEnabled(true);
+        toggle->setEnabled(false);
+        toggle->setOpacity(100);
+    }
 
     lbl = CCLabelBMFont::create("Hide Endscreen:", "bigFont.fnt");
     lbl->setPosition(ccp(-105, -83));
@@ -322,7 +373,10 @@ bool RenderSettingsLayer::setup() {
     lbl->setScale(0.325);
     menu->addChild(lbl);
 
-    toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    toggle = CCMenuItemToggler::create(
+        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
+        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
+        this, menu_selector(RecordLayer::toggleSetting));
     toggle->setPosition(ccp(0, -83));
     toggle->setScale(0.555);
     toggle->toggle(mod->getSavedValue<bool>("render_hide_endscreen"));
@@ -336,7 +390,10 @@ bool RenderSettingsLayer::setup() {
     lbl->setScale(0.25);
     menu->addChild(lbl);
 
-    toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(RecordLayer::toggleSetting));
+    toggle = CCMenuItemToggler::create(
+        CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png"),
+        CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png"),
+        this, menu_selector(RecordLayer::toggleSetting));
     toggle->setPosition(ccp(0, -108));
     toggle->setScale(0.555);
     toggle->toggle(mod->getSavedValue<bool>("render_hide_levelcomplete"));
@@ -347,6 +404,8 @@ bool RenderSettingsLayer::setup() {
     lbl->setScale(0.475f);
     lbl->setPosition({188, 42});
     menu->addChild(lbl);
+    
+    if (usingApi) lbl->setOpacity(90);
 
     sfxSlider = Slider::create(
 		this,
@@ -363,6 +422,8 @@ bool RenderSettingsLayer::setup() {
     lbl->setScale(0.475f);
     lbl->setPosition({188, 87});
     menu->addChild(lbl);
+    
+    if (usingApi) lbl->setOpacity(90);
 
     musicSlider = Slider::create(
 		this,
@@ -384,7 +445,7 @@ bool RenderSettingsLayer::setup() {
     spr = ButtonSprite::create("Restore Defaults");
     spr->setScale(0.375f);
     btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(RenderSettingsLayer::onDefaults));
-    btn->setPosition({200, -123});
+    btn->setPosition({211, -123});
     menu->addChild(btn);
 
     CCSprite* spr2 = CCSprite::createWithSpriteFrameName("GJ_infoIcon_001.png");
@@ -400,6 +461,44 @@ bool RenderSettingsLayer::setup() {
     btn->setPosition({13, -48});
     btn->setTag(0);
     menu->addChild(btn);
+
+    if (usingApi) {
+        argsInput->m_placeholderLabel->setOpacity(100);
+        audioArgsInput->m_placeholderLabel->setOpacity(100);
+
+        argsInput->setID("disabled-input"_spr);
+        audioArgsInput->setID("disabled-input"_spr);
+
+        extensionInput->setEnabled(false);
+        extensionInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        extensionInput->getBGSprite()->setOpacity(40);
+
+        fadeOutInput->setEnabled(false);
+        fadeOutInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        fadeOutInput->getBGSprite()->setOpacity(40);
+
+        fadeInInput->setEnabled(false);
+        fadeInInput->getInputNode()->m_placeholderLabel->setOpacity(100);
+        fadeInInput->getBGSprite()->setOpacity(40);
+
+        onlySongToggle->setCascadeOpacityEnabled(true);
+        onlySongToggle->setEnabled(false);
+        recordAudioToggle->setCascadeOpacityEnabled(true);
+        recordAudioToggle->setEnabled(false);
+
+        onlySongToggle->setOpacity(100);
+        recordAudioToggle->setOpacity(100);
+
+        sfxSlider->setID("disabled-slider"_spr);
+        musicSlider->setID("disabled-slider"_spr);
+
+        sfxSlider->m_sliderBar->setOpacity(100);
+        sfxSlider->m_groove->setOpacity(100);
+        sfxSlider->m_touchLogic->setOpacity(100);
+        musicSlider->m_sliderBar->setOpacity(100);
+        musicSlider->m_groove->setOpacity(100);
+        musicSlider->m_touchLogic->setOpacity(100);
+    }
 
     return true;
 }

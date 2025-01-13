@@ -1,3 +1,10 @@
+# v2.3.7
+
+* Fixed macro death bug with other bot's macros.
+* Fixed tps input bugs.
+* Made render use video args if using ffmpeg api.
+* Made render settings that dont work gray out if youre using ffmpeg api.
+
 # v2.3.6
 
 * Improved compatibility with other bot's macros (Pathfinder, Eclipse).

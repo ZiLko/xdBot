@@ -76,5 +76,6 @@ public:
     void handleAudioRecording(PlayLayer* pl, int frame);
     
     static bool toggle();
+    static bool shouldUseAPI();
     bool tryPause();
 };

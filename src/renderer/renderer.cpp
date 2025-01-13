@@ -141,6 +141,23 @@ class $modify(CCScheduler) {
 
 };
 
+bool Renderer::shouldUseAPI() {
+    #ifdef GEODE_IS_WINDOWS
+
+    bool foundApi = Loader::get()->isModLoaded("eclipse.ffmpeg-api");
+    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<std::filesystem::path>("ffmpeg_path");
+    bool foundExe = std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe";
+
+    return !foundExe && foundApi;
+
+#else
+
+    return true;
+
+#endif
+
+}
+
 bool Renderer::toggle() {
     auto& g = Global::get();
     if (Loader::get()->isModLoaded("syzzi.click_between_frames")) {
@@ -149,14 +166,10 @@ bool Renderer::toggle() {
     }
 
     bool foundApi = Loader::get()->isModLoaded("eclipse.ffmpeg-api");
-
-#ifdef GEODE_IS_WINDOWS
-    std::filesystem::path ffmpegPath = g.mod->getSettingValue<std::filesystem::path>("ffmpeg_path");
+    std::filesystem::path ffmpegPath = Mod::get()->getSettingValue<std::filesystem::path>("ffmpeg_path");
     bool foundExe = std::filesystem::exists(ffmpegPath) && ffmpegPath.filename().string() == "ffmpeg.exe";
-    g.renderer.usingApi = !foundExe && foundApi;
-#else
-    g.renderer.usingApi = true;
-#endif
+
+    g.renderer.usingApi = Renderer::shouldUseAPI();
 
     if (g.renderer.recording || g.renderer.recordingAudio) {
         g.renderer.recordingAudio ? g.renderer.stopAudio() : g.renderer.stop(Global::getCurrentFrame());
@@ -291,6 +304,7 @@ void Renderer::start() {
     settings.m_height = height;
     settings.m_fps = fps;
     settings.m_outputFile = path;
+    settings.m_colorspaceFilters = videoArgs;
 
     if (!Mod::get()->setSavedValue("first_render_", true)) {
         FLAlertLayer::create(

@@ -347,14 +347,21 @@ PauseLayer* Global::getPauseLayer() {
 $execute{
   auto & g = Global::get();
 
+  if (!g.mod->setSavedValue("defaults_set_14", true)) {
+    g.mod->setSavedValue("render_fade_in_video", std::to_string(2));
+    g.mod->setSavedValue("render_fade_out_video", std::to_string(2));
+  }
+
   if (!g.mod->setSavedValue("defaults_set_12", true)) {
     g.mod->setSettingValue<std::filesystem::path>("macros_folder", g.mod->getSaveDir() / "macros");
     g.mod->setSettingValue<std::filesystem::path>("autosaves_folder", g.mod->getSaveDir() / "autosaves");
   }
 
   #ifdef GEODE_IS_ANDROID
+  
   if (!g.mod->setSavedValue("defaults_set_11", true))
     g.mod->setSavedValue("render_codec", std::string("libx264"));
+  
   #endif
 
   if (!g.mod->setSavedValue("defaults_set_10", true)) {

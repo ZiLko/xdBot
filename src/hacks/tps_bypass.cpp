@@ -3,32 +3,22 @@
 
 class $modify(GJBaseGameLayer) {
 
-    struct Fields {
-        float leftOver = 0.f;
-    };
-
     void update(float dt) {
         if (!Global::get().tpsEnabled) return GJBaseGameLayer::update(dt);
         if (Global::getTPS() == 240.f) return GJBaseGameLayer::update(dt);
-        if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
         if (Global::get().frameStepper) return GJBaseGameLayer::update(dt);
-
-        using namespace std::literals;
+        if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
         
         float newDt = 1.f / Global::getTPS();
 
         auto startTime = std::chrono::high_resolution_clock::now();
-        int mult = static_cast<int>((dt + m_fields->leftOver) / newDt);
 
-        for (int i = 0; i < mult; ++i) {
+        for (int i = 0; i < static_cast<int>(dt / newDt); ++i) {
             GJBaseGameLayer::update(newDt);
-            if (std::chrono::high_resolution_clock::now() - startTime > 33.333ms) {
-                mult = i + 1;
+            if (std::chrono::high_resolution_clock::now() - startTime > std::chrono::duration<double, std::milli>(16.666))
                 break;
-            }
         }
         
-        m_fields->leftOver += (dt - newDt * mult);
     }
 
     float getModifiedDelta(float dt) {
