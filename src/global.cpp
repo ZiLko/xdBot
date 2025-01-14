@@ -359,6 +359,9 @@ $execute{
 
   #ifdef GEODE_IS_ANDROID
   
+  if (!g.mod->setSavedValue("defaults_set_15", true))
+    g.mod->setSavedValue("render_video_args", "");
+  
   if (!g.mod->setSavedValue("defaults_set_11", true))
     g.mod->setSavedValue("render_codec", std::string("libx264"));
   

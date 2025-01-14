@@ -1,6 +1,7 @@
 # v2.3.9
 
-* Fixed tps bypass bug when at 240 and enabled.
+* Fixed tps bypass bug when at 240 and enabled so that this lucalwise kid can play with tps enabled but at 240tps.
+* Made android video args empty by default cus ffmpeg api dies with them i think.
 
 # v2.3.8
 
