@@ -14,7 +14,7 @@ cocos2d::CCPoint dataFromString(std::string dataString);
 
 std::vector<std::string> splitByChar(std::string str, char splitChar);
 
-const std::string xdBotVersion = "v2.3.8";
+const std::string xdBotVersion = "v2.3.9";
 
 namespace gdr {
 
@@ -182,8 +182,6 @@ namespace gdr {
 
 					if (macroVer >= checkVer) offset = false;
 				}
-
-				if (ver == "2.0.0-alpha.1") offset--;
 			}
 
 			replay.parseExtension(replayJson.get<json::object_t>());

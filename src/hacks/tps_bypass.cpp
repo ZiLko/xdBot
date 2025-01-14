@@ -7,12 +7,12 @@ class $modify(GJBaseGameLayer) {
 
     void update(float dt) {
         if (!Global::get().tpsEnabled) return GJBaseGameLayer::update(dt);
-        if (Global::get().frameStepper) return GJBaseGameLayer::update(dt);
+        if (Global::getTPS() == 240.f) return GJBaseGameLayer::update(dt);
         if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
         
         float newDt = 1.f / Global::getTPS();
 
-        if (Global::getTPS() == 240.f) return GJBaseGameLayer::update(newDt);
+        if (Global::get().frameStepper) return GJBaseGameLayer::update(newDt);
 
         auto startTime = std::chrono::high_resolution_clock::now();
         int mult = static_cast<int>((dt+ leftOver2) / newDt);

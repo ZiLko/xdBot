@@ -1,3 +1,7 @@
+# v2.3.9
+
+* Fixed tps bypass bug when at 240 and enabled.
+
 # v2.3.8
 
 * Fixed some tps thing and some macro offset thing.

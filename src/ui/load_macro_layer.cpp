@@ -204,9 +204,7 @@ void LoadMacroLayer::onImportMacro(CCObject*) {
 			f2.write(reinterpret_cast<const char*>(data.data()), data.size());
 			f2.close();
 
-#ifdef GEODE_IS_WINDOWS
 			this->reloadList(0);
-#endif
 
 			if (xdMacro)
 				FLAlertLayer::create("Warning", "<cl>.xd</c> extension macros may not function correctly in this version.", "Ok")->show();
