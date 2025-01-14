@@ -1,3 +1,7 @@
+# v2.3.8
+
+* Fixed some tps thing and some macro offset thing.
+
 # v2.3.7
 
 * Fixed macro death bug with other bot's macros.

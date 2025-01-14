@@ -14,7 +14,7 @@ cocos2d::CCPoint dataFromString(std::string dataString);
 
 std::vector<std::string> splitByChar(std::string str, char splitChar);
 
-const std::string xdBotVersion = "v2.3.7";
+const std::string xdBotVersion = "v2.3.8";
 
 namespace gdr {
 
@@ -166,10 +166,10 @@ namespace gdr {
 			bool rotation = ver.find("beta.") == std::string::npos && ver.find("alpha.") == std::string::npos;
 			if (replay.botInfo.name == "xdBot" && ver == "v2.0.0") rotation = true;
 
-			// bool addOffset = false;
-			bool addOffset = replay.botInfo.name == "xdBot";
+			// bool offset = false;
+			int offset = replay.botInfo.name == "xdBot" ? 1 : 0;
 
-			if (addOffset) {
+			if (offset == 1) {
 				if (ver.front() == 'v') ver = ver.substr(1);
 
 				std::vector<std::string> splitVer = splitByChar(ver, '.');
@@ -180,8 +180,10 @@ namespace gdr {
 					geode::prelude::VersionInfo macroVer = getVersion(splitVer);
 					geode::prelude::VersionInfo checkVer = getVersion(realVer);
 
-					if (macroVer >= checkVer) addOffset = false;
+					if (macroVer >= checkVer) offset = false;
 				}
+
+				if (ver == "2.0.0-alpha.1") offset--;
 			}
 
 			replay.parseExtension(replayJson.get<json::object_t>());
@@ -195,7 +197,7 @@ namespace gdr {
 				if (!inputJson.contains("frame")) continue;
 				if (inputJson["frame"].is_null()) continue;
 
-				input.frame = inputJson["frame"].get<int>() + (addOffset ? 1 : 0);
+				input.frame = inputJson["frame"].get<int>() + offset;
 				input.button = inputJson["btn"];
 				input.player2 = inputJson["2p"];
 				input.down = inputJson["down"];
@@ -212,7 +214,7 @@ namespace gdr {
 				if (!frameFixJson.contains("frame")) continue;
 				if (frameFixJson["frame"].is_null()) continue;
 
-				frameFix.frame = frameFixJson["frame"].get<int>() + (addOffset ? 1 : 0);
+				frameFix.frame = frameFixJson["frame"].get<int>() + offset;
 
 				if (frameFixJson.contains("player1")) {
 
