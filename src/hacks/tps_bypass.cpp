@@ -14,12 +14,15 @@ class $modify(GJBaseGameLayer) {
 
         if (Global::get().frameStepper) return GJBaseGameLayer::update(newDt);
 
+        float realDt = dt + leftOver2;
+        if (realDt > dt) realDt = dt;
+
         auto startTime = std::chrono::high_resolution_clock::now();
-        int mult = static_cast<int>((dt+ leftOver2) / newDt);
+        int mult = static_cast<int>(realDt / newDt);
 
         for (int i = 0; i < mult; ++i) {
             GJBaseGameLayer::update(newDt);
-            if (std::chrono::high_resolution_clock::now() - startTime > std::chrono::duration<double, std::milli>(16.666)) {
+            if (std::chrono::high_resolution_clock::now() - startTime > std::chrono::duration<double, std::milli>(16.666f)) {
                 mult = i + 1;
                 break;
             }

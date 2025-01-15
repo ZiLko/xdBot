@@ -91,71 +91,71 @@ void Clickbot::setSound(std::string id, FMOD::Sound* sound) {
 }
 
 void Clickbot::playSound(std::string id) {
-    auto& c = get();
-    if (!c.system) return updateSounds();
+    // auto& c = get();
+    // if (!c.system) return updateSounds();
 
-    auto& g = Global::get();
-    matjson::Value data = g.mod->getSavedValue<matjson::Value>(id);
-    ClickSetting settings = matjson::Serialize<ClickSetting>::from_json(data);
+    // auto& g = Global::get();
+    // matjson::Value data = g.mod->getSavedValue<matjson::Value>(id);
+    // ClickSetting settings = matjson::Serialize<ClickSetting>::from_json(data);
 
-    if (settings.disabled) return;
+    // if (settings.disabled) return;
 
-    FMOD::Sound* sound = getSound(id);
+    // FMOD::Sound* sound = getSound(id);
 
-    if (!sound) return;
+    // if (!sound) return;
 
-    int masterVol = g.mod->getSavedValue<int64_t>("clickbot_volume");
-    if (settings.volume == 0 || masterVol == 0) return;
+    // int masterVol = g.mod->getSavedValue<int64_t>("clickbot_volume");
+    // if (settings.volume == 0 || masterVol == 0) return;
 
-    FMOD_RESULT result;
+    // FMOD_RESULT result;
 
-    result = c.system->playSound(sound, nullptr, false, &c.channel);
-    if (result != FMOD_OK) return log::debug("Click sound errored. ID: 2");
+    // result = c.system->playSound(sound, nullptr, false, &c.channel);
+    // if (result != FMOD_OK) return log::debug("Click sound errored. ID: 2");
 
-    result = c.channel->setVolume((settings.volume / 100.f) * (masterVol / 100.f));
-    if (result != FMOD_OK) return log::debug("Click sound errored. ID: 3");
+    // result = c.channel->setVolume((settings.volume / 100.f) * (masterVol / 100.f));
+    // if (result != FMOD_OK) return log::debug("Click sound errored. ID: 3");
 
-    result = c.channel->setPitch(g.currentPitch);
-    if (result != FMOD_OK) return log::debug("Click sound errored. ID: 4");
+    // result = c.channel->setPitch(g.currentPitch);
+    // if (result != FMOD_OK) return log::debug("Click sound errored. ID: 4");
 
-    FMOD::DSP* pitchShifter = c.pitchShifter;
-    if (!pitchShifter) return updateSounds();
+    // FMOD::DSP* pitchShifter = c.pitchShifter;
+    // if (!pitchShifter) return updateSounds();
 
-    result = pitchShifter->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, settings.pitch * g.mod->getSavedValue<float>("clickbot_pitch"));
-    if (result != FMOD_OK) return log::debug("Click sound errored. ID: 6");
+    // result = pitchShifter->setParameterFloat(FMOD_DSP_PITCHSHIFT_PITCH, settings.pitch * g.mod->getSavedValue<float>("clickbot_pitch"));
+    // if (result != FMOD_OK) return log::debug("Click sound errored. ID: 6");
 
-    result = c.channel->addDSP(0, pitchShifter);
-    if (result != FMOD_OK) return log::debug("Click sound errored. ID: 7");
+    // result = c.channel->addDSP(0, pitchShifter);
+    // if (result != FMOD_OK) return log::debug("Click sound errored. ID: 7");
 }
 
 void Clickbot::updateSounds() {
-    auto& c = get();
-    FMOD_RESULT result;
+    // auto& c = get();
+    // FMOD_RESULT result;
 
-    if (!c.system) {
-        FMODAudioEngine* fmod = FMODAudioEngine::sharedEngine();
-        c.system = fmod->m_system;
-    }
+    // if (!c.system) {
+    //     FMODAudioEngine* fmod = FMODAudioEngine::sharedEngine();
+    //     c.system = fmod->m_system;
+    // }
 
-    if (!c.system) return;
+    // if (!c.system) return;
 
-    for (std::string name : buttonNames) {
-        matjson::Value data = Global::get().mod->getSavedValue<matjson::Value>(name);
-        ClickSetting settings = matjson::Serialize<ClickSetting>::from_json(data);
-        if (!std::filesystem::exists(settings.path)) continue;
+    // for (std::string name : buttonNames) {
+    //     matjson::Value data = Global::get().mod->getSavedValue<matjson::Value>(name);
+    //     ClickSetting settings = matjson::Serialize<ClickSetting>::from_json(data);
+    //     if (!std::filesystem::exists(settings.path)) continue;
 
-        FMOD::Sound* sound = getSound(name);
-        result = c.system->createSound(settings.path.string().c_str(), FMOD_DEFAULT, nullptr, &sound);
-        if (result != FMOD_OK) {
-            log::debug("Click sound errored. ID: 1");
-            continue;
-        }
+    //     FMOD::Sound* sound = getSound(name);
+    //     result = c.system->createSound(settings.path.string().c_str(), FMOD_DEFAULT, nullptr, &sound);
+    //     if (result != FMOD_OK) {
+    //         log::debug("Click sound errored. ID: 1");
+    //         continue;
+    //     }
 
-        setSound(name, sound);
-    }
+    //     setSound(name, sound);
+    // }
 
-    if (!c.pitchShifter) {
-        result = c.system->createDSPByType(FMOD_DSP_TYPE_PITCHSHIFT, &c.pitchShifter);
-        if (result != FMOD_OK) return log::debug("Click sound errored. ID: 5");
-    }
+    // if (!c.pitchShifter) {
+    //     result = c.system->createDSPByType(FMOD_DSP_TYPE_PITCHSHIFT, &c.pitchShifter);
+    //     if (result != FMOD_OK) return log::debug("Click sound errored. ID: 5");
+    // }
 }

@@ -219,8 +219,8 @@ void Global::updateSeed(bool isRestart) {
 
     if (!pl->m_player1->m_isDead) {
       std::mt19937 generator(seed + pl->m_gameState.m_currentProgress);
-      std::uniform_int_distribution<int> distribution(100000, 999999999);
-      int randomSeed = distribution(generator);
+      std::uniform_int_distribution<int> distribution(10000, 999999999);
+      finalSeed = distribution(generator);
     }
     else {
       std::random_device rd;

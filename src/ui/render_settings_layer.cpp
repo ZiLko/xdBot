@@ -260,7 +260,7 @@ bool RenderSettingsLayer::setup() {
         this, menu_selector(RecordLayer::toggleSetting));
     onlySongToggle->setPosition(ccp(0, -32));
     onlySongToggle->setScale(0.555);
-    onlySongToggle->toggle(mod->getSavedValue<bool>("render_only_song"));
+    if (!usingApi) onlySongToggle->toggle(mod->getSavedValue<bool>("render_only_song"));
     onlySongToggle->setID("render_only_song");
     menu->addChild(onlySongToggle);
 
@@ -279,7 +279,7 @@ bool RenderSettingsLayer::setup() {
         this, menu_selector(RecordLayer::toggleSetting));
     recordAudioToggle->setPosition(ccp(0, -58));
     recordAudioToggle->setScale(0.555);
-    recordAudioToggle->toggle(mod->getSavedValue<bool>("render_record_audio"));
+    if (!usingApi) recordAudioToggle->toggle(mod->getSavedValue<bool>("render_record_audio"));
     recordAudioToggle->setID("render_record_audio");
     menu->addChild(recordAudioToggle);
 
@@ -306,7 +306,7 @@ bool RenderSettingsLayer::setup() {
         this, menu_selector(RecordLayer::toggleSetting));
     toggle->setPosition(ccp(130, -32));
     toggle->setScale(0.555);
-    toggle->toggle(mod->getSavedValue<bool>("render_fade_in"));
+    if (!usingApi) toggle->toggle(mod->getSavedValue<bool>("render_fade_in"));
     toggle->setID("render_fade_in");
     menu->addChild(toggle);
 
@@ -356,7 +356,7 @@ bool RenderSettingsLayer::setup() {
         this, menu_selector(RecordLayer::toggleSetting));
     toggle->setPosition(ccp(130, -58));
     toggle->setScale(0.555);
-    toggle->toggle(mod->getSavedValue<bool>("render_fade_out"));
+    if (!usingApi) toggle->toggle(mod->getSavedValue<bool>("render_fade_out"));
     toggle->setID("render_fade_out");
     menu->addChild(toggle);
 
