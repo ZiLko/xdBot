@@ -67,6 +67,8 @@ public:
         saveSettings();
     }
 
+    void onRestore(CCObject*);
+    
 };
 
 

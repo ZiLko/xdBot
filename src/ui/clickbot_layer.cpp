@@ -307,8 +307,8 @@ bool ClickSettingsLayer::setup(std::string button, geode::Popup<>* layer) {
 	CCMenu* menu = CCMenu::create();
 	m_mainLayer->addChild(menu);
 
-	this->button = button;
-	this->clickbotLayer = layer;
+	button = button;
+	clickbotLayer = layer;
 
 	matjson::Value data = Mod::get()->getSavedValue<matjson::Value>(button);
 	settings = matjson::Serialize<ClickSetting>::from_json(data);
@@ -386,6 +386,12 @@ bool ClickSettingsLayer::setup(std::string button, geode::Popup<>* layer) {
 	lbl->setScale(0.45f);
 	menu->addChild(lbl);
 
+	spr = ButtonSprite::create("Restore");
+	spr->setScale(0.425f);
+	btn = CCMenuItemSpriteExtra::create(spr, this, menu_selector(ClickSettingsLayer::onRestore));
+	btn->setPosition({89, -69});
+	menu->addChild(btn);
+
 	return true;
 }
 
@@ -400,12 +406,29 @@ void ClickSettingsLayer::onSelectFile(CCObject*) {
 		if (res->isOk()) {
 			std::filesystem::path path = res->unwrapOrDefault();
 
-			this->filenameLabel->setString(path.filename().string().c_str());
+			filenameLabel->setString(path.filename().string().c_str());
 
-			this->settings.path = path;
-			this->saveSettings();
+			settings.path = path;
+			saveSettings();
 
-			static_cast<ClickbotLayer*>(this->clickbotLayer)->updateLabels();
+			static_cast<ClickbotLayer*>(clickbotLayer)->updateLabels();
 		}
 		});
+}
+
+void ClickSettingsLayer::onRestore(CCObject*) {
+	pitchSlider->setValue(0.33333333f);
+	volumeSlider->setValue(0.33333333f);
+
+	updatePitch(nullptr);
+	updateVolume(nullptr);
+	
+	std::filesystem::path path = Mod::get()->getResourcesDir() / fmt::format("default_{}.mp3", button);
+
+	filenameLabel->setString(path.filename().string().c_str());
+
+	settings.path = path;
+	saveSettings();
+
+	static_cast<ClickbotLayer*>(clickbotLayer)->updateLabels();
 }

@@ -1,8 +1,10 @@
 # v2.3.10
 
+* Added restore button for clickbot click settings.
 * Fixed seed again cus i forgot sometinhg.
 * Fixed android render trying to record audio even though it cant add it to the video.
 * Fixed buttons scale JUST for viper.
+* Fixed tps bypass speedups maybe.
 * R
 
 # v2.3.9
