@@ -20,6 +20,8 @@ private:
     CCLabelBMFont* volumeLabel = nullptr;
     CCLabelBMFont* pitchLabel = nullptr;
 
+    CCMenuItemToggler* disableToggle = nullptr;
+
     bool setup(std::string button, geode::Popup<>* layer) override;
 
 public:

@@ -358,6 +358,7 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
         if (std::string_view(tpsInput->getString()) != "" && value < 999999 && value >= 0.f) {
             mod->setSavedValue("macro_tps", value);
             Global::get().tps = value;
+            Global::get().leftOver = 0.f;
         }
     }
 

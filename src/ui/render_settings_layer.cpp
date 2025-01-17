@@ -47,7 +47,11 @@ void RenderSettingsLayer::onDefaults(CCObject*) {
             
             g.mod->setSavedValue("render_args", std::string("-pix_fmt yuv420p"));
 	        g.mod->setSavedValue("render_audio_args", std::string(""));
+            #ifdef GEODE_IS_WINDOWS
             g.mod->setSavedValue("render_video_args", std::string("colorspace=all=bt709:iall=bt470bg:fast=1"));
+            #else
+            g.mod->setSavedValue("render_video_args", std::string(""));
+            #endif
             g.mod->setSavedValue("render_record_audio", true);
             g.mod->setSavedValue("render_only_song", false);
             g.mod->setSavedValue("render_music_volume", 1.0);

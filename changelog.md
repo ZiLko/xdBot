@@ -1,3 +1,9 @@
+# v2.3.11
+
+* Fixed render restore defaults button restoring defaults.
+* Fixed clickbot restore defaults button NOT restoring defaults.
+* Fixed tps bug? lets find out.
+
 # v2.3.10
 
 * Added restore button for clickbot click settings.
@@ -10,7 +16,7 @@
 # v2.3.9
 
 * Fixed tps bypass bug when at 240 and enabled so that this lucalwise kid can play with tps enabled but at 240tps.
-* Made android video args empty by default cus ffmpeg api dies with them i think.
+* Made android video args empty by default cus dffmpeg api dies with them i think.
 
 # v2.3.8
 

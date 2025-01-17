@@ -1,21 +1,21 @@
 #include "../includes.hpp"
 #include <Geode/modify/GJBaseGameLayer.hpp>
 
-float leftOver2 = 0.f;
-
 class $modify(GJBaseGameLayer) {
 
     void update(float dt) {
-        if (!Global::get().tpsEnabled) return GJBaseGameLayer::update(dt);
+        auto& g = Global::get();
+
+        if (!g.tpsEnabled) return GJBaseGameLayer::update(dt);
         if (Global::getTPS() == 240.f) return GJBaseGameLayer::update(dt);
         if (!PlayLayer::get()) return GJBaseGameLayer::update(dt);
         
         float newDt = 1.f / Global::getTPS();
 
-        if (Global::get().frameStepper) return GJBaseGameLayer::update(newDt);
+        if (g.frameStepper) return GJBaseGameLayer::update(newDt);
 
-        float realDt = dt + leftOver2;
-        if (realDt > dt) realDt = dt;
+        float realDt = dt + g.leftOver;
+        if (realDt > dt && newDt < dt) realDt = dt;
 
         auto startTime = std::chrono::high_resolution_clock::now();
         int mult = static_cast<int>(realDt / newDt);
@@ -28,7 +28,7 @@ class $modify(GJBaseGameLayer) {
             }
         }
 
-        leftOver2 += (dt - newDt * mult);
+        g.leftOver += (dt - newDt * mult);
         
     }
 

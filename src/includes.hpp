@@ -163,4 +163,5 @@ public:
     int currentPage = 0;
     float currentPitch = 1.f;
     uintptr_t latestSeed = 0;
+    float leftOver = 0.f;
 };

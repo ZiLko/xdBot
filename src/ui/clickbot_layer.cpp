@@ -307,8 +307,8 @@ bool ClickSettingsLayer::setup(std::string button, geode::Popup<>* layer) {
 	CCMenu* menu = CCMenu::create();
 	m_mainLayer->addChild(menu);
 
-	button = button;
-	clickbotLayer = layer;
+	this->button = button;
+	this->clickbotLayer = layer;
 
 	matjson::Value data = Mod::get()->getSavedValue<matjson::Value>(button);
 	settings = matjson::Serialize<ClickSetting>::from_json(data);
@@ -375,11 +375,11 @@ bool ClickSettingsLayer::setup(std::string button, geode::Popup<>* layer) {
 	CCSprite* spriteOn = CCSprite::createWithSpriteFrameName("GJ_checkOn_001.png");
 	CCSprite* spriteOff = CCSprite::createWithSpriteFrameName("GJ_checkOff_001.png");
 
-	CCMenuItemToggler* toggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(ClickSettingsLayer::onDisable));
-	toggle->setScale(0.7f);
-	toggle->setPosition(ccp(76, -9));
-	toggle->toggle(settings.disabled);
-	menu->addChild(toggle);
+	disableToggle = CCMenuItemToggler::create(spriteOff, spriteOn, this, menu_selector(ClickSettingsLayer::onDisable));
+	disableToggle->setScale(0.7f);
+	disableToggle->setPosition(ccp(76, -9));
+	disableToggle->toggle(settings.disabled);
+	menu->addChild(disableToggle);
 
 	CCLabelBMFont* lbl = CCLabelBMFont::create("Disable", "bigFont.fnt");
 	lbl->setPosition(ccp(76, -32));
@@ -422,6 +422,10 @@ void ClickSettingsLayer::onRestore(CCObject*) {
 
 	updatePitch(nullptr);
 	updateVolume(nullptr);
+
+	disableToggle->toggle(false);
+
+	settings.disabled = false;
 	
 	std::filesystem::path path = Mod::get()->getResourcesDir() / fmt::format("default_{}.mp3", button);
 
