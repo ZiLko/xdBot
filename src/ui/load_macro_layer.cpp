@@ -29,14 +29,14 @@ void LoadMacroLayer::open(geode::Popup<>* layer, geode::Popup<>* layer2, bool au
 	std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder");
 
 	if (!std::filesystem::exists(path)) {
-		if (!std::filesystem::create_directory(path))
+		if (utils::file::createDirectoryAll(path).isErr())
 			return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 6", "Ok")->show();
 	}
 
 	path = Mod::get()->getSettingValue<std::filesystem::path>("autosaves_folder");
 
 	if (!std::filesystem::exists(path)) {
-		if (!std::filesystem::create_directory(path))
+		if (utils::file::createDirectoryAll(path).isErr())
 			return FLAlertLayer::create("Error", "There was an error getting the folder. ID: 61", "Ok")->show();
 	}
 
@@ -773,20 +773,17 @@ void MacroCell::onDelete(CCObject*) {
 }
 
 void MacroCell::deleteMacro(bool reload) {
-	try {
-		if (std::filesystem::remove(path)) {
-			if (reload) {
-				static_cast<LoadMacroLayer*>(loadLayer)->reloadList();
-				Notification::create("Macro Deleted", NotificationIcon::Success)->show();
-			}
-			this->removeFromParentAndCleanup(true);
-		}
-		else
-			return FLAlertLayer::create("Error", "There was an error deleting this macro. ID: 8", "Ok")->show();
-
-	}
-	catch (const std::filesystem::filesystem_error& e) {
+	std::error_code ec;
+	std::filesystem::remove(path, ec);
+	if (ec) {
 		return FLAlertLayer::create("Error", "There was an error deleting this macro. ID: 7", "Ok")->show();
+	}
+	else {
+		if (reload) {
+			static_cast<LoadMacroLayer*>(loadLayer)->reloadList();
+			Notification::create("Macro Deleted", NotificationIcon::Success)->show();
+		}
+		this->removeFromParentAndCleanup(true);
 	}
 }
 

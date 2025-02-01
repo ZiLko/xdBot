@@ -77,7 +77,9 @@ void Macro::tryAutosave(GJGameLevel* level, CheckpointObject* cp) {
 
     std::string levelname = level->m_levelName;
     std::filesystem::path path = autoSavesPath / fmt::format("autosave_{}_{}", levelname, g.currentSession);
-    std::filesystem::remove(path.string() + ".gdr"); // Remove previous save
+    std::error_code ec;
+    std::filesystem::remove(path.string() + ".gdr", ec); // Remove previous save
+    if (ec) log::warn("Failed to remove previous autosave");
 
     autoSave(level, g.currentSession);
 

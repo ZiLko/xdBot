@@ -97,20 +97,12 @@ std::string LayoutMode::getModifiedString(std::string levelString) {
 
         for (size_t i = 0; i <= result.size(); i += 2) {
             if (i >= result.size()) break;
-            int propID;
+            auto propID = numFromString<int>(result[i]);
 
-            try {
-                propID = std::stoi(result[i]);
-            }
-            catch (const std::invalid_argument& e) {
-                continue;
-            }
-            catch (const std::out_of_range& e) {
-                continue;
-            }
+            if (propID.isErr()) continue;
 
             if (result[i] == "135") hidden = i;
-            props[std::stoi(result[i])] = result[i + 1];
+            props[propID.unwrap()] = result[i + 1];
         }
 
         objects.push_back({ result, props, hidden, objectStrings[i] });

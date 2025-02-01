@@ -210,7 +210,7 @@ bool Renderer::toggle() {
         if (std::filesystem::exists(path))
             g.renderer.start();
         else {
-            if (std::filesystem::create_directory(path))
+            if (utils::file::createDirectoryAll(path).isOk())
                 g.renderer.start();
             else {
                 FLAlertLayer::create("Error", "There was an error getting the renders folder. ID: 11", "Ok")->show();
@@ -426,8 +426,7 @@ void Renderer::start() {
 
         if (usingApi) {
             std::string file = audioMode == AudioMode::Song ? songFile : "fmodoutput.wav";
-            ffmpeg::AudioMixer mixer;
-            mixer.mixVideoAudio(path, file, tempPath);
+            ffmpeg::AudioMixer::mixVideoAudio(path, file, tempPath);
         }
         else {
             #ifdef GEODE_IS_WINDOWS
@@ -442,8 +441,14 @@ void Renderer::start() {
                 log::info("Executing (Fade Out): {}", command);
                 process = subprocess::Popen(command);
                 if (!process.close()) {
-                    std::filesystem::remove(path);
-                    std::filesystem::rename(path + "_temp" + extension, path);
+                    std::error_code ec;
+                    std::filesystem::remove(path, ec);
+                    if (ec) log::warn("Failed to remove old render file.");
+                    else {
+                        ec.clear();
+                        std::filesystem::rename(path + "_temp" + extension, path, ec);
+                        if (ec) log::warn("Failed to rename temp render file.");
+                    }
                 } else log::debug("Fade Out Error xD");
             }
 
@@ -510,10 +515,22 @@ void Renderer::start() {
             #endif 
         }
 
-        std::filesystem::remove(Utils::widen(path));
-        std::filesystem::rename(tempPath, Utils::widen(path));
-        std::filesystem::remove(tempPathAudio);
-        std::filesystem::remove("fmodoutput.wav");
+        std::error_code ec;
+        std::filesystem::remove(Utils::widen(path), ec);
+        if (ec) log::warn("Failed to remove old render file.");
+        else {
+            ec.clear();
+            std::filesystem::rename(tempPath, Utils::widen(path), ec);
+            if (ec) log::warn("Failed to rename temp render file.");
+        }
+
+        ec.clear();
+        std::filesystem::remove(tempPathAudio, ec);
+        if (ec) log::warn("Failed to remove temp audio file.");
+
+        ec.clear();
+        std::filesystem::remove("fmodoutput.wav", ec);
+        if (ec) log::warn("Failed to remove fmod audio file.");
 
         Loader::get()->queueInMainThread([] {
             Notification::create("Render Saved With Audio", NotificationIcon::Success)->show();
