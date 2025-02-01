@@ -312,6 +312,7 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
 
         if (auto num = numFromString<unsigned long long>(seedInput->getString())) {
             mod->setSavedValue("macro_seed", std::to_string(num.unwrap()));
+            return;
         }
         else {
             return seedInput->setString(mod->getSavedValue<std::string>("macro_seed").c_str());
