@@ -310,24 +310,12 @@ void RecordLayer::textChanged(CCTextInputNode* node) {
 
     if (node == seedInput) {
 
-        try {
-            std::string value = seedInput->getString();
-            if (value != "") {
-                unsigned long long ull = std::stoull(value, nullptr, 0);
-                uintptr_t intPtr = static_cast<uintptr_t>(ull);
-
-                mod->setSavedValue("macro_seed", value);
-            }
-
-            return;
+        if (auto num = numFromString<unsigned long long>(seedInput->getString())) {
+            mod->setSavedValue("macro_seed", std::to_string(num.unwrap()));
         }
-        catch (const std::invalid_argument& e) {
+        else {
             return seedInput->setString(mod->getSavedValue<std::string>("macro_seed").c_str());
         }
-        catch (const std::out_of_range& e) {
-            return seedInput->setString(mod->getSavedValue<std::string>("macro_seed").c_str());
-        }
-
     }
 
     if (node == codecInput)
