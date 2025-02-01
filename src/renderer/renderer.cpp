@@ -426,8 +426,7 @@ void Renderer::start() {
 
         if (usingApi) {
             std::string file = audioMode == AudioMode::Song ? songFile : "fmodoutput.wav";
-            ffmpeg::AudioMixer mixer;
-            mixer.mixVideoAudio(path, file, tempPath);
+            ffmpeg::AudioMixer::mixVideoAudio(path, file, tempPath);
         }
         else {
             #ifdef GEODE_IS_WINDOWS
