@@ -127,15 +127,10 @@ namespace gdr {
 			Self replay;
 			json replayJson;
 
-			try {
-				if (json::accept(data)) {
-						replayJson = json::parse(data);
-				}
-				else {
-						replayJson = json::from_msgpack(data);
-				}
-			} catch(const json::parse_error& e) {
-				return replay;
+			replayJson = json::from_msgpack(data, true, false);
+			if (replayJson.is_discarded()) {
+				replayJson = json::parse(data, nullptr, false);
+				if (replayJson.is_discarded()) return replay;
 			}
 
 			// try {
