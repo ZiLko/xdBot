@@ -1,10 +1,10 @@
 {
-	"geode": "4.1.1",
+	"geode": "4.2.0",
 	"gd": {
 		"win": "2.2074",
 		"android": "2.2074"
 	},
-	"version": "2.3.11",
+	"version": "2.4.0",
 	"id": "zilko.xdbot",
 	"name": "xdBot",
 	"developer": "Zilko",
@@ -15,12 +15,7 @@
 			"version": ">=v1.10.0",
 			"importance": "required",
 			"platforms": ["win"]
-		},
-		{
-            "id": "eclipse.ffmpeg-api",
-            "version": ">=1.1.2",
-            "importance": "required"
-        }
+		}
 	],
 	"settings": {
 		"button-setting": {

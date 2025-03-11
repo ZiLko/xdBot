@@ -61,7 +61,7 @@ bool ClickbotLayer::setup() {
 	bg->setContentSize({ 230, 55 });
 	menu->addChild(bg);
 
-	lbl = CCLabelBMFont::create("default_hold_click.mp3", "chatFont.fnt");
+	lbl = CCLabelBMFont::create("easter egg", "chatFont.fnt");
 	lbl->setPosition(ccp(-150, 35));
 	menu->addChild(lbl);
 	labels.push_back(lbl);
@@ -88,7 +88,7 @@ bool ClickbotLayer::setup() {
 	bg->setContentSize({ 230, 55 });
 	menu->addChild(bg);
 
-	lbl = CCLabelBMFont::create("default_hold_click.mp3", "chatFont.fnt");
+	lbl = CCLabelBMFont::create("easter egg", "chatFont.fnt");
 	lbl->setPosition(ccp(-29, 35));
 	lbl->setScale(0.425);
 	menu->addChild(lbl);
@@ -113,7 +113,7 @@ bool ClickbotLayer::setup() {
 	bg->setContentSize({ 230, 55 });
 	menu->addChild(bg);
 
-	lbl = CCLabelBMFont::create("default_hold_click.mp3", "chatFont.fnt");
+	lbl = CCLabelBMFont::create("easter egg", "chatFont.fnt");
 	lbl->setPosition(ccp(-150, -22));
 	lbl->setScale(0.425);
 	menu->addChild(lbl);
@@ -138,7 +138,7 @@ bool ClickbotLayer::setup() {
 	bg->setContentSize({ 230, 55 });
 	menu->addChild(bg);
 
-	lbl = CCLabelBMFont::create("default_hold_click.mp3", "chatFont.fnt");
+	lbl = CCLabelBMFont::create("easter egg", "chatFont.fnt");
 	lbl->setPosition(ccp(-29, -22));
 	lbl->setScale(0.425);
 	menu->addChild(lbl);
@@ -163,7 +163,7 @@ bool ClickbotLayer::setup() {
 	bg->setContentSize({ 230, 55 });
 	menu->addChild(bg);
 
-	lbl = CCLabelBMFont::create("default_hold_click.mp3", "chatFont.fnt");
+	lbl = CCLabelBMFont::create("easter egg", "chatFont.fnt");
 	lbl->setPosition(ccp(-150, -79));
 	lbl->setScale(0.425);
 	menu->addChild(lbl);
@@ -188,7 +188,7 @@ bool ClickbotLayer::setup() {
 	bg->setContentSize({ 230, 55 });
 	menu->addChild(bg);
 
-	lbl = CCLabelBMFont::create("default_hold_click.mp3", "chatFont.fnt");
+	lbl = CCLabelBMFont::create("easter egg", "chatFont.fnt");
 	lbl->setPosition(ccp(-29, -79));
 	lbl->setScale(0.425);
 	menu->addChild(lbl);

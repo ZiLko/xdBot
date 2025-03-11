@@ -34,7 +34,7 @@ class $modify(CCCircleWave) {
     static CCCircleWave* create(float v1, float v2, float v3, bool v4, bool v5) {
         CCCircleWave* ret = CCCircleWave::create(v1, v2, v3, v4, v5);
 
-        if (!Global::get().renderer.recording) return ret;
+        if (!Global::get().renderer.recording || !PlayLayer::get()->m_levelEndAnimationStarted) return ret;
 
         if (Mod::get()->getSavedValue<bool>("render_hide_levelcomplete"))
             ret->setVisible(false);
@@ -80,6 +80,8 @@ class $modify(EndLevelLayer) {
 class $modify(FMODAudioEngine) {
 
     void playEffect(gd::string path, float speed, float p2, float volume) {
+        if (path == "explode_11.ogg" && Global::get().renderer.recording) return;
+
         if (path != "playSound_01.ogg" || !Global::get().renderer.recordingAudio)
             FMODAudioEngine::playEffect(path, speed, p2, volume);
     }
@@ -87,8 +89,8 @@ class $modify(FMODAudioEngine) {
 };
 
 class $modify(GJBaseGameLayer) {
-    void update(float dt) {
-        GJBaseGameLayer::update(dt);
+    void processCommands(float dt) {
+        GJBaseGameLayer::processCommands(dt);
         auto& g = Global::get();
 
         PlayLayer* pl = PlayLayer::get();
@@ -97,14 +99,14 @@ class $modify(GJBaseGameLayer) {
         
         int frame = Global::getCurrentFrame();
 
-        if (g.renderer.recording && frame % static_cast<int>(Global::getTPS() / g.renderer.fps) == 0)
+        if (g.renderer.recording)
             return g.renderer.handleRecording(pl, frame);
 
         if (g.renderer.recordingAudio && !g.renderer.startedAudio) {
             return g.renderer.startAudio(pl);
         }
 
-        if (g.renderer.recordingAudio && frame % static_cast<int>(Global::getTPS() / g.renderer.fps) == 0)
+        if (g.renderer.recordingAudio)
             return g.renderer.handleAudioRecording(pl, frame);
     }
 };
@@ -335,9 +337,11 @@ void Renderer::start() {
             fadeArgs = fmt::format(",fade=t=in:st=0:d={}", fadeInTime);
 
         if (usingApi) {
-            if (!ffmpeg.init(settings)) {
+            auto res = ffmpeg.init(settings);
+            if (res.isErr()) {
                 Loader::get()->queueInMainThread([] {
-                    FLAlertLayer::create("Error", "FFmpeg API failed to initialize.", "Ok")->show();
+                    // std::string err = res.unwrapErr();
+                    FLAlertLayer::create("Error", "FFmpeg API failed to initialize: ", "Ok")->show();
                 });
 
                 audioMode = AudioMode::Off;
@@ -372,8 +376,18 @@ void Renderer::start() {
                 const std::vector<uint8_t> frame = currentFrame;
                 frameHasData = false;
                 lock.unlock();
-                if (usingApi)
-                    ffmpeg.writeFrame(frame);
+                if (usingApi) {
+                    auto res = ffmpeg.writeFrame(frame);
+                    if (res.isErr()) {
+                        Loader::get()->queueInMainThread([] {
+                            FLAlertLayer::create("Error", "FFmpeg API failed: ", "Ok")->show();
+                        });
+
+                        audioMode = AudioMode::Off;
+                        stop();
+                        break;
+                    }
+                }
                 #ifdef GEODE_IS_WINDOWS
                 else
                     process.m_stdin.write(frame.data(), frame.size());
@@ -414,7 +428,7 @@ void Renderer::start() {
                 Notification::create("Render Saved Without Audio", NotificationIcon::Success)->show();
                 if (!Mod::get()->getSavedValue<bool>("render_hide_endscreen")) return;
                 if (PlayLayer* pl = PlayLayer::get())
-                        if (EndLevelLayer* layer = pl->getChildByType<EndLevelLayer>(0))
+                    if (EndLevelLayer* layer = pl->getChildByType<EndLevelLayer>(0))
                         layer->setVisible(true);
             });
 
@@ -426,7 +440,14 @@ void Renderer::start() {
 
         if (usingApi) {
             std::string file = audioMode == AudioMode::Song ? songFile : "fmodoutput.wav";
-            ffmpeg::AudioMixer::mixVideoAudio(path, file, tempPath);
+            auto res = ffmpeg::events::AudioMixer::mixVideoAudio(path, file, tempPath);
+            log::debug("XD");
+            if (res.isErr()) {
+                Loader::get()->queueInMainThread([] {
+                    FLAlertLayer::create("Error", "FFmpeg failed to add audio: ", "Ok")->show();
+                });
+                return;
+            }
         }
         else {
             #ifdef GEODE_IS_WINDOWS
@@ -546,26 +567,24 @@ void Renderer::stop(int frame) {
     recording = false;
     timeAfter = 0.f;
 
-    #ifdef GEODE_IS_ANDROID
-    audioMode = AudioMode::Off;
-    #else
     if (usingApi) audioMode = AudioMode::Off;
-    #endif
 
     if (PlayLayer* pl = PlayLayer::get()) {
-        if (pl->m_levelEndAnimationStarted) {
+
+        if (pl->m_isPaused && audioMode == AudioMode::Record) {
+            if (PauseLayer* layer = Global::getPauseLayer()) {
+                CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
+                if (RecordLayer* xdbot = scene->getChildByType<RecordLayer>(0))
+                    xdbot->onClose(nullptr);
+                
+                layer->onResume(nullptr);
+            }
+        }
+        else if (pl->m_levelEndAnimationStarted) {
             finishFrame = 0;
             levelFinished = true;
         }
 
-        if (pl->m_isPaused && audioMode == AudioMode::Record) {
-            if (PauseLayer* layer = Global::getPauseLayer()) {
-                layer->onResume(nullptr);
-                CCScene* scene = CCDirector::sharedDirector()->getRunningScene();
-                if (RecordLayer* xdbot = scene->getChildByType<RecordLayer>(0))
-                    xdbot->onClose(nullptr);
-            }
-        }
     } else
         audioMode = AudioMode::Off;
 
@@ -661,9 +680,7 @@ void MyRenderTexture::capture(std::mutex& lock, std::vector<uint8_t>& data, vola
         glGetIntegerv(GL_FRAMEBUFFER_BINDING, &old_fbo);
         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 
-        pl->setScaleY(-1);
         pl->visit();
-        pl->setScaleY(1);
 
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
         lock.lock();
@@ -806,7 +823,7 @@ void Renderer::handleAudioRecording(PlayLayer* pl, int frame) {
         return;
     }
 
-    if ((finishFrame != 0 && frame >= finishFrame) || pl->m_player1->m_isDead) {
+    if (finishFrame != 0 && frame >= finishFrame) {
         g.renderer.stopAudio();
         return;
     }

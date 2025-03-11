@@ -1,3 +1,10 @@
+# v2.4.0
+
+* Remove FFmpeg API dependency.
+* Fixed bug where the inputs of the previous macro would stay on the new one.
+* Fixed bug where orb and pad effects wouldn't show on render if hide level complete was enabled.
+* uhhh umm.... ermrmrm... huhh erhuhreurhe uhhhhh ummm. ughg...
+
 # v2.3.11
 
 * Fixed render restore defaults button restoring defaults.

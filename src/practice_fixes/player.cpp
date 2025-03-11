@@ -119,9 +119,6 @@ PlayerData PlayerPracticeFixes::saveData(PlayerObject* player) {
     data.m_landParticlesAngle = player->m_landParticlesAngle;
     data.m_landParticleRelatedY = player->m_landParticleRelatedY;
     data.m_playerStreak = player->m_playerStreak;
-    data.m_streakRelated1 = player->m_streakRelated1;
-    data.m_streakRelated2 = player->m_streakRelated2;
-    data.m_streakRelated3 = player->m_streakRelated3;
     data.m_slopeRotation = player->m_slopeRotation;
     data.m_currentSlopeYVelocity = player->m_currentSlopeYVelocity;
     data.m_unk3d0 = player->m_unk3d0;
@@ -134,7 +131,6 @@ PlayerData PlayerPracticeFixes::saveData(PlayerObject* player) {
     data.m_collidedBottomMaxY = player->m_collidedBottomMaxY;
     data.m_collidedLeftMaxX = player->m_collidedLeftMaxX;
     data.m_collidedRightMinX = player->m_collidedRightMinX;
-    data.m_streakRelated4 = player->m_streakRelated4;
     data.m_canPlaceCheckpoint = player->m_canPlaceCheckpoint;
     data.m_maybeIsColliding = player->m_maybeIsColliding;
     data.m_jumpBuffered = player->m_jumpBuffered;
@@ -379,9 +375,6 @@ void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, bool 
     player->m_landParticlesAngle = data.m_landParticlesAngle;
     player->m_landParticleRelatedY = data.m_landParticleRelatedY;
     player->m_playerStreak = data.m_playerStreak;
-    player->m_streakRelated1 = data.m_streakRelated1;
-    player->m_streakRelated2 = data.m_streakRelated2;
-    player->m_streakRelated3 = data.m_streakRelated3;
     player->m_slopeRotation = data.m_slopeRotation;
     player->m_currentSlopeYVelocity = data.m_currentSlopeYVelocity;
     player->m_unk3d0 = data.m_unk3d0;
@@ -394,7 +387,6 @@ void PlayerPracticeFixes::applyData(PlayerObject* player, PlayerData data, bool 
     player->m_collidedBottomMaxY = data.m_collidedBottomMaxY;
     player->m_collidedLeftMaxX = data.m_collidedLeftMaxX;
     player->m_collidedRightMinX = data.m_collidedRightMinX;
-    player->m_streakRelated4 = data.m_streakRelated4;
     player->m_canPlaceCheckpoint = data.m_canPlaceCheckpoint;
     player->m_maybeIsColliding = data.m_maybeIsColliding;
     player->m_jumpBuffered = data.m_jumpBuffered;

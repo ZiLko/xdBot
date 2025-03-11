@@ -108,8 +108,8 @@ private:
 
         if (std::filesystem::exists(path))
             file::openFolder(path);
-        // else if (geode::utils::file::createDirectoryAll(path).isOk())
-            // file::openFolder(path);
+        else if (geode::utils::file::createDirectoryAll(path).isOk())
+            file::openFolder(path);
         else
             FLAlertLayer::create("Error", "There was an error getting the folder. ID: 4", "Ok")->show();
     }

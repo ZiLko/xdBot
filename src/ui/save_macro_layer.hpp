@@ -79,7 +79,8 @@ public:
         std::filesystem::path path = Mod::get()->getSettingValue<std::filesystem::path>("macros_folder");
 
         if (!std::filesystem::exists(path)) {
-            return FLAlertLayer::create("Error", ("There was an error getting the folder \"" + path.string() + "\". ID: 10").c_str(), "Ok")->show();
+            if (!utils::file::createDirectoryAll(path).isOk())
+                return FLAlertLayer::create("Error", ("There was an error getting the folder \"" + path.string() + "\". ID: 10").c_str(), "Ok")->show();
         }
 
         SaveMacroLayer* layerReal = create();

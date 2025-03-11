@@ -190,9 +190,6 @@ struct PlayerData {
     float m_landParticlesAngle;
     float m_landParticleRelatedY;
     int m_playerStreak;
-    float m_streakRelated1;
-    bool m_streakRelated2;
-    bool m_streakRelated3;
     double m_slopeRotation;
     double m_currentSlopeYVelocity;
     double m_unk3d0;
@@ -205,7 +202,6 @@ struct PlayerData {
     double m_collidedBottomMaxY;
     double m_collidedLeftMaxX;
     double m_collidedRightMinX;
-    bool m_streakRelated4;
     bool m_canPlaceCheckpoint;
     bool m_maybeIsColliding;
     bool m_jumpBuffered;

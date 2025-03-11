@@ -56,7 +56,7 @@ class $modify(GJBaseGameLayer) {
         }
 
         dVar1 = dt + m_extraDelta;
-        fVar3 = std::roundf(dVar1 / (fVar2 * newDt));
+        fVar3 = std::round(dVar1 / (fVar2 * newDt));
         dVar4 = fVar3 * fVar2 * newDt;
         m_extraDelta = dVar1 - dVar4;
 

@@ -151,7 +151,7 @@ class $modify(PlayLayer) {
     if (g.state == state::recording)
       Macro::updateInfo(this);
 
-    if ((!m_isPracticeMode || frame == 0 || g.checkpoints.empty()) && g.state == state::recording) {
+    if ((!m_isPracticeMode || frame <= 1 || g.checkpoints.empty()) && g.state == state::recording) {
       g.macro.inputs.clear();
       g.macro.frameFixes.clear();
       g.checkpoints.clear();
