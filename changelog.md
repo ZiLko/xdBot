@@ -1,3 +1,9 @@
+# v2.4.1
+
+* Added Auto Clicker keybind.
+* Fixed spider being buggy if using Input Fixes.
+* Made render extension default to .mp4 if empty.
+
 # v2.4.0
 
 * Remove FFmpeg API dependency.

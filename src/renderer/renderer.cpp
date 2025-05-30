@@ -79,18 +79,18 @@ class $modify(EndLevelLayer) {
 
 class $modify(FMODAudioEngine) {
 
-    void playEffect(gd::string path, float speed, float p2, float volume) {
-        if (path == "explode_11.ogg" && Global::get().renderer.recording) return;
+    int playEffect(gd::string path, float speed, float p2, float volume) {
+        if (path == "explode_11.ogg" && Global::get().renderer.recording) return 0;
 
         if (path != "playSound_01.ogg" || !Global::get().renderer.recordingAudio)
-            FMODAudioEngine::playEffect(path, speed, p2, volume);
+            return FMODAudioEngine::playEffect(path, speed, p2, volume);
     }
 
 };
 
 class $modify(GJBaseGameLayer) {
-    void processCommands(float dt) {
-        GJBaseGameLayer::processCommands(dt);
+    void update(float dt) {
+        GJBaseGameLayer::update(dt);
         auto& g = Global::get();
 
         PlayLayer* pl = PlayLayer::get();
@@ -99,14 +99,14 @@ class $modify(GJBaseGameLayer) {
         
         int frame = Global::getCurrentFrame();
 
-        if (g.renderer.recording)
+        if (g.renderer.recording && frame % static_cast<int>(Global::getTPS() / g.renderer.fps) == 0)
             return g.renderer.handleRecording(pl, frame);
 
         if (g.renderer.recordingAudio && !g.renderer.startedAudio) {
             return g.renderer.startAudio(pl);
         }
 
-        if (g.renderer.recordingAudio)
+        if (g.renderer.recordingAudio && frame % static_cast<int>(Global::getTPS() / g.renderer.fps) == 0)
             return g.renderer.handleAudioRecording(pl, frame);
     }
 };
@@ -716,7 +716,7 @@ void Renderer::captureFrame() {
     while (frameHasData) {}
     renderer.capture(lock, currentFrame, frameHasData);
 }
-
+int wa = 0;
 void Renderer::handleRecording(PlayLayer* pl, int frame) {
     if (!pl) stop(frame);
     isPlatformer = pl->m_levelSettings->m_platformerMode;
